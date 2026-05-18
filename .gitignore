@@ -1,0 +1,48 @@
+# ProTrack - Global Gitignore
+
+# macOS System Files
+.DS_Store
+Thumbs.db
+*.pem
+
+# Dependencies
+**/node_modules/
+
+# Local Environment and Secrets (CRITICAL)
+**/.env
+**/.env.local
+**/.env*.local
+**/.env.production
+**/supabase/.env
+**/supabase/functions/**/.env
+
+# Expo / React Native (protrack-mobile)
+**/protrack-mobile/.expo/
+**/protrack-mobile/dist/
+**/protrack-mobile/web-build/
+**/protrack-mobile/expo-env.d.ts
+**/protrack-mobile/ios/
+**/protrack-mobile/android/
+**/.kotlin/
+**/*.orig.*
+**/*.jks
+**/*.p8
+**/*.p12
+**/*.key
+**/*.mobileprovision
+**/.metro-health-check*
+
+# Supabase Local Development
+**/supabase/.temp/
+
+# Build & Cache
+**/*.tsbuildinfo
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+pnpm-debug.*
+.eslintcache
+
+# Local backup / test files (from development)
+**/protrack-mobile/package copy.json
+**/protrack-mobile/test_fetch.js

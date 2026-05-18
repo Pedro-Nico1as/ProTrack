@@ -1,0 +1,4 @@
+-- Este arquivo está vazio intencionalmente.
+-- Os dados reais de exercícios são carregados pela migration
+-- 20260512212600_real_exercise_library.sql para garantir
+-- que existam tanto em dev quanto em produção.
