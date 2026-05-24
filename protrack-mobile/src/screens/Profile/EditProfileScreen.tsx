@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, SafeAreaView, Alert, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  SafeAreaView,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, sizing } from '../../theme/tokens';
+import { colors, spacing } from '../../theme/tokens';
 import { Text } from '../../components/core/Text';
 import { Button } from '../../components/core/Button';
 import { Input } from '../../components/core/Input';
@@ -14,7 +23,8 @@ import { strings } from '../../constants/strings';
 import { useAuthStore } from '../../stores/useAuthStore';
 
 const profileSchema = z.object({
-  name: z.string()
+  name: z
+    .string()
     .min(1, { message: strings.auth.errorNameRequired })
     .min(3, { message: strings.auth.errorNameMin }),
 });
@@ -28,7 +38,7 @@ export const EditProfileScreen = () => {
 
   const initialName = user?.user_metadata?.full_name || '';
 
-  const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const { control, handleSubmit } = useForm<FormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: initialName,
@@ -44,7 +54,7 @@ export const EditProfileScreen = () => {
     setIsLoading(true);
     try {
       // Atualiza os metadados do usuário na autenticação (origem da verdade para o app)
-      const { data: authData, error: authError } = await supabase.auth.updateUser({
+      const { error: authError } = await supabase.auth.updateUser({
         data: { full_name: data.name },
       });
 
@@ -56,7 +66,7 @@ export const EditProfileScreen = () => {
           .from('profiles')
           .update({ full_name: data.name })
           .eq('id', user.id);
-        
+
         if (profileError) {
           console.warn('Falha ao atualizar a tabela profiles:', profileError);
           // Não lançamos erro aqui para não interromper se a tabela não for essencial
@@ -73,25 +83,30 @@ export const EditProfileScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
-        style={styles.keyboardView} 
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <Ionicons name="close" size={28} color={colors.text} />
           </TouchableOpacity>
-          <Text variant="heading" style={styles.title}>{strings.profile.editProfile}</Text>
+          <Text variant="heading" style={styles.title}>
+            {strings.profile.editProfile}
+          </Text>
           <View style={styles.placeholder} />
         </View>
 
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.form}>
             <Controller
               control={control}
               name="name"
               render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-                <Input 
+                <Input
                   label={strings.auth.nameLabel}
                   placeholder={strings.auth.namePlaceholder}
                   value={value}

@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useActiveWorkoutStore } from '../../stores/useActiveWorkoutStore';
 import { colors, spacing, sizing } from '../../theme/tokens';
@@ -13,6 +19,14 @@ export const RestTimer = () => {
   const { restTargetEndTime, skipRest } = useActiveWorkoutStore();
   const [timeLeft, setTimeLeft] = useState(0);
   const pulseScale = useSharedValue(1);
+
+  const playBeep = async () => {
+    try {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (e) {
+      console.warn('Erro ao acionar haptics', e);
+    }
+  };
 
   useEffect(() => {
     if (!restTargetEndTime) return;
@@ -52,14 +66,6 @@ export const RestTimer = () => {
     transform: [{ scale: pulseScale.value }],
   }));
 
-  const playBeep = async () => {
-    try {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (e) {
-      console.warn('Erro ao acionar haptics', e);
-    }
-  };
-
   if (!restTargetEndTime) return null;
 
   const minutes = Math.floor(timeLeft / 60);
@@ -81,7 +87,9 @@ export const RestTimer = () => {
           <Text style={styles.timerText}>{timeString}</Text>
         </Animated.View>
 
-        <Text variant="label" style={styles.label}>{strings.workout.restTimerLabel}</Text>
+        <Text variant="label" style={styles.label}>
+          {strings.workout.restTimerLabel}
+        </Text>
 
         <Button
           title={strings.activeWorkout.skipRest}

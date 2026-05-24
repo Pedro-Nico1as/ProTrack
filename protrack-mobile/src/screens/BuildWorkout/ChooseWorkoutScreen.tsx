@@ -7,7 +7,10 @@ import { colors, spacing, sizing } from '../../theme/tokens';
 import { Text } from '../../components/core/Text';
 import { Button } from '../../components/core/Button';
 import { RootStackParamList } from '../../navigation/types';
-import { useCustomWorkoutsStore, CustomWorkoutPartition } from '../../stores/useCustomWorkoutsStore';
+import {
+  useCustomWorkoutsStore,
+  CustomWorkoutPartition,
+} from '../../stores/useCustomWorkoutsStore';
 import { useActiveWorkoutStore } from '../../stores/useActiveWorkoutStore';
 import { strings } from '../../constants/strings';
 
@@ -34,13 +37,13 @@ export const ChooseWorkoutScreen = () => {
   const handleStartWorkout = () => {
     if (!selectedWorkoutId || !selectedPartitionId) return;
 
-    const workout = workouts.find(w => w.id === selectedWorkoutId);
+    const workout = workouts.find((w) => w.id === selectedWorkoutId);
     if (!workout) return;
 
-    const partition = workout.partitions.find(p => p.id === selectedPartitionId);
+    const partition = workout.partitions.find((p) => p.id === selectedPartitionId);
     if (!partition) return;
 
-    const activeExercises = partition.exercises.map(ex => ({
+    const activeExercises = partition.exercises.map((ex) => ({
       id: ex.id,
       exerciseId: ex.exerciseId || ex.id, // Fallback if old workout doesn't have it
       name: ex.name,
@@ -48,7 +51,7 @@ export const ChooseWorkoutScreen = () => {
       youtubeId: ex.youtubeId,
       targetSets: ex.targetSets,
       targetReps: ex.targetReps,
-      loggedSets: []
+      loggedSets: [],
     }));
 
     startWorkout(`${workout.name} - ${partition.name}`, activeExercises, null);
@@ -63,21 +66,24 @@ export const ChooseWorkoutScreen = () => {
           <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={12}>
             <Ionicons name="close" size={28} color={colors.text} />
           </Pressable>
-          <Text variant="heading" weight="semibold">{strings.chooseWorkout.title}</Text>
+          <Text variant="heading" weight="semibold">
+            {strings.chooseWorkout.title}
+          </Text>
           <View style={{ width: 44 }} />
         </View>
 
         <ScrollView contentContainerStyle={styles.scroll}>
-          
-          <Pressable 
-            style={styles.buildNewCard} 
+          <Pressable
+            style={styles.buildNewCard}
             onPress={() => navigation.navigate('BuildWorkout')}
           >
             <View style={styles.buildIconContainer}>
               <Ionicons name="add" size={28} color="#FFF" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text variant="body" weight="semibold">{strings.chooseWorkout.buildNewWorkout}</Text>
+              <Text variant="body" weight="semibold">
+                {strings.chooseWorkout.buildNewWorkout}
+              </Text>
               <Text variant="caption" color={colors.textSecondary}>
                 {strings.chooseWorkout.buildNewWorkoutSub}
               </Text>
@@ -87,12 +93,19 @@ export const ChooseWorkoutScreen = () => {
 
           <View style={styles.divider} />
 
-          <Text variant="label" style={styles.sectionTitle}>{strings.chooseWorkout.chooseSavedWorkout}</Text>
+          <Text variant="label" style={styles.sectionTitle}>
+            {strings.chooseWorkout.chooseSavedWorkout}
+          </Text>
 
           {workouts.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="folder-open-outline" size={48} color={colors.borderSubtle} />
-              <Text variant="body" color={colors.textSecondary} align="center" style={{ marginTop: spacing.md }}>
+              <Text
+                variant="body"
+                color={colors.textSecondary}
+                align="center"
+                style={{ marginTop: spacing.md }}
+              >
                 {strings.chooseWorkout.emptySavedWorkouts}
               </Text>
             </View>
@@ -103,7 +116,7 @@ export const ChooseWorkoutScreen = () => {
 
                 return (
                   <View key={workout.id} style={styles.workoutContainer}>
-                    <Pressable 
+                    <Pressable
                       style={[styles.workoutCard, isSelected && styles.workoutCardSelected]}
                       onPress={() => handleSelectWorkout(workout.id)}
                     >
@@ -111,40 +124,56 @@ export const ChooseWorkoutScreen = () => {
                         <Ionicons name="flash" size={20} color={colors.primary} />
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text variant="body" weight="semibold">{workout.name}</Text>
+                        <Text variant="body" weight="semibold">
+                          {workout.name}
+                        </Text>
                         <Text variant="caption" color={colors.textMuted}>
-                          {workout.partitions?.length || 0} {(workout.partitions?.length === 1) ? strings.myWorkouts.sheetSingular : strings.myWorkouts.sheetPlural}
+                          {workout.partitions?.length || 0}{' '}
+                          {workout.partitions?.length === 1
+                            ? strings.myWorkouts.sheetSingular
+                            : strings.myWorkouts.sheetPlural}
                         </Text>
                       </View>
-                      <Ionicons 
-                        name={isSelected ? "chevron-down" : "chevron-forward"} 
-                        size={20} 
-                        color={isSelected ? colors.primary : colors.textMuted} 
+                      <Ionicons
+                        name={isSelected ? 'chevron-down' : 'chevron-forward'}
+                        size={20}
+                        color={isSelected ? colors.primary : colors.textMuted}
                       />
                     </Pressable>
 
                     {isSelected && workout.partitions && workout.partitions.length > 0 && (
                       <View style={styles.partitionsList}>
-                        <Text variant="caption" color={colors.textSecondary} style={{ marginBottom: spacing.sm, paddingHorizontal: spacing.xs }}>
+                        <Text
+                          variant="caption"
+                          color={colors.textSecondary}
+                          style={{ marginBottom: spacing.sm, paddingHorizontal: spacing.xs }}
+                        >
                           {strings.chooseWorkout.selectPartitionHeader}
                         </Text>
-                        {workout.partitions.map(part => {
+                        {workout.partitions.map((part) => {
                           const isPartSelected = selectedPartitionId === part.id;
                           return (
-                            <Pressable 
-                              key={part.id} 
-                              style={[styles.partitionItem, isPartSelected && styles.partitionItemSelected]}
+                            <Pressable
+                              key={part.id}
+                              style={[
+                                styles.partitionItem,
+                                isPartSelected && styles.partitionItemSelected,
+                              ]}
                               onPress={() => setSelectedPartitionId(part.id)}
                             >
                               <View style={styles.partitionIcon}>
-                                <Ionicons 
-                                  name={isPartSelected ? "radio-button-on" : "radio-button-off"} 
-                                  size={20} 
-                                  color={isPartSelected ? colors.accent : colors.borderSubtle} 
+                                <Ionicons
+                                  name={isPartSelected ? 'radio-button-on' : 'radio-button-off'}
+                                  size={20}
+                                  color={isPartSelected ? colors.accent : colors.borderSubtle}
                                 />
                               </View>
                               <View style={{ flex: 1 }}>
-                                <Text variant="body" weight={isPartSelected ? 'bold' : 'regular'} color={isPartSelected ? colors.text : colors.textSecondary}>
+                                <Text
+                                  variant="body"
+                                  weight={isPartSelected ? 'bold' : 'regular'}
+                                  color={isPartSelected ? colors.text : colors.textSecondary}
+                                >
                                   {part.name}
                                 </Text>
                               </View>
@@ -161,7 +190,6 @@ export const ChooseWorkoutScreen = () => {
               })}
             </View>
           )}
-
         </ScrollView>
 
         <View style={styles.footer}>

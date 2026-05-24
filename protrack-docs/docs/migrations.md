@@ -97,3 +97,17 @@ Este documento rastreia o impacto de cada alteração de schema no banco de dado
 - **Breaking Changes**: Nenhuma. Comportamento retrocompatível; usuários existentes não são afetados.
 - **Nova Lógica**: Sanitiza o nome base (lowercase, `REGEXP_REPLACE` para caracteres especiais), remove underscores consecutivos e adiciona sufixo numérico incremental (`_1`, `_2`...) até encontrar um username disponível.
 - **Rollback**: Reverter para a versão anterior da função conforme descrito nos comentários da própria migration.
+
+## 20260524141000_remove_offline_columns.sql
+**Descrição**: Remove as colunas de deduplicação offline (`client_id`, `synced_at`) das tabelas de logs e adiciona índice composto de performance.
+**Impacto**:
+- **Breaking Change**: As colunas `client_id` (UNIQUE) e `synced_at` foram removidas de `user_workout_logs`. A coluna `client_id` foi removida de `user_set_logs`. A estratégia de sincronização offline via fila com deduplicação por `client_id` foi descartada em favor de gravação síncrona direta via `save-workout`.
+- **Performance**: Adicionado índice composto `idx_user_set_logs_exercise_completed` em `(exercise_id, completed_at DESC)` para otimizar as queries de histórico e PR na Edge Function `user-progress`.
+- **Rollback**: `ALTER TABLE user_workout_logs ADD COLUMN IF NOT EXISTS client_id UUID UNIQUE; ALTER TABLE user_workout_logs ADD COLUMN IF NOT EXISTS synced_at TIMESTAMPTZ; ALTER TABLE user_set_logs ADD COLUMN IF NOT EXISTS client_id UUID UNIQUE; DROP INDEX IF EXISTS idx_user_set_logs_exercise_completed;`
+
+## 20260524141500_remove_auto_confirm_prod.sql
+**Descrição**: Remove a trigger de auto-confirmação de e-mail criada para ambiente de desenvolvimento.
+**Impacto**:
+- **Segurança**: Restaura o fluxo de verificação obrigatória por e-mail no Supabase Auth para ambiente de produção.
+- **Breaking Changes**: Nenhuma para produção. Usuários que se cadastrarem agora precisarão confirmar o e-mail antes de fazer login (comportamento correto e esperado).
+- **Rollback**: Re-executar a migration `20260523204500_auto_confirm_users.sql`.

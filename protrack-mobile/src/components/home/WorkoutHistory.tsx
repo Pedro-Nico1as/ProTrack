@@ -6,7 +6,7 @@ import { Text } from '../core/Text';
 import { strings } from '../../constants/strings';
 
 interface WorkoutLog {
-  client_id: string;
+  id: string;
   completed_at: string;
   duration_seconds: number;
   total_volume_kg: number;
@@ -22,9 +22,13 @@ export const WorkoutHistory = ({ logs, isLoading }: WorkoutHistoryProps) => {
   if (isLoading) {
     return (
       <View style={styles.section}>
-        <Text variant="label" style={styles.sectionTitle}>{strings.workoutHistory.title}</Text>
+        <Text variant="label" style={styles.sectionTitle}>
+          {strings.workoutHistory.title}
+        </Text>
         <View style={styles.loadingContainer}>
-          <Text variant="caption" color={colors.textMuted}>{strings.workoutHistory.loading}</Text>
+          <Text variant="caption" color={colors.textMuted}>
+            {strings.workoutHistory.loading}
+          </Text>
         </View>
       </View>
     );
@@ -33,7 +37,9 @@ export const WorkoutHistory = ({ logs, isLoading }: WorkoutHistoryProps) => {
   if (!logs || logs.length === 0) {
     return (
       <View style={styles.section}>
-        <Text variant="label" style={styles.sectionTitle}>{strings.workoutHistory.title}</Text>
+        <Text variant="label" style={styles.sectionTitle}>
+          {strings.workoutHistory.title}
+        </Text>
         <View style={styles.emptyContainer}>
           <Ionicons name="time-outline" size={32} color={colors.textMuted} />
           <Text variant="caption" color={colors.textMuted} style={{ marginTop: spacing.xs }}>
@@ -45,42 +51,61 @@ export const WorkoutHistory = ({ logs, isLoading }: WorkoutHistoryProps) => {
   }
 
   // Sort logs by newest first
-  const sortedLogs = [...logs].sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime());
+  const sortedLogs = [...logs].sort(
+    (a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime()
+  );
 
   return (
     <View style={styles.section}>
-      <Text variant="label" style={styles.sectionTitle}>{strings.workoutHistory.title}</Text>
-      
+      <Text variant="label" style={styles.sectionTitle}>
+        {strings.workoutHistory.title}
+      </Text>
+
       <View style={styles.list}>
         {sortedLogs.map((log) => {
           const date = new Date(log.completed_at);
-          const formattedDate = date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+          const formattedDate = date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+          });
           const duration = Math.round((log.duration_seconds || 0) / 60);
 
           return (
-            <View key={log.client_id} style={styles.card}>
+            <View key={log.id} style={styles.card}>
               <View style={styles.cardHeader}>
                 <View style={styles.iconContainer}>
                   <Ionicons name="barbell" size={20} color={colors.accent} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text variant="body" weight="semibold">{strings.workoutHistory.finishedWorkoutTitle}</Text>
-                  <Text variant="caption" color={colors.textMuted}>{formattedDate}</Text>
+                  <Text variant="body" weight="semibold">
+                    {strings.workoutHistory.finishedWorkoutTitle}
+                  </Text>
+                  <Text variant="caption" color={colors.textMuted}>
+                    {formattedDate}
+                  </Text>
                 </View>
               </View>
 
               <View style={styles.metricsRow}>
                 <View style={styles.metric}>
                   <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
-                  <Text variant="caption" color={colors.textSecondary}>{duration} {strings.workoutHistory.min}</Text>
+                  <Text variant="caption" color={colors.textSecondary}>
+                    {duration} {strings.workoutHistory.min}
+                  </Text>
                 </View>
                 <View style={styles.metric}>
                   <Ionicons name="fitness-outline" size={14} color={colors.textSecondary} />
-                  <Text variant="caption" color={colors.textSecondary}>{Math.round(log.total_volume_kg || 0)} {strings.workoutHistory.kg}</Text>
+                  <Text variant="caption" color={colors.textSecondary}>
+                    {Math.round(log.total_volume_kg || 0)} {strings.workoutHistory.kg}
+                  </Text>
                 </View>
                 <View style={styles.metric}>
                   <Ionicons name="layers-outline" size={14} color={colors.textSecondary} />
-                  <Text variant="caption" color={colors.textSecondary}>{log.total_sets || 0} {strings.workoutHistory.sets}</Text>
+                  <Text variant="caption" color={colors.textSecondary}>
+                    {log.total_sets || 0} {strings.workoutHistory.sets}
+                  </Text>
                 </View>
               </View>
             </View>

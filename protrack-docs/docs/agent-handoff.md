@@ -266,3 +266,31 @@ Backend entregou:
 
 QA entregou:
 - **Script de regressão de nomes duplicados (`test-duplicate-signup.js`):** Valida o cenário de dois usuários com `full_name` idêntico ("Pedro Vieira") cadastrados em sequência, confirmando que ambos os signups e logins subsequentes completam com sucesso sem erros de constraint.
+
+---
+
+## Atualização das 18:51 (Mobile + Backend + QA + Infra)
+Mobile entregou:
+- **Redefinição de Senha (`ResetPasswordScreen.tsx`):** Nova tela com formulário validado via `zod` (`react-hook-form`) para redefinição de senha. Suporta deep links do tipo `type=recovery` vindos do e-mail do Supabase. Utiliza `supabase.auth.updateUser({ password })` e lida com mensagens de erro amigáveis incluindo rate limit.
+- **Utilitário de Deep Link (`authUtils.ts`):** Função `parseAuthParams` que interpreta parâmetros de `?query` e `#hash` de URLs de deep link do Supabase Auth — compatível com os fluxos de signup, recovery e magic link.
+- **Remoção do `syncEngine` e `useSyncStore`:** A arquitetura de sincronização offline via fila em memória (Zustand) foi substituída pela nova Edge Function `save-workout` de gravação direta. Os arquivos `syncEngine.ts` e `useSyncStore.ts` foram removidos do Mobile.
+
+Backend entregou:
+- **Nova Edge Function `save-workout`:** Endpoint `POST /functions/v1/save-workout` para gravação síncrona do treino finalizado. Recebe `workout` (metadados da sessão) e `sets` (array de séries) e insere diretamente nas tabelas `user_workout_logs` e `user_set_logs`. Autenticação obrigatória via JWT — sem mock auth.
+- **Módulo compartilhado `_shared/deps.ts`:** Centraliza as importações do `serve`, `createClient` e `corsHeaders` para todas as Edge Functions, eliminando duplicação.
+- **Remoção das colunas offline (`20260524141000_remove_offline_columns.sql`):** Colunas `client_id` e `synced_at` removidas de `user_workout_logs` e `user_set_logs`, pois a estratégia de deduplicação offline foi descartada. Adicionado índice composto `idx_user_set_logs_exercise_completed` em `(exercise_id, completed_at DESC)` para otimizar queries da `user-progress`.
+- **Remoção do auto-confirm em produção (`20260524141500_remove_auto_confirm_prod.sql`):** Trigger de auto-confirmação de e-mail (criada para sandbox) removida para restaurar o fluxo seguro de produção com verificação de e-mail obrigatória.
+- **`sync-workout` removida:** Edge Function substituída pela nova `save-workout` de gravação direta.
+
+QA entregou:
+- **Testes de integração Jest para Auth (`integration/auth/`):**
+  - `authStore.test.ts`: 5 testes unitários cobrindo `setSession`, `signOut`, `setIsResettingPassword` e estado inicial do `useAuthStore` (com mock do cliente Supabase).
+  - `authUtils.test.ts`: 5 testes unitários para `parseAuthParams` cobrindo hash fragments, query params, parâmetros mistos, URL vazia e valores com URL encoding.
+
+Infra entregou:
+- **Pipeline CI/CD (`.github/workflows/ci.yml`):** Workflow GitHub Actions configurado para rodar em pushes e PRs para `main` e `develop`. Executa lint (`npm run lint`) e testes (`npm test`) no `protrack-mobile` e `protrack-tests` respectivamente, com Node.js 20 e cache de dependências.
+
+Pendências:
+- Mobile precisa integrar o `RootNavigator` para redirecionar automaticamente para `ResetPasswordScreen` ao detectar deep link com `type=recovery`.
+- QA precisa adicionar testes de integração para o fluxo completo de redefinição de senha (deep link → ResetPasswordScreen → updateUser).
+- Backend precisa de definições de IAP (RevenueCat) para implementar a lógica de assinaturas e paywall.

@@ -89,7 +89,13 @@ export const Button = ({
 
   return (
     <AnimatedPressable
-      style={[styles.container, variantStyles[variant], animatedStyle, { opacity: isDisabled ? 0.6 : 1 }, style]}
+      style={[
+        styles.container,
+        variantStyles[variant],
+        animatedStyle,
+        { opacity: isDisabled ? 0.6 : 1 },
+        style,
+      ]}
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}

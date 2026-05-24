@@ -1,8 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, SafeAreaView, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform, StatusBar } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  SafeAreaView,
+  Pressable,
+  ScrollView,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StatusBar,
+} from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, FadeIn } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  FadeIn,
+} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, sizing, animation } from '../../theme/tokens';
 import { RootStackParamList } from '../../navigation/types';
@@ -10,7 +25,6 @@ import { useActiveWorkoutStore } from '../../stores/useActiveWorkoutStore';
 import { ExerciseCard } from '../../components/workout/ExerciseCard';
 import { RestTimer } from '../../components/workout/RestTimer';
 import { ExerciseCardSkeleton } from '../../components/core/Skeleton';
-import { generateUUID } from '../../utils/uuid';
 import { api } from '../../services/api';
 import { Text } from '../../components/core/Text';
 import { Button } from '../../components/core/Button';
@@ -32,9 +46,17 @@ export const ActiveWorkoutScreen = () => {
   const workoutStartedAtRef = useRef<string>(new Date().toISOString());
 
   const {
-    isActive, exercises, currentExerciseIndex, workoutName, sessionId,
-    startWorkout, finishWorkout, nextExercise, prevExercise,
-    logSet, startRest
+    isActive,
+    exercises,
+    currentExerciseIndex,
+    workoutName,
+    sessionId,
+    startWorkout,
+    finishWorkout,
+    nextExercise,
+    prevExercise,
+    logSet,
+    startRest,
   } = useActiveWorkoutStore();
 
   // Inicialização: usa treino já ativo no store ou inicia demo
@@ -52,7 +74,7 @@ export const ActiveWorkoutScreen = () => {
           youtubeId: 'M7lc1UVf-VE',
           targetSets: 4,
           targetReps: 10,
-          loggedSets: []
+          loggedSets: [],
         },
         {
           id: 'ex-2',
@@ -61,8 +83,8 @@ export const ActiveWorkoutScreen = () => {
           youtubeId: 'jNQXAC9IVRw',
           targetSets: 3,
           targetReps: 12,
-          loggedSets: []
-        }
+          loggedSets: [],
+        },
       ];
       const templateSessionId = routeParams?.sessionId || null;
 
@@ -80,18 +102,17 @@ export const ActiveWorkoutScreen = () => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
       if (!isActive || isFinishingRef.current) return;
       e.preventDefault();
-      Alert.alert(
-        strings.activeWorkout.alertCancelTitle,
-        strings.activeWorkout.alertCancelMsg,
-        [
-          { text: strings.activeWorkout.alertCancelNo, style: 'cancel', onPress: () => {} },
-          { text: strings.activeWorkout.alertCancelYes, style: 'destructive', onPress: () => {
-              finishWorkout();
-              navigation.dispatch(e.data.action);
-            }
+      Alert.alert(strings.activeWorkout.alertCancelTitle, strings.activeWorkout.alertCancelMsg, [
+        { text: strings.activeWorkout.alertCancelNo, style: 'cancel', onPress: () => {} },
+        {
+          text: strings.activeWorkout.alertCancelYes,
+          style: 'destructive',
+          onPress: () => {
+            finishWorkout();
+            navigation.dispatch(e.data.action);
           },
-        ]
-      );
+        },
+      ]);
     });
     return unsubscribe;
   }, [navigation, isActive]);
@@ -101,46 +122,28 @@ export const ActiveWorkoutScreen = () => {
 
     const now = new Date();
     const startedAt = workoutStartedAtRef.current;
-    const startedDate = new Date(startedAt);
+    const durationSeconds = Math.round((now.getTime() - new Date(startedAt).getTime()) / 1000);
 
-    // Cálculo REAL da duração em segundos
-    const durationSeconds = Math.round((now.getTime() - startedDate.getTime()) / 1000);
-
-    const logId = generateUUID();
-    // IMPORTANTE: Se o treino for avulso/livre, enviamos null. Gerar UUID falso aqui quebra a restrição de FK no banco!
-    const workoutSessionId = sessionId || null;
-
-    // Cálculo REAL do volume total (soma de peso × reps de cada série)
-    let totalVolumeKg = 0;
-    const allSets: any[] = [];
-    exercises.forEach(ex => {
-      ex.loggedSets.forEach(set => {
-        totalVolumeKg += set.weight * set.reps;
-        allSets.push({
-          client_id: generateUUID(),
-          log_client_id: logId,
-          session_exercise_id: sessionId ? ex.id : null,
-          exercise_id: ex.exerciseId || ex.id,
-          set_number: set.setNumber,
-          weight_kg: set.weight,
-          reps_done: set.reps,
-          completed_at: set.completedAt,
-        });
-      });
-    });
+    const sets = exercises.flatMap((ex, exIdx) =>
+      ex.loggedSets.map((set, i) => ({
+        session_exercise_id: sessionId ? ex.id : null,
+        exercise_id: ex.exerciseId || ex.id,
+        set_number: set.setNumber ?? i + 1,
+        weight_kg: set.weight,
+        reps_done: set.reps,
+        completed_at: set.completedAt,
+      }))
+    );
 
     try {
-      await api.post('/sync-workout', {
-        logs: [{
-          client_id: logId,
-          session_id: workoutSessionId,
+      await api.post('/save-workout', {
+        workout: {
+          session_id: sessionId || null,
           started_at: startedAt,
           completed_at: now.toISOString(),
           duration_seconds: durationSeconds,
-          total_volume_kg: totalVolumeKg,
-          total_sets: allSets.length,
-        }],
-        sets: allSets
+        },
+        sets,
       });
 
       isFinishingRef.current = true;
@@ -166,7 +169,9 @@ export const ActiveWorkoutScreen = () => {
             <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={8}>
               <Ionicons name="close" size={28} color={colors.text} />
             </Pressable>
-            <Text variant="body" weight="semibold">{strings.activeWorkout.loading}</Text>
+            <Text variant="body" weight="semibold">
+              {strings.activeWorkout.loading}
+            </Text>
             <View style={{ width: 28 }} />
           </View>
           <ScrollView contentContainerStyle={styles.scroll}>
@@ -194,7 +199,9 @@ export const ActiveWorkoutScreen = () => {
               <Ionicons name="close" size={28} color={colors.text} />
             </Pressable>
             <View style={styles.headerCenter}>
-              <Text variant="body" weight="semibold" align="center">{workoutName}</Text>
+              <Text variant="body" weight="semibold" align="center">
+                {workoutName}
+              </Text>
               <View style={styles.progressDots}>
                 {exercises.map((_, i) => (
                   <View
@@ -213,10 +220,7 @@ export const ActiveWorkoutScreen = () => {
 
           <ScrollView contentContainerStyle={styles.scroll}>
             <Animated.View entering={FadeIn.duration(300)} key={`ex-${currentExerciseIndex}`}>
-              <ExerciseCard
-                exercise={currentExercise}
-                onLogSet={handleLogSet}
-              />
+              <ExerciseCard exercise={currentExercise} onLogSet={handleLogSet} />
             </Animated.View>
           </ScrollView>
 

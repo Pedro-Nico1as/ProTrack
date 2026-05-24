@@ -45,7 +45,9 @@ export const BuildWorkoutCard = ({ onPress }: BuildWorkoutCardProps) => {
       </View>
 
       <View style={styles.textWrap}>
-        <Text variant="body" weight="semibold">{strings.buildWorkout.title}</Text>
+        <Text variant="body" weight="semibold">
+          {strings.buildWorkout.title}
+        </Text>
         <Text variant="caption">{strings.buildWorkout.subtitle}</Text>
       </View>
 

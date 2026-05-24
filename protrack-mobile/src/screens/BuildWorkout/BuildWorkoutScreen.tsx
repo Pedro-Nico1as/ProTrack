@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, ScrollView, Pressable, StatusBar, Modal, FlatList, ActivityIndicator, TextInput, Alert } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  Pressable,
+  StatusBar,
+  Modal,
+  FlatList,
+  ActivityIndicator,
+  TextInput,
+  Alert,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +21,11 @@ import { Button } from '../../components/core/Button';
 import { RootStackParamList } from '../../navigation/types';
 import { fetchExercises, Exercise } from '../../services/api';
 import { generateUUID } from '../../utils/uuid';
-import { useCustomWorkoutsStore, CustomWorkoutPartition, CustomExercise } from '../../stores/useCustomWorkoutsStore';
+import {
+  useCustomWorkoutsStore,
+  CustomWorkoutPartition,
+  CustomExercise,
+} from '../../stores/useCustomWorkoutsStore';
 import { strings } from '../../constants/strings';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'BuildWorkout'>;
@@ -17,15 +33,15 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'BuildWorkou
 export const BuildWorkoutScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [workoutName, setWorkoutName] = useState(strings.buildWorkout.defaultWorkoutName);
-  
+
   const [partitions, setPartitions] = useState<CustomWorkoutPartition[]>([
-    { id: generateUUID(), name: strings.buildWorkout.defaultPartitionName, exercises: [] }
+    { id: generateUUID(), name: strings.buildWorkout.defaultPartitionName, exercises: [] },
   ]);
-  
+
   const [selectingForPartition, setSelectingForPartition] = useState<string | null>(null);
   const [catalog, setCatalog] = useState<Exercise[]>([]);
   const [loadingCatalog, setLoadingCatalog] = useState(false);
-  
+
   const addWorkout = useCustomWorkoutsStore((state) => state.addWorkout);
 
   const isSelecting = selectingForPartition !== null;
@@ -46,8 +62,8 @@ export const BuildWorkoutScreen = () => {
       {
         id: generateUUID(),
         name: `${strings.buildWorkout.defaultPartitionName.replace(' A', '')} ${String.fromCharCode(65 + partitions.length)}`, // Treino B, C...
-        exercises: []
-      }
+        exercises: [],
+      },
     ]);
   };
 
@@ -57,24 +73,24 @@ export const BuildWorkoutScreen = () => {
       strings.buildWorkout.alertRemovePartitionMsg,
       [
         { text: strings.buildWorkout.cancel, style: 'cancel' },
-        { 
-          text: strings.buildWorkout.remove, 
+        {
+          text: strings.buildWorkout.remove,
           style: 'destructive',
           onPress: () => {
-            setPartitions(prev => prev.filter(p => p.id !== id));
-          }
-        }
+            setPartitions((prev) => prev.filter((p) => p.id !== id));
+          },
+        },
       ]
     );
   };
 
   const updatePartitionName = (id: string, newName: string) => {
-    setPartitions(prev => prev.map(p => p.id === id ? { ...p, name: newName } : p));
+    setPartitions((prev) => prev.map((p) => (p.id === id ? { ...p, name: newName } : p)));
   };
 
   const addExercise = (exercise: Exercise) => {
     if (!selectingForPartition) return;
-    
+
     const newEx: CustomExercise = {
       id: generateUUID(),
       exerciseId: exercise.id,
@@ -85,58 +101,69 @@ export const BuildWorkoutScreen = () => {
       targetReps: 10,
     };
 
-    setPartitions(prev => prev.map(p => {
-      if (p.id === selectingForPartition) {
-        return { ...p, exercises: [...p.exercises, newEx] };
-      }
-      return p;
-    }));
-    
+    setPartitions((prev) =>
+      prev.map((p) => {
+        if (p.id === selectingForPartition) {
+          return { ...p, exercises: [...p.exercises, newEx] };
+        }
+        return p;
+      })
+    );
+
     setSelectingForPartition(null);
   };
 
-  const updateExercise = (partitionId: string, exId: string, field: 'targetSets' | 'targetReps', delta: number) => {
-    setPartitions(prev => prev.map(p => {
-      if (p.id === partitionId) {
-        return {
-          ...p,
-          exercises: p.exercises.map(ex => {
-            if (ex.id === exId) {
-              return { ...ex, [field]: Math.max(1, ex[field] + delta) };
-            }
-            return ex;
-          })
-        };
-      }
-      return p;
-    }));
+  const updateExercise = (
+    partitionId: string,
+    exId: string,
+    field: 'targetSets' | 'targetReps',
+    delta: number
+  ) => {
+    setPartitions((prev) =>
+      prev.map((p) => {
+        if (p.id === partitionId) {
+          return {
+            ...p,
+            exercises: p.exercises.map((ex) => {
+              if (ex.id === exId) {
+                return { ...ex, [field]: Math.max(1, ex[field] + delta) };
+              }
+              return ex;
+            }),
+          };
+        }
+        return p;
+      })
+    );
   };
 
   const removeExercise = (partitionId: string, exId: string) => {
-    setPartitions(prev => prev.map(p => {
-      if (p.id === partitionId) {
-        return {
-          ...p,
-          exercises: p.exercises.filter(ex => ex.id !== exId)
-        };
-      }
-      return p;
-    }));
+    setPartitions((prev) =>
+      prev.map((p) => {
+        if (p.id === partitionId) {
+          return {
+            ...p,
+            exercises: p.exercises.filter((ex) => ex.id !== exId),
+          };
+        }
+        return p;
+      })
+    );
   };
 
   const handleCreateWorkout = () => {
     // Only save partitions that have at least one exercise, or keep empty if user explicitly wants?
     // Let's keep them as user left them. But ensure names are not empty.
-    const cleanPartitions = partitions.map(p => ({
+    const cleanPartitions = partitions.map((p) => ({
       ...p,
-      name: p.name.trim() || strings.buildWorkout.noName
+      name: p.name.trim() || strings.buildWorkout.noName,
     }));
 
     addWorkout({
       id: generateUUID(),
       name: workoutName.trim() || strings.buildWorkout.defaultWorkoutName,
       partitions: cleanPartitions,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     });
 
     navigation.goBack();
@@ -150,14 +177,21 @@ export const BuildWorkoutScreen = () => {
           <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={12}>
             <Ionicons name="close" size={28} color={colors.text} />
           </Pressable>
-          <Text variant="heading" weight="semibold">{strings.buildWorkout.title}</Text>
+          <Text variant="heading" weight="semibold">
+            {strings.buildWorkout.title}
+          </Text>
           <View style={{ width: 44 }} />
         </View>
 
         <ScrollView contentContainerStyle={styles.scroll}>
-          
           <View style={styles.nameContainer}>
-            <Text variant="caption" color={colors.textSecondary} style={{ marginBottom: spacing.xs }}>{strings.buildWorkout.mainPlanName}</Text>
+            <Text
+              variant="caption"
+              color={colors.textSecondary}
+              style={{ marginBottom: spacing.xs }}
+            >
+              {strings.buildWorkout.mainPlanName}
+            </Text>
             <TextInput
               style={styles.nameInput}
               value={workoutName}
@@ -177,50 +211,88 @@ export const BuildWorkoutScreen = () => {
                   placeholder={strings.buildWorkout.partitionNamePlaceholder}
                   placeholderTextColor={colors.textMuted}
                 />
-                <Pressable onPress={() => removePartition(partition.id)} hitSlop={12} style={styles.iconBtn}>
+                <Pressable
+                  onPress={() => removePartition(partition.id)}
+                  hitSlop={12}
+                  style={styles.iconBtn}
+                >
                   <Ionicons name="trash-outline" size={22} color={colors.error} />
                 </Pressable>
               </View>
 
               {partition.exercises.length === 0 ? (
                 <View style={styles.emptyPartition}>
-                  <Text variant="caption" color={colors.textSecondary}>{strings.buildWorkout.emptyPartition}</Text>
+                  <Text variant="caption" color={colors.textSecondary}>
+                    {strings.buildWorkout.emptyPartition}
+                  </Text>
                 </View>
               ) : (
                 partition.exercises.map((item, index) => (
                   <View key={item.id} style={styles.exerciseCard}>
                     <View style={styles.exerciseHeader}>
                       <View style={{ flex: 1 }}>
-                        <Text variant="body" weight="semibold">{index + 1}. {item.name}</Text>
-                        <Text variant="caption" color={colors.primary}>{item.muscleGroup}</Text>
+                        <Text variant="body" weight="semibold">
+                          {index + 1}. {item.name}
+                        </Text>
+                        <Text variant="caption" color={colors.primary}>
+                          {item.muscleGroup}
+                        </Text>
                       </View>
-                      <Pressable onPress={() => removeExercise(partition.id, item.id)} hitSlop={12} style={styles.removeBtn}>
+                      <Pressable
+                        onPress={() => removeExercise(partition.id, item.id)}
+                        hitSlop={12}
+                        style={styles.removeBtn}
+                      >
                         <Ionicons name="close" size={20} color={colors.textSecondary} />
                       </Pressable>
                     </View>
-                    
+
                     <View style={styles.controlsRow}>
                       <View style={styles.controlGroup}>
-                        <Text variant="caption" color={colors.textSecondary}>{strings.buildWorkout.series}</Text>
+                        <Text variant="caption" color={colors.textSecondary}>
+                          {strings.buildWorkout.series}
+                        </Text>
                         <View style={styles.stepper}>
-                          <Pressable style={styles.stepperBtn} onPress={() => updateExercise(partition.id, item.id, 'targetSets', -1)} hitSlop={8}>
+                          <Pressable
+                            style={styles.stepperBtn}
+                            onPress={() => updateExercise(partition.id, item.id, 'targetSets', -1)}
+                            hitSlop={8}
+                          >
                             <Ionicons name="remove" size={20} color={colors.text} />
                           </Pressable>
-                          <Text variant="body" weight="bold" style={styles.stepperValue}>{item.targetSets}</Text>
-                          <Pressable style={styles.stepperBtn} onPress={() => updateExercise(partition.id, item.id, 'targetSets', 1)} hitSlop={8}>
+                          <Text variant="body" weight="bold" style={styles.stepperValue}>
+                            {item.targetSets}
+                          </Text>
+                          <Pressable
+                            style={styles.stepperBtn}
+                            onPress={() => updateExercise(partition.id, item.id, 'targetSets', 1)}
+                            hitSlop={8}
+                          >
                             <Ionicons name="add" size={20} color={colors.text} />
                           </Pressable>
                         </View>
                       </View>
 
                       <View style={styles.controlGroup}>
-                        <Text variant="caption" color={colors.textSecondary}>{strings.buildWorkout.reps}</Text>
+                        <Text variant="caption" color={colors.textSecondary}>
+                          {strings.buildWorkout.reps}
+                        </Text>
                         <View style={styles.stepper}>
-                          <Pressable style={styles.stepperBtn} onPress={() => updateExercise(partition.id, item.id, 'targetReps', -1)} hitSlop={8}>
+                          <Pressable
+                            style={styles.stepperBtn}
+                            onPress={() => updateExercise(partition.id, item.id, 'targetReps', -1)}
+                            hitSlop={8}
+                          >
                             <Ionicons name="remove" size={20} color={colors.text} />
                           </Pressable>
-                          <Text variant="body" weight="bold" style={styles.stepperValue}>{item.targetReps}</Text>
-                          <Pressable style={styles.stepperBtn} onPress={() => updateExercise(partition.id, item.id, 'targetReps', 1)} hitSlop={8}>
+                          <Text variant="body" weight="bold" style={styles.stepperValue}>
+                            {item.targetReps}
+                          </Text>
+                          <Pressable
+                            style={styles.stepperBtn}
+                            onPress={() => updateExercise(partition.id, item.id, 'targetReps', 1)}
+                            hitSlop={8}
+                          >
                             <Ionicons name="add" size={20} color={colors.text} />
                           </Pressable>
                         </View>
@@ -245,7 +317,6 @@ export const BuildWorkoutScreen = () => {
             onPress={addPartition}
             style={styles.addPartitionBtn}
           />
-
         </ScrollView>
 
         <View style={styles.footer}>
@@ -261,12 +332,18 @@ export const BuildWorkoutScreen = () => {
       <Modal visible={isSelecting} animationType="slide" presentationStyle="pageSheet">
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <Text variant="heading" weight="semibold">{strings.buildWorkout.selectExerciseModal}</Text>
-            <Pressable onPress={() => setSelectingForPartition(null)} hitSlop={12} style={styles.iconBtn}>
+            <Text variant="heading" weight="semibold">
+              {strings.buildWorkout.selectExerciseModal}
+            </Text>
+            <Pressable
+              onPress={() => setSelectingForPartition(null)}
+              hitSlop={12}
+              style={styles.iconBtn}
+            >
               <Ionicons name="close" size={28} color={colors.text} />
             </Pressable>
           </View>
-          
+
           {loadingCatalog ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator color={colors.primary} size="large" />
@@ -279,8 +356,12 @@ export const BuildWorkoutScreen = () => {
               renderItem={({ item }) => (
                 <Pressable style={styles.catalogItem} onPress={() => addExercise(item)}>
                   <View style={{ flex: 1 }}>
-                    <Text variant="body" weight="semibold">{item.name}</Text>
-                    <Text variant="caption" color={colors.primary}>{item.muscle_group}</Text>
+                    <Text variant="body" weight="semibold">
+                      {item.name}
+                    </Text>
+                    <Text variant="caption" color={colors.primary}>
+                      {item.muscle_group}
+                    </Text>
                   </View>
                   <View style={styles.addExerciseIconBtn}>
                     <Ionicons name="add-circle" size={24} color={colors.accent} />

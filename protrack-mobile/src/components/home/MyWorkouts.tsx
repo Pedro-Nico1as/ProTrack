@@ -18,8 +18,10 @@ export const MyWorkouts = () => {
 
   return (
     <View style={styles.section}>
-      <Text variant="label" style={styles.sectionTitle}>{strings.myWorkouts.title}</Text>
-      
+      <Text variant="label" style={styles.sectionTitle}>
+        {strings.myWorkouts.title}
+      </Text>
+
       <View style={styles.list}>
         {workouts.map((workout) => (
           <View key={workout.id} style={styles.card}>
@@ -28,9 +30,14 @@ export const MyWorkouts = () => {
                 <Ionicons name="flash" size={20} color={colors.primary} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text variant="body" weight="semibold">{workout.name}</Text>
+                <Text variant="body" weight="semibold">
+                  {workout.name}
+                </Text>
                 <Text variant="caption" color={colors.textMuted}>
-                  {workout.partitions?.length || 0} {(workout.partitions?.length === 1) ? strings.myWorkouts.sheetSingular : strings.myWorkouts.sheetPlural}
+                  {workout.partitions?.length || 0}{' '}
+                  {workout.partitions?.length === 1
+                    ? strings.myWorkouts.sheetSingular
+                    : strings.myWorkouts.sheetPlural}
                 </Text>
               </View>
               <Button

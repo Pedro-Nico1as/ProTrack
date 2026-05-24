@@ -1,31 +1,82 @@
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, SafeAreaView, FlatList, StatusBar } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  SafeAreaView,
+  FlatList,
+  StatusBar,
+  ActivityIndicator,
+} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, spacing, sizing } from '../../theme/tokens';
+import { colors, spacing } from '../../theme/tokens';
 import { strings } from '../../constants/strings';
-
+import { supabase } from '../../services/supabase';
 import { Text } from '../../components/core/Text';
 import { Card } from '../../components/core/Card';
+
+const CARD_HEIGHT = 80;
+const CARD_SEPARATOR = spacing.sm;
 
 export const HistoryScreen = () => {
   const [workouts, setWorkouts] = useState<any[]>([]);
   const [setsCount, setSetsCount] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
       const fetchHistory = async () => {
         try {
+          setIsLoading(true);
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+          if (!session) {
+            setIsLoading(false);
+            return;
+          }
+
+          const { data, error } = await supabase
+            .from('user_workout_logs')
+            .select(
+              `
+              id,
+              started_at,
+              completed_at,
+              duration_seconds,
+              session_id,
+              workout_sessions (
+                title
+              ),
+              user_set_logs (
+                id
+              )
+            `
+            )
+            .eq('user_id', session.user.id)
+            .order('completed_at', { ascending: false })
+            .limit(50);
+
+          if (error) throw error;
+
           if (isActive) {
-            setWorkouts([]);
-            setSetsCount(0);
+            setWorkouts(data ?? []);
+            const total = (data ?? []).reduce((acc, w) => acc + (w.user_set_logs?.length ?? 0), 0);
+            setSetsCount(total);
           }
         } catch (e) {
-          console.error("Erro", e);
+          console.error('Erro ao buscar histórico', e);
+        } finally {
+          if (isActive) {
+            setIsLoading(false);
+          }
         }
       };
+
       fetchHistory();
-      return () => { isActive = false; };
+      return () => {
+        isActive = false;
+      };
     }, [])
   );
 
@@ -39,7 +90,11 @@ export const HistoryScreen = () => {
             {setsCount} séries registradas
           </Text>
 
-          {workouts.length === 0 ? (
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={colors.accent} />
+            </View>
+          ) : workouts.length === 0 ? (
             <View style={styles.emptyState}>
               <Text variant="body" color={colors.textMuted} align="center">
                 Nenhum treino finalizado ainda.
@@ -51,30 +106,43 @@ export const HistoryScreen = () => {
           ) : (
             <FlatList
               data={workouts}
-              keyExtractor={item => item.id}
+              keyExtractor={(item) => item.id}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ gap: spacing.sm }}
-              renderItem={({ item }) => (
-                <Card gradient={colors.gradients.card}>
-                  <View style={styles.cardRow}>
-                    <View style={styles.cardDot} />
-                    <View style={{ flex: 1 }}>
-                      <Text variant="body" weight="semibold">
-                        Treino #{item.id.substring(0, 6)}
-                      </Text>
-                      <Text variant="caption">
-                        {new Date(item.started_at).toLocaleDateString('pt-BR', {
-                          day: '2-digit', month: 'short', year: 'numeric'
-                        })}
-                        {' · '}
-                        {new Date(item.started_at).toLocaleTimeString('pt-BR', {
-                          hour: '2-digit', minute: '2-digit'
-                        })}
-                      </Text>
+              contentContainerStyle={{ gap: CARD_SEPARATOR }}
+              getItemLayout={(_, index) => ({
+                length: CARD_HEIGHT + CARD_SEPARATOR,
+                offset: (CARD_HEIGHT + CARD_SEPARATOR) * index,
+                index,
+              })}
+              renderItem={({ item }) => {
+                const sessionTitle = item.workout_sessions?.title || 'Treino Livre';
+                const durationMinutes = Math.round(item.duration_seconds / 60);
+                const setsLength = item.user_set_logs?.length ?? 0;
+
+                return (
+                  <Card gradient={colors.gradients.card} style={styles.card}>
+                    <View style={styles.cardRow}>
+                      <View style={styles.cardDot} />
+                      <View style={{ flex: 1 }}>
+                        <Text variant="body" weight="semibold">
+                          {sessionTitle}
+                        </Text>
+                        <Text variant="caption" color={colors.textSecondary}>
+                          {new Date(item.completed_at).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                          {' · '}
+                          {durationMinutes} min
+                          {' · '}
+                          {setsLength} séries
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                </Card>
-              )}
+                  </Card>
+                );
+              }}
             />
           )}
         </View>
@@ -99,11 +167,20 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     marginBottom: spacing.lg,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     gap: spacing.sm,
+  },
+  card: {
+    height: CARD_HEIGHT,
+    justifyContent: 'center',
   },
   cardRow: {
     flexDirection: 'row',

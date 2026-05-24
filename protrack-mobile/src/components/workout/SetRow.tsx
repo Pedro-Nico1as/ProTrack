@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { View, TextInput, Pressable, StyleSheet } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSequence,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, sizing, spacing, typography, animation } from '../../theme/tokens';
@@ -40,7 +45,11 @@ export const SetRow = ({ setNumber, targetReps, isCompleted, onComplete }: Props
   return (
     <View style={[styles.container, isCompleted && styles.completedContainer]}>
       <View style={styles.setNumberWrap}>
-        <Text variant="body" weight="bold" color={isCompleted ? colors.primary : colors.textSecondary}>
+        <Text
+          variant="body"
+          weight="bold"
+          color={isCompleted ? colors.primary : colors.textSecondary}
+        >
           {setNumber}
         </Text>
       </View>
@@ -68,7 +77,11 @@ export const SetRow = ({ setNumber, targetReps, isCompleted, onComplete }: Props
       </View>
 
       <AnimatedPressable
-        style={[styles.button, isCompleted ? styles.buttonCompleted : styles.buttonPending, animatedCheckStyle]}
+        style={[
+          styles.button,
+          isCompleted ? styles.buttonCompleted : styles.buttonPending,
+          animatedCheckStyle,
+        ]}
         onPress={handleComplete}
         disabled={isCompleted}
       >

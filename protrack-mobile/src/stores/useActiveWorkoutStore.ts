@@ -43,7 +43,7 @@ interface ActiveWorkoutState {
   currentExerciseIndex: number;
   restTargetEndTime: number | null;
   sessionId: string | null;
-  
+
   startWorkout: (name: string, exercises: ActiveExercise[], sessionId?: string | null) => void;
   finishWorkout: () => void;
   nextExercise: () => void;
@@ -63,39 +63,49 @@ export const useActiveWorkoutStore = create<ActiveWorkoutState>()(
       restTargetEndTime: null,
       sessionId: null,
 
-      startWorkout: (name, exercises, sessionId = null) => set({
-        isActive: true,
-        workoutName: name,
-        exercises,
-        currentExerciseIndex: 0,
-        restTargetEndTime: null,
-        sessionId,
-      }),
-      finishWorkout: () => set({
-        isActive: false,
-        workoutName: '',
-        exercises: [],
-        currentExerciseIndex: 0,
-        restTargetEndTime: null,
-        sessionId: null,
-      }),
-      nextExercise: () => set((state) => ({
-        currentExerciseIndex: Math.min(state.currentExerciseIndex + 1, state.exercises.length - 1)
-      })),
-      prevExercise: () => set((state) => ({
-        currentExerciseIndex: Math.max(state.currentExerciseIndex - 1, 0)
-      })),
-      logSet: (exerciseIndex, loggedSet) => set((state) => {
-        const newExercises = [...state.exercises];
-        newExercises[exerciseIndex].loggedSets.push(loggedSet);
-        return { exercises: newExercises };
-      }),
-      startRest: (seconds) => set({
-        restTargetEndTime: Date.now() + seconds * 1000,
-      }),
-      skipRest: () => set({
-        restTargetEndTime: null,
-      }),
+      startWorkout: (name, exercises, sessionId = null) =>
+        set({
+          isActive: true,
+          workoutName: name,
+          exercises,
+          currentExerciseIndex: 0,
+          restTargetEndTime: null,
+          sessionId,
+        }),
+      finishWorkout: () =>
+        set({
+          isActive: false,
+          workoutName: '',
+          exercises: [],
+          currentExerciseIndex: 0,
+          restTargetEndTime: null,
+          sessionId: null,
+        }),
+      nextExercise: () =>
+        set((state) => ({
+          currentExerciseIndex: Math.min(
+            state.currentExerciseIndex + 1,
+            state.exercises.length - 1
+          ),
+        })),
+      prevExercise: () =>
+        set((state) => ({
+          currentExerciseIndex: Math.max(state.currentExerciseIndex - 1, 0),
+        })),
+      logSet: (exerciseIndex, loggedSet) =>
+        set((state) => {
+          const newExercises = [...state.exercises];
+          newExercises[exerciseIndex].loggedSets.push(loggedSet);
+          return { exercises: newExercises };
+        }),
+      startRest: (seconds) =>
+        set({
+          restTargetEndTime: Date.now() + seconds * 1000,
+        }),
+      skipRest: () =>
+        set({
+          restTargetEndTime: null,
+        }),
     }),
     {
       name: 'active-workout',
@@ -103,4 +113,3 @@ export const useActiveWorkoutStore = create<ActiveWorkoutState>()(
     }
   )
 );
-

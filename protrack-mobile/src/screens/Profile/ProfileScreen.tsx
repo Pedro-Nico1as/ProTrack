@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, SafeAreaView, StatusBar, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, sizing } from '../../theme/tokens';
 import { strings } from '../../constants/strings';
@@ -66,7 +73,9 @@ export const ProfileScreen = () => {
                   activeOpacity={0.7}
                 >
                   <Ionicons name={item.icon} size={22} color={colors.textSecondary} />
-                  <Text variant="body" style={styles.menuLabel}>{item.label}</Text>
+                  <Text variant="body" style={styles.menuLabel}>
+                    {item.label}
+                  </Text>
                   <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
                 </TouchableOpacity>
               );
@@ -77,7 +86,6 @@ export const ProfileScreen = () => {
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {

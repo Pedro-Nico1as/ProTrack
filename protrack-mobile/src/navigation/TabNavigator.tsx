@@ -2,11 +2,19 @@ import React, { useEffect } from 'react';
 import { View, Text as RNText, StyleSheet, Pressable, Platform } from 'react-native';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { IconHome2, IconUser, IconPlus } from '@tabler/icons-react-native';
+import {
+  IconHome2,
+  IconUser,
+  IconPlus,
+  IconHistory,
+  IconCompass,
+} from '@tabler/icons-react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { HomeScreen } from '../screens/Home/HomeScreen';
 import { ProfileScreen } from '../screens/Profile/ProfileScreen';
+import { HistoryScreen } from '../screens/History/HistoryScreen';
+import { ExploreScreen } from '../screens/Explore/ExploreScreen';
 import { TabParamList } from './types';
 import { colors, spacing, sizing, typography } from '../theme/tokens';
 import { strings } from '../constants/strings';
@@ -19,7 +27,7 @@ interface TabItemProps {
   isFocused: boolean;
   onPress: () => void;
   label: string;
-  routeName: 'Home' | 'Profile';
+  routeName: 'Home' | 'Explore' | 'History' | 'Profile';
 }
 
 const TabItem = ({ isFocused, onPress, label, routeName }: TabItemProps) => {
@@ -52,7 +60,14 @@ const TabItem = ({ isFocused, onPress, label, routeName }: TabItemProps) => {
   });
 
   const tintColor = isFocused ? colors.accent : colors.textSecondary;
-  const IconComponent = routeName === 'Home' ? IconHome2 : IconUser;
+
+  const iconMap: Record<string, React.ElementType> = {
+    Home: IconHome2,
+    Explore: IconCompass,
+    History: IconHistory,
+    Profile: IconUser,
+  };
+  const IconComponent = iconMap[routeName] ?? IconHome2;
 
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -60,10 +75,7 @@ const TabItem = ({ isFocused, onPress, label, routeName }: TabItemProps) => {
   };
 
   return (
-    <Pressable
-      style={styles.tabItem}
-      onPress={handlePress}
-    >
+    <Pressable style={styles.tabItem} onPress={handlePress}>
       <Animated.View style={[styles.glowBackground, animatedGlowStyle]} />
       <Animated.View style={[animatedIconStyle, animatedStyle]}>
         <IconComponent size={22} color={tintColor} />
@@ -132,7 +144,13 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
           return <AnimatedFAB key={route.key} onPress={onPress} />;
         }
 
-        const label = route.name === 'Home' ? strings.tabs.home : strings.tabs.profile;
+        const labelMap: Record<string, string> = {
+          Home: strings.tabs.home,
+          Explore: strings.explore.title,
+          History: strings.history.title,
+          Profile: strings.tabs.profile,
+        };
+        const label = labelMap[route.name] ?? route.name;
 
         return (
           <TabItem
@@ -140,7 +158,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
             isFocused={isFocused}
             onPress={onPress}
             label={label}
-            routeName={route.name as 'Home' | 'Profile'}
+            routeName={route.name as 'Home' | 'Explore' | 'History' | 'Profile'}
           />
         );
       })}
@@ -155,7 +173,9 @@ export const TabNavigator = () => {
       screenOptions={{ headerShown: false }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Explore" component={ExploreScreen} />
       <Tab.Screen name="NewWorkoutPlaceholder" component={EmptyScreen} />
+      <Tab.Screen name="History" component={HistoryScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

@@ -22,7 +22,9 @@ export const ExerciseCard = ({ exercise, onLogSet }: Props) => {
         <View style={styles.accentBar} />
         <View style={{ flex: 1 }}>
           <Text variant="subheading">{exercise.name}</Text>
-          <Text variant="label" style={styles.muscle}>{exercise.muscleGroup}</Text>
+          <Text variant="label" style={styles.muscle}>
+            {exercise.muscleGroup}
+          </Text>
         </View>
         <View style={styles.badge}>
           <Text variant="caption" weight="bold" color={colors.primary}>
@@ -40,17 +42,21 @@ export const ExerciseCard = ({ exercise, onLogSet }: Props) => {
             <Text variant="label">#</Text>
           </View>
           <View style={styles.headerFlex}>
-            <Text variant="label" align="center">{strings.workout.weightHeader}</Text>
+            <Text variant="label" align="center">
+              {strings.workout.weightHeader}
+            </Text>
           </View>
           <View style={styles.headerFlex}>
-            <Text variant="label" align="center">{strings.workout.repsHeader}</Text>
+            <Text variant="label" align="center">
+              {strings.workout.repsHeader}
+            </Text>
           </View>
           <View style={styles.headerBtn} />
         </View>
 
         {Array.from({ length: exercise.targetSets }).map((_, idx) => {
           const setNumber = idx + 1;
-          const logged = exercise.loggedSets.find(s => s.setNumber === setNumber);
+          const logged = exercise.loggedSets.find((s) => s.setNumber === setNumber);
 
           return (
             <SetRow
@@ -58,13 +64,15 @@ export const ExerciseCard = ({ exercise, onLogSet }: Props) => {
               setNumber={setNumber}
               targetReps={exercise.targetReps}
               isCompleted={!!logged}
-              onComplete={(weight, reps) => onLogSet({
-                id: Date.now().toString(),
-                setNumber,
-                weight,
-                reps,
-                completedAt: new Date().toISOString()
-              })}
+              onComplete={(weight, reps) =>
+                onLogSet({
+                  id: Date.now().toString(),
+                  setNumber,
+                  weight,
+                  reps,
+                  completedAt: new Date().toISOString(),
+                })
+              }
             />
           );
         })}

@@ -1,14 +1,18 @@
-import React from 'react';
-import { TextInput, TextInputProps, View, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { TextInput, TextInputProps, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing, typography, sizing } from '../../theme/tokens';
 import { Text } from './Text';
+import { IconEye, IconEyeOff } from '@tabler/icons-react-native';
 
 interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
+  isPassword?: boolean;
 }
 
-export const Input = ({ label, error, style, ...rest }: InputProps) => {
+export const Input = ({ label, error, style, isPassword, ...rest }: InputProps) => {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <View style={styles.container}>
       {label && (
@@ -20,8 +24,22 @@ export const Input = ({ label, error, style, ...rest }: InputProps) => {
         <TextInput
           style={[styles.input, style]}
           placeholderTextColor={colors.textMuted}
+          secureTextEntry={isPassword ? !showPassword : rest.secureTextEntry}
           {...rest}
         />
+        {isPassword && (
+          <TouchableOpacity
+            style={styles.eyeButton}
+            onPress={() => setShowPassword(!showPassword)}
+            activeOpacity={0.7}
+          >
+            {showPassword ? (
+              <IconEyeOff size={20} color={colors.textSecondary} />
+            ) : (
+              <IconEye size={20} color={colors.textSecondary} />
+            )}
+          </TouchableOpacity>
+        )}
       </View>
       {error && (
         <Text variant="caption" color={colors.error} style={styles.errorText}>
@@ -47,6 +65,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   inputError: {
     borderColor: colors.error,
@@ -56,6 +76,13 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: typography.sizes.md,
     paddingHorizontal: spacing.md,
+    height: '100%',
+  },
+  eyeButton: {
+    paddingHorizontal: spacing.md,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   errorText: {
     marginTop: spacing.xs,

@@ -1,10 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4"
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { serve, createClient, corsHeaders } from '../_shared/deps.ts'
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,25 +7,26 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get('Authorization')
-    const token = authHeader ? authHeader.replace('Bearer ', '') : ''
-    
-    const isMock = token === 'mock-valid-token'
-    
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+    const token = authHeader.replace('Bearer ', '')
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      isMock 
-        ? (Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? '')
-        : (Deno.env.get('SUPABASE_ANON_KEY') ?? ''),
-      isMock ? {} : { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
     )
 
-    let user;
-    if (isMock) {
-      user = { id: 'd290f1ee-6c54-4b01-90e6-d701748f0851', email: 'test@protrack.com' }
-    } else {
-      const { data: { user: authUser }, error: userError } = await supabase.auth.getUser(token)
-      if (userError || !authUser) throw new Error('Unauthorized: ' + (userError?.message || 'No user found'))
-      user = authUser;
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
     }
 
     // Explicit UTC start of week calculation (Monday 00:00:00.000 UTC)
@@ -51,6 +46,7 @@ serve(async (req) => {
           reps_done
         )
       `)
+      .eq('user_id', user.id) // Crucial to filter by validated user ID
       .gte('completed_at', startOfWeek.toISOString())
 
     if (logsError) throw logsError

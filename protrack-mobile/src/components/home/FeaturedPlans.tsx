@@ -27,13 +27,22 @@ const PulseSkeleton = ({ width, height }: { width: number | string; height: numb
   useEffect(() => {
     opacity.value = withRepeat(
       withTiming(0.7, { duration: 900, easing: Easing.inOut(Easing.ease) }),
-      -1, true
+      -1,
+      true
     );
   }, []);
   const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
   return (
     <Animated.View
-      style={[{ width: width as number, height, borderRadius: 8, backgroundColor: colors.surfaceHighlight }, style]}
+      style={[
+        {
+          width: width as number,
+          height,
+          borderRadius: 8,
+          backgroundColor: colors.surfaceHighlight,
+        },
+        style,
+      ]}
     />
   );
 };
@@ -73,7 +82,9 @@ const FeaturedCard = ({ plan, onPress }: { plan: WorkoutPlan; onPress: () => voi
       </View>
 
       <View style={styles.textWrap}>
-        <Text variant="body" weight="semibold" numberOfLines={2}>{plan.name}</Text>
+        <Text variant="body" weight="semibold" numberOfLines={2}>
+          {plan.name}
+        </Text>
         <Text variant="caption" numberOfLines={1}>
           {plan.athlete_name} · {plan.exercise_count} {strings.featured.exercises}
         </Text>
@@ -109,7 +120,7 @@ export const FeaturedPlans = ({ plans, isLoading, onPressPlan }: FeaturedPlansPr
           </Text>
         </View>
       ) : (
-        plans.map(plan => (
+        plans.map((plan) => (
           <FeaturedCard key={plan.id} plan={plan} onPress={() => onPressPlan(plan)} />
         ))
       )}

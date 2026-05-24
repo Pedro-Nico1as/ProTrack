@@ -1,33 +1,29 @@
-# Sincronização Offline
+# Gravação de Treinos
 
-Explicação técnica de como o ProTrack & Flow gerencia dados sem conexão.
+Explicação técnica de como o ProTrack & Flow persiste os dados de treino.
 
-## Fluxo de Sincronização
-1. O usuário realiza o treino offline.
-2. Os dados são salvos localmente no **SQLite**.
-3. O app monitora a conexão (`NetInfo`).
-4. Ao recuperar a internet, o app envia os logs pendentes para o endpoint `/sync-workout`.
-5. O backend processa e retorna confirmação.
-6. O app remove os logs locais processados.
+> [!NOTE]
+> **Mudança de Arquitetura (2026-05-24):** A estratégia de sincronização offline assíncrona com fila em memória (`useSyncStore` + `syncEngine`) foi descontinuada. O app agora utiliza **gravação síncrona direta** via Edge Function `save-workout`. As colunas `client_id` e `synced_at` foram removidas do banco de dados.
+
+## Fluxo de Gravação
+1. O usuário realiza o treino com o app aberto (conexão ativa).
+2. As séries são registradas em tempo real na `useActiveWorkoutStore` (MMKV).
+3. Ao clicar em "Finalizar Treino", o app envia os dados imediatamente para `POST /functions/v1/save-workout`.
+4. O backend insere o log e as séries no banco de dados e retorna o `log_id` gerado.
+5. O estado ativo é limpo localmente.
 
 ## Armazenamento Local e Persistência
 
-O aplicativo utiliza duas camadas de armazenamento local para diferentes propósitos:
+O aplicativo utiliza uma camada de armazenamento local para estado de treino em andamento:
 
-### 1. Estado do Treino Ativo (MMKV com Adapter Customizado)
+### Estado do Treino Ativo (MMKV com Adapter Customizado)
 Para garantir que o usuário não perca o progresso se o aplicativo for fechado acidentalmente durante uma sessão de treino:
 - **Tecnologia**: [Zustand](https://github.com/pmndrs/zustand) com middleware de persistência e [react-native-mmkv](https://github.com/mrousavy/react-native-mmkv) usando um adapter síncrono customizado (`mmkvStorage` resolvendo o contrato `StateStorage` do Zustand).
 - **Dados**: Estado atual do timer, lista de exercícios/partições do treino selecionado e séries já registradas mas ainda não finalizadas.
 - **Vantagem**: Hidratação de estado síncrona instantânea ao abrir o app e gravação em milissegundos de séries em tempo real. Solução definitiva contra o bug de prototype no Hermes Engine (veja [ADR-006](../decisions/ADR-006-mmkv-custom-adapter-state-persistence.md)).
 
-### 2. Fila de Sincronização e Logs (Zustand)
-Uma vez que o usuário clica em "Finalizar Treino", os dados precisam ser transmitidos ao backend de forma confiável:
-- **Tecnologia**: Zustand Store (`useSyncStore`) configurada com filas.
-- **Processo**: Os logs de sessões completas e as séries executadas entram nas filas locais `pendingLogs` e `pendingSets`.
-- **Sincronização**: O serviço `SyncEngine` lê diretamente do `useSyncStore` e dispara um envio em massa (batch) para o backend. Se não houver internet, os dados são preservados.
-- **Resolução de Fila**: A remoção e limpeza dos logs na memória local do cliente só ocorre mediante a confirmação explícita do servidor (`synced_ids`) ou pela classificação de conflitos de relacionamento estrutural (`conflicts`).
-
-## Estratégia de Conflitos e Deduplicação
-- **Deduplicação via `client_id`**: Cada log e série gerada offline recebe um UUID v4 no cliente. O backend ignora registros com IDs já existentes para evitar duplicatas em caso de múltiplas tentativas de sync.
+## Limitações Atuais
+- **Sem suporte offline completo:** Se o usuário perder a conexão antes de finalizar o treino, os dados ficam no MMKV mas não são enviados automaticamente ao backend. A retentativa precisa ser feita manualmente pelo usuário (finalizar novamente quando houver conexão).
+- **Append Only**: Logs de treino são sempre preservados cronologicamente no banco de dados.
 - **Last Write Wins (LWW)**: Aplicado a dados de perfil e configurações.
-- **Append Only**: Logs de treino são sempre preservados cronologicamente.
+

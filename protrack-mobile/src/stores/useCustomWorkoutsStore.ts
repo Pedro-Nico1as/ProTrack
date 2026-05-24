@@ -52,8 +52,7 @@ export const useCustomWorkoutsStore = create<CustomWorkoutsState>()(
   persist(
     (set) => ({
       workouts: [],
-      addWorkout: (workout) =>
-        set((state) => ({ workouts: [workout, ...state.workouts] })),
+      addWorkout: (workout) => set((state) => ({ workouts: [workout, ...state.workouts] })),
       updateWorkout: (workout) =>
         set((state) => ({
           workouts: state.workouts.map((w) => (w.id === workout.id ? workout : w)),

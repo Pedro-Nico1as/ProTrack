@@ -51,7 +51,12 @@ export const ExerciseCardSkeleton = () => {
       {/* Subtitle */}
       <SkeletonPulse width="30%" height={14} style={{ marginBottom: spacing.md }} />
       {/* Video placeholder */}
-      <SkeletonPulse width="100%" height={180} borderRadius={sizing.videoRadius} style={{ marginBottom: spacing.md }} />
+      <SkeletonPulse
+        width="100%"
+        height={180}
+        borderRadius={sizing.videoRadius}
+        style={{ marginBottom: spacing.md }}
+      />
       {/* Table header */}
       <View style={styles.row}>
         <SkeletonPulse width="20%" height={12} />
@@ -60,7 +65,7 @@ export const ExerciseCardSkeleton = () => {
         <SkeletonPulse width={48} height={12} />
       </View>
       {/* Set rows */}
-      {[1, 2, 3].map(i => (
+      {[1, 2, 3].map((i) => (
         <View key={i} style={styles.setRow}>
           <SkeletonPulse width={24} height={24} borderRadius={4} />
           <SkeletonPulse width="30%" height={44} borderRadius={8} />

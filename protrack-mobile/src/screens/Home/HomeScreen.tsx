@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, SafeAreaView, StatusBar, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing } from '../../theme/tokens';
 import { strings } from '../../constants/strings';
@@ -27,7 +26,7 @@ export const HomeScreen = () => {
 
   const userName = user?.user_metadata?.full_name?.split(' ')[0] || 'Atleta';
   const greetingText = strings.home.greeting.replace('{name}', userName);
-  
+
   useFocusEffect(
     useCallback(() => {
       let active = true;
@@ -37,14 +36,14 @@ export const HomeScreen = () => {
 
         try {
           const allLogs = await fetchWorkoutLogs();
-          
+
           if (active) {
             setLogs(allLogs);
-            
+
             const now = new Date();
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
-            
+
             // Start of week (Sunday)
             const weekStart = new Date(now);
             weekStart.setDate(now.getDate() - now.getDay());
@@ -53,7 +52,7 @@ export const HomeScreen = () => {
             let monthCount = 0;
             let weekCount = 0;
 
-            allLogs.forEach(log => {
+            allLogs.forEach((log) => {
               if (!log.completed_at) return;
               const d = new Date(log.completed_at);
               if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) monthCount++;
@@ -74,7 +73,9 @@ export const HomeScreen = () => {
       };
 
       loadData();
-      return () => { active = false; };
+      return () => {
+        active = false;
+      };
     }, [])
   );
 
@@ -82,10 +83,7 @@ export const HomeScreen = () => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <SafeAreaView style={styles.safe}>
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
           {/* Greeting header */}
           <View style={styles.heroSection}>
             <Text variant="heading">{greetingText}</Text>
@@ -95,14 +93,12 @@ export const HomeScreen = () => {
           </View>
 
           {/* Build Workout CTA */}
-          <BuildWorkoutCard
-            onPress={() => navigation.navigate('BuildWorkout')}
-          />
+          <BuildWorkoutCard onPress={() => navigation.navigate('BuildWorkout')} />
 
           {/* Active workout banner */}
           {isActive && (
             <Card
-               gradient={['rgba(83, 74, 183, 0.12)', 'rgba(83, 74, 183, 0.06)']}
+              gradient={['rgba(83, 74, 183, 0.12)', 'rgba(83, 74, 183, 0.06)']}
               style={styles.activeIndicator}
               onPress={() => navigation.navigate('ActiveWorkout')}
             >
@@ -127,10 +123,7 @@ export const HomeScreen = () => {
           <MyWorkouts />
 
           {/* Workout History */}
-          <WorkoutHistory
-            logs={logs}
-            isLoading={isLoading}
-          />
+          <WorkoutHistory logs={logs} isLoading={isLoading} />
         </ScrollView>
       </SafeAreaView>
     </View>

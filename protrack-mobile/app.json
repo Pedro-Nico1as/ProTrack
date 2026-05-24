@@ -2,6 +2,7 @@
   "expo": {
     "name": "protrack-mobile",
     "slug": "protrack-mobile",
+    "jsEngine": "hermes",
     "scheme": "protrack",
     "version": "1.0.0",
     "orientation": "portrait",

@@ -36,14 +36,24 @@ const PulseSkeleton = ({ width, height }: { width: number | string; height: numb
   return (
     <Animated.View
       style={[
-        { width: width as number, height, borderRadius: 8, backgroundColor: colors.surfaceHighlight },
+        {
+          width: width as number,
+          height,
+          borderRadius: 8,
+          backgroundColor: colors.surfaceHighlight,
+        },
         style,
       ]}
     />
   );
 };
 
-export const WeeklyStats = ({ totalWorkouts, monthWorkouts, weekWorkouts, isLoading }: WeeklyStatsProps) => {
+export const WeeklyStats = ({
+  totalWorkouts,
+  monthWorkouts,
+  weekWorkouts,
+  isLoading,
+}: WeeklyStatsProps) => {
   const stats = [
     { value: String(totalWorkouts), label: strings.weeklyStats.total },
     { value: String(monthWorkouts), label: strings.weeklyStats.month },
@@ -61,9 +71,13 @@ export const WeeklyStats = ({ totalWorkouts, monthWorkouts, weekWorkouts, isLoad
             {isLoading ? (
               <PulseSkeleton width={50} height={28} />
             ) : (
-              <Text variant="subheading" weight="bold">{stat.value}</Text>
+              <Text variant="subheading" weight="bold">
+                {stat.value}
+              </Text>
             )}
-            <Text variant="caption" color={colors.textMuted}>{stat.label}</Text>
+            <Text variant="caption" color={colors.textMuted}>
+              {stat.label}
+            </Text>
           </View>
         ))}
       </View>

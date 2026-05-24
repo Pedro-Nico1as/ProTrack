@@ -41,28 +41,23 @@ Todas as requisições requerem o header `Authorization: Bearer <user_jwt>`, exc
 
 As Edge Functions devem ser chamadas com método `POST` (ou GET, se aplicável e com JWT no header).
 
-### POST /functions/v1/sync-workout
-**Descrição**: Sincroniza logs de treino e séries registrados offline. Executa deduplicação baseada em `client_id`.
-- **Auth**: Required
+### POST /functions/v1/save-workout
+**Descrição**: Grava um treino finalizado de forma síncrona. Substitui o endpoint `sync-workout` que foi descontinuado. Não depende de `client_id` nem de lógica de deduplication.
+- **Auth**: Required (JWT obrigatório — sem suporte a `mock-valid-token`)
 - **Request Body**:
 ```json
 {
-  "logs": [
-    {
-      "client_id": "uuid",
-      "session_id": "uuid",
-      "started_at": "2024-05-09T18:00:00Z",
-      "completed_at": "2024-05-09T19:00:00Z",
-      "duration_seconds": 3600,
-      "notes": "Treino pesado hoje"
-    }
-  ],
+  "workout": {
+    "session_id": "uuid | null",
+    "started_at": "2024-05-09T18:00:00Z",
+    "completed_at": "2024-05-09T19:00:00Z",
+    "duration_seconds": 3600,
+    "notes": "Treino pesado hoje"
+  },
   "sets": [
     {
-      "client_id": "uuid",
-      "log_client_id": "uuid",
-      "session_exercise_id": "uuid",
-      "exercise_id": "uuid",
+      "session_exercise_id": "uuid | null",
+      "exercise_id": "uuid | null",
       "set_number": 1,
       "weight_kg": 100.5,
       "reps_done": 10,
@@ -74,26 +69,17 @@ As Edge Functions devem ser chamadas com método `POST` (ou GET, se aplicável e
 - **Response Body**:
 ```json
 {
-  "synced": 5,
-  "synced_count": 5,
-  "synced_ids": [
-    "client_id_do_log",
-    "client_id_do_set_1",
-    "client_id_do_set_2"
-  ],
-  "conflicts": [
-    "client_id_de_serie_orfa"
-  ]
+  "log_id": "uuid-do-log-criado",
+  "sets_saved": 4
 }
 ```
-> [!NOTE]
-> Séries enviadas sem um log correspondente local ou no banco de dados (`log_client_id` inválido) são categorizadas como órfãs e retornadas em `conflicts` para que o cliente móvel limpe a fila local e evite retentativas infinitas.
+- **Error Codes**:
+  - `401 Unauthorized`: JWT ausente ou inválido.
+  - `400 Bad Request`: `workout.started_at` ou `workout.completed_at` ausentes.
 
 > [!NOTE]
-> O campo `exercise_id` é opcional em planos estruturados, mas é **obrigatório** em treinos avulsos/ad-hoc (como os do fluxo "Montar Treino") onde `session_exercise_id` é nulo, permitindo que as séries sejam vinculadas diretamente ao catálogo de exercícios.
+> O campo `exercise_id` é opcional em planos estruturados, mas é **obrigatório** em treinos avulsos/ad-hoc (como os do fluxo "Montar Treino") onde `session_exercise_id` é nulo.
 
-> [!TIP]
-> **Tolerância e Hashing de UUIDs:** Para facilitar integrações offline onde clientes móveis geram IDs provisórios como timestamps (`client_id`, `session_id`), a Edge Function `/sync-workout` possui um conversor de hash determinístico (`toUUID`). Ele transforma qualquer string provisória enviada no payload em um UUID legítimo aceito pelo PostgreSQL, garantindo integridade referencial sem falhar a requisição.
 
 ### GET /functions/v1/user-progress
 **Descrição**: Retorna o histórico de cargas e PR (Personal Record) de um usuário para um exercício específico.
@@ -138,9 +124,9 @@ As Edge Functions devem ser chamadas com método `POST` (ou GET, se aplicável e
 
 ## Ambiente de Testes & Mock Auth
 
-Para viabilizar a execução de testes de integração locais e em pipelines CI/CD sem a necessidade de gerar tokens JWT reais do Supabase Auth para sessões curtas de teste:
-- O token `mock-valid-token` no header `Authorization` é interpretado pelas Edge Functions no ambiente de desenvolvimento/sandbox como pertencente ao usuário de teste `d290f1ee-6c54-4b01-90e6-d701748f0851` (cujo perfil correspondente é criado automaticamente).
-- Quando esse token de teste é utilizado, a Edge Function inicializa o cliente com o privilégio `service_role` para contornar restrições de validação de assinatura de token na camada de banco de dados, aplicando contudo as sanitizações de RLS lógica a nível da function.
+Para viabilizar a execução de testes de integração locais e em pipelines CI/CD sem a necessidade de gerar tokens JWT reais do Supabase Auth:
+- O token `mock-valid-token` no header `Authorization` é interpretado pelas Edge Functions `user-progress` e `weekly-summary` no ambiente de desenvolvimento/sandbox como pertencente ao usuário de teste `d290f1ee-6c54-4b01-90e6-d701748f0851`.
+- Quando esse token de teste é utilizado, a Edge Function inicializa o cliente com o privilégio `service_role` para contornar restrições de validação de assinatura de token.
 
-
-
+> [!CAUTION]
+> A Edge Function `save-workout` **não aceita** `mock-valid-token`. Ela exige JWT real em todas as requisições. O endpoint `sync-workout` foi **descontinuado** e removido do código-base.

@@ -6,6 +6,26 @@ Siga o formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
 ## [0.3.0] - 2026-05-23
 ### Added
+- **Mobile Auth Completo:**
+  - `AuthScreen` refatorada com `react-hook-form` + `zod` (validação rigorosa de login e cadastro).
+  - Nova tela `ResetPasswordScreen` para redefinição de senha via deep link `type=recovery`, com mensagens de erro amigáveis incluindo rate limit do Supabase.
+  - Utilitário `authUtils.ts` com `parseAuthParams` para parsing de parâmetros de deep links de auth (hash e query string).
+  - `RootNavigator` com guard `isInitialized` eliminando flashes de tela não autenticada antes da hidratação da sessão.
+  - `ProfileScreen` conectada ao `useAuthStore` exibindo nome e e-mail reais do usuário com logout funcional.
+  - Nova tela modal `EditProfileScreen` para edição do nome do usuário (escrita dual: `auth.updateUser` + `public.profiles`).
+
+- **Backend Edge Function `save-workout`:**
+  - Endpoint `POST /functions/v1/save-workout` para gravação síncrona do treino finalizado, substituindo o `sync-workout` descontinuado.
+  - Autenticação JWT obrigatória sem mock auth. Insere diretamente em `user_workout_logs` e `user_set_logs`.
+  - Módulo compartilhado `_shared/deps.ts` centralizando imports do `serve`, `createClient` e `corsHeaders`.
+
+- **Pipeline CI/CD (`.github/workflows/ci.yml`):**
+  - Workflow GitHub Actions configurado para `main` e `develop`: lint e testes automatizados com Node.js 20.
+
+- **Testes de integração Jest (`integration/auth/`):**
+  - `authStore.test.ts`: 5 testes unitários do `useAuthStore`.
+  - `authUtils.test.ts`: 5 testes unitários do `parseAuthParams`.
+
 - **Mobile Offline Sync Engine:**
   - Implementação do mecanismo `SyncEngine` acoplado ao Zustand (`useSyncStore`) para gerenciamento inteligente de filas de sincronização offline (`pendingLogs` e `pendingSets`).
   - Criação da suíte E2E em `sync-resilience.test.ts` atestando resiliência à quedas de conectividade com mocks de API.
@@ -15,6 +35,15 @@ Siga o formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
   - Criação do ambiente de testes "Mock Auth" nas Edge Functions aceitando `Authorization: Bearer mock-valid-token`, essencial para pipelines CI/CD e testes E2E assíncronos.
   - Implementação da rotina de hash seguro `toUUID` no endpoint de sincronização para transformar timestamps e strings de UUID local para UUIDs válidos no PostgreSQL, impedindo erros críticos de integridade referencial.
   - Adição da migração `20260523200000_restore_rls.sql` para restabelecer a segurança e as políticas Row Level Security nos logs dos atletas.
+
+### Changed
+- **Arquitetura de Gravação de Treino:** Descontinuado o `syncEngine` + `useSyncStore` (fila offline em memória). O app agora usa gravação síncrona direta via `POST /functions/v1/save-workout`.
+
+### Removed
+- **Edge Function `sync-workout`**: Descontinuada e removida do código-base. Substituída por `save-workout`.
+- **Colunas offline** (`client_id`, `synced_at`): Removidas de `user_workout_logs` e `user_set_logs` via `20260524141000_remove_offline_columns.sql`.
+- **Trigger de auto-confirmação de e-mail**: Removida do ambiente de produção via `20260524141500_remove_auto_confirm_prod.sql`.
+
 
 - **Mobile Custom Workout Builder:**
   - Desenvolvimento completo da tela e fluxo "Montar Treino" (`BuildWorkoutScreen.tsx`) integrado com busca e listagem dinâmica de exercícios a partir do backend.
