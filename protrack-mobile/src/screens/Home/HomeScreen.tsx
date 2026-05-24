@@ -7,6 +7,7 @@ import { colors, spacing } from '../../theme/tokens';
 import { strings } from '../../constants/strings';
 import { RootStackParamList } from '../../navigation/types';
 import { useActiveWorkoutStore } from '../../stores/useActiveWorkoutStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 import { fetchWorkoutLogs } from '../../services/api';
 import { Text } from '../../components/core/Text';
 import { Card } from '../../components/core/Card';
@@ -18,11 +19,15 @@ import { MyWorkouts } from '../../components/home/MyWorkouts';
 export const HomeScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { isActive } = useActiveWorkoutStore();
+  const { user } = useAuthStore();
 
   const [stats, setStats] = useState({ total: 0, month: 0, week: 0 });
   const [logs, setLogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const userName = user?.user_metadata?.full_name?.split(' ')[0] || 'Atleta';
+  const greetingText = strings.home.greeting.replace('{name}', userName);
+  
   useFocusEffect(
     useCallback(() => {
       let active = true;
@@ -83,7 +88,7 @@ export const HomeScreen = () => {
         >
           {/* Greeting header */}
           <View style={styles.heroSection}>
-            <Text variant="heading">{strings.home.greeting}</Text>
+            <Text variant="heading">{greetingText}</Text>
             <Text variant="caption" style={styles.subtitle}>
               {strings.home.subtitle}
             </Text>
@@ -104,7 +109,7 @@ export const HomeScreen = () => {
               <View style={styles.activeRow}>
                 <View style={styles.pulseDot} />
                 <Text variant="caption" weight="semibold" color={colors.accent}>
-                  Treino em andamento — toque para continuar
+                  {strings.home.activeWorkoutBanner}
                 </Text>
               </View>
             </Card>

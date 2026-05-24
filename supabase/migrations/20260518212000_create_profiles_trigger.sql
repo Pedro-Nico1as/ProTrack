@@ -4,13 +4,11 @@
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, username, full_name, avatar_url, level)
+  INSERT INTO public.profiles (id, username, full_name)
   VALUES (
     new.id,
-    coalesce(new.raw_user_meta_data->>'username', split_part(new.email, '@', 1) || '_' || substr(md5(random()::text), 1, 5)),
-    coalesce(new.raw_user_meta_data->>'full_name', ''),
-    new.raw_user_meta_data->>'avatar_url',
-    'beginner'
+    COALESCE(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1), 'user_' || substr(new.id::text, 1, 8)),
+    new.raw_user_meta_data->>'full_name'
   );
   RETURN new;
 END;

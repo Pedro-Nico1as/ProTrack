@@ -2,59 +2,123 @@ import React, { useState } from 'react';
 import { View, StyleSheet, SafeAreaView, Alert, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri } from 'expo-auth-session';
-import { Ionicons } from '@expo/vector-icons';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { IconFlame, IconBrandGoogle } from '@tabler/icons-react-native';
 import { colors, spacing, sizing } from '../../theme/tokens';
 import { Text } from '../../components/core/Text';
 import { Button } from '../../components/core/Button';
 import { Input } from '../../components/core/Input';
 import { supabase } from '../../services/supabase';
+import { strings } from '../../constants/strings';
 
 WebBrowser.maybeCompleteAuthSession();
+
+const authSchema = z.object({
+  mode: z.enum(['login', 'register']),
+  name: z.string().optional(),
+  email: z.string()
+    .min(1, { message: strings.auth.errorEmailRequired })
+    .email({ message: strings.auth.errorEmailInvalid }),
+  password: z.string()
+    .min(1, { message: strings.auth.errorPasswordRequired })
+    .min(6, { message: strings.auth.errorPasswordMin }),
+  confirmPassword: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.mode === 'register') {
+    if (!data.name || data.name.trim().length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: strings.auth.errorNameRequired,
+        path: ['name'],
+      });
+    } else if (data.name.trim().length < 3) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: strings.auth.errorNameMin,
+        path: ['name'],
+      });
+    }
+
+    if (!data.confirmPassword || data.confirmPassword.trim().length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: strings.auth.errorConfirmPasswordRequired,
+        path: ['confirmPassword'],
+      });
+    } else if (data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: strings.auth.errorPasswordMismatch,
+        path: ['confirmPassword'],
+      });
+    }
+  }
+});
+
+type FormValues = z.infer<typeof authSchema>;
 
 export const AuthScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<'login' | 'register'>('login');
 
-  // Form states
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const { control, handleSubmit, reset, setValue, clearErrors, formState: { errors } } = useForm<FormValues>({
+    resolver: zodResolver(authSchema),
+    defaultValues: {
+      mode: 'login',
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
 
-  const handleEmailAuth = async () => {
-    if (!email || !password) {
-      Alert.alert('Erro', 'Por favor, preencha o e-mail e a senha.');
-      return;
-    }
+  const handleToggleMode = () => {
+    const newMode = mode === 'login' ? 'register' : 'login';
+    setMode(newMode);
+    setValue('mode', newMode);
+    clearErrors();
+  };
 
+
+  const handleEmailAuth = async (data: FormValues) => {
     setIsLoading(true);
     try {
-      if (mode === 'register') {
-        if (!name) throw new Error('O nome é obrigatório para criar a conta.');
-        if (password !== confirmPassword) {
-          throw new Error('As senhas não coincidem.');
-        }
-        
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
+      if (data.mode === 'register') {
+        const { data: signUpData, error } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password,
           options: {
-            data: { full_name: name },
+            data: { full_name: data.name },
           },
         });
         
         if (error) throw error;
-        Alert.alert('Sucesso!', 'Conta criada com sucesso. Bem-vindo ao ProTrack!');
+        
+        // Se o signup retornou sessão, o onAuthStateChange já vai cuidar da navegação.
+        // Se não retornou sessão (ex: confirmação de e-mail ativa no dashboard),
+        // fazemos login automático em background — o trigger auto_confirm_user garante
+        // que o email_confirmed_at já foi preenchido no momento do INSERT.
+        if (signUpData.user && !signUpData.session) {
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: data.email,
+            password: data.password,
+          });
+          if (signInError) throw signInError;
+        }
+        // Navegação para MainTabs acontece automaticamente via onAuthStateChange -> useAuthStore -> RootNavigator
         
       } else {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+          email: data.email,
+          password: data.password,
         });
         if (error) throw error;
+        // Navegação para MainTabs acontece automaticamente via onAuthStateChange -> useAuthStore -> RootNavigator
       }
     } catch (error: any) {
-      Alert.alert('Atenção', error.message || 'Ocorreu um problema na autenticação.');
+      Alert.alert(strings.auth.alertErrorTitle, error.message || strings.auth.errorGeneral);
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +138,7 @@ export const AuthScreen = () => {
       });
 
       if (error) throw error;
-      if (!data?.url) throw new Error('Não foi possível obter a URL de autenticação');
+      if (!data?.url) throw new Error(strings.auth.errorGoogleAuthUrl);
 
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
 
@@ -98,7 +162,7 @@ export const AuthScreen = () => {
         }
       }
     } catch (error: any) {
-      Alert.alert('Erro no Login', error.message || 'Ocorreu um problema ao conectar com o Google.');
+      Alert.alert(strings.auth.alertErrorTitleGoogle, error.message || strings.auth.errorGoogleConnection);
     } finally {
       setIsLoading(false);
     }
@@ -114,67 +178,102 @@ export const AuthScreen = () => {
           
           <View style={styles.header}>
             <View style={styles.iconWrapper}>
-              <Ionicons name="fitness" size={32} color={colors.accent} />
+              <IconFlame size={32} color={colors.accent} />
             </View>
-            <Text variant="heading" style={styles.title}>ProTrack</Text>
+            <Text variant="heading" style={styles.title}>{strings.auth.appName}</Text>
             <Text variant="caption" color={colors.textSecondary} align="center" style={styles.subtitle}>
-              {mode === 'login' ? 'Acesse seus treinos de qualquer lugar.' : 'Crie sua conta e revolucione seus treinos.'}
+              {mode === 'login' ? strings.auth.subtitleLogin : strings.auth.subtitleRegister}
             </Text>
           </View>
 
           <View style={styles.form}>
             {mode === 'register' && (
-              <Input 
-                label="Nome completo"
-                placeholder="Ex: Pedro Vieira"
-                value={name}
-                onChangeText={setName}
-                autoCapitalize="words"
+              <Controller
+                control={control}
+                name="name"
+                render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                  <Input 
+                    label={strings.auth.nameLabel}
+                    placeholder={strings.auth.namePlaceholder}
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={error?.message}
+                    autoCapitalize="words"
+                  />
+                )}
               />
             )}
-            <Input 
-              label="E-mail"
-              placeholder="seu@email.com"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
+            
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <Input 
+                  label={strings.auth.emailLabel}
+                  placeholder={strings.auth.emailPlaceholder}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              )}
             />
-            <Input 
-              label="Senha"
-              placeholder="••••••••"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
+
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <Input 
+                  label={strings.auth.passwordLabel}
+                  placeholder={strings.auth.passwordPlaceholder}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                  secureTextEntry
+                />
+              )}
             />
+
             {mode === 'register' && (
-              <Input 
-                label="Confirmar Senha"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
+              <Controller
+                control={control}
+                name="confirmPassword"
+                render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                  <Input 
+                    label={strings.auth.confirmPasswordLabel}
+                    placeholder={strings.auth.passwordPlaceholder}
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={error?.message}
+                    secureTextEntry
+                  />
+                )}
               />
             )}
 
             <Button
-              title={mode === 'login' ? 'Entrar' : 'Criar Conta'}
+              title={mode === 'login' ? strings.auth.loginBtn : strings.auth.registerBtn}
               variant="primary"
-              onPress={handleEmailAuth}
+              onPress={handleSubmit(handleEmailAuth)}
               loading={isLoading}
               style={styles.submitButton}
             />
 
             <TouchableOpacity 
               style={styles.toggleModeButton} 
-              onPress={() => setMode(mode === 'login' ? 'register' : 'login')}
+              onPress={handleToggleMode}
             >
               <Text variant="body" color={colors.textSecondary} align="center">
                 {mode === 'login' ? (
-                  <>Não tem uma conta? <Text color={colors.primary}>Cadastre-se</Text></>
+                  <>{strings.auth.dontHaveAccount}<Text color={colors.primary}>{strings.auth.signUpLink}</Text></>
                 ) : (
-                  <>Já tem conta? <Text color={colors.primary}>Fazer login</Text></>
+                  <>{strings.auth.alreadyHaveAccount}<Text color={colors.primary}>{strings.auth.loginLink}</Text></>
                 )}
               </Text>
             </TouchableOpacity>
@@ -182,7 +281,7 @@ export const AuthScreen = () => {
 
           <View style={styles.separatorContainer}>
             <View style={styles.separatorLine} />
-            <Text variant="caption" color={colors.textMuted} style={styles.separatorText}>ou conecte-se com</Text>
+            <Text variant="caption" color={colors.textMuted} style={styles.separatorText}>{strings.auth.orConnectWith}</Text>
             <View style={styles.separatorLine} />
           </View>
 
@@ -192,10 +291,9 @@ export const AuthScreen = () => {
               onPress={handleGoogleLogin} 
               disabled={isLoading}
             >
-              {/* O Google possui as próprias guidelines. Este botão segue exatamente o padrão oficial: fundo branco, texto escuro, sombra discreta e logo. */}
-              <Ionicons name="logo-google" size={20} color="#4285F4" style={styles.googleIcon} />
+              <IconBrandGoogle size={20} color="#4285F4" style={styles.googleIcon} />
               <Text style={styles.googleButtonText}>
-                Continuar com o Google
+                {strings.auth.googleBtnText}
               </Text>
             </TouchableOpacity>
           </View>

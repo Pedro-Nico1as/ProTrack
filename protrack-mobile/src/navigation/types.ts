@@ -17,4 +17,5 @@ export type RootStackParamList = {
   ChooseWorkout: undefined;
   BuildWorkout: undefined;
   EditWorkout: { workoutId: string };
+  EditProfile: undefined;
 };

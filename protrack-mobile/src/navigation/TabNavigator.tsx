@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text as RNText, StyleSheet, Pressable, Platform } from 'react-native';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { IconHome2, IconUser, IconPlus } from '@tabler/icons-react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { HomeScreen } from '../screens/Home/HomeScreen';
@@ -19,10 +19,10 @@ interface TabItemProps {
   isFocused: boolean;
   onPress: () => void;
   label: string;
-  iconName: keyof typeof Feather.glyphMap;
+  routeName: 'Home' | 'Profile';
 }
 
-const TabItem = ({ isFocused, onPress, label, iconName }: TabItemProps) => {
+const TabItem = ({ isFocused, onPress, label, routeName }: TabItemProps) => {
   const scale = useSharedValue(1);
   const activeProgress = useSharedValue(isFocused ? 1 : 0);
 
@@ -52,6 +52,7 @@ const TabItem = ({ isFocused, onPress, label, iconName }: TabItemProps) => {
   });
 
   const tintColor = isFocused ? colors.accent : colors.textSecondary;
+  const IconComponent = routeName === 'Home' ? IconHome2 : IconUser;
 
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -65,7 +66,7 @@ const TabItem = ({ isFocused, onPress, label, iconName }: TabItemProps) => {
     >
       <Animated.View style={[styles.glowBackground, animatedGlowStyle]} />
       <Animated.View style={[animatedIconStyle, animatedStyle]}>
-        <Feather name={iconName} size={22} color={tintColor} />
+        <IconComponent size={22} color={tintColor} />
       </Animated.View>
       <RNText style={[styles.tabLabel, { color: tintColor }]}>{label}</RNText>
     </Pressable>
@@ -100,7 +101,7 @@ const AnimatedFAB = ({ onPress }: { onPress: () => void }) => {
       onPressOut={handlePressOut}
     >
       <Animated.View style={[styles.fab, animatedStyle]}>
-        <Ionicons name="add" size={30} color="#FFFFFF" />
+        <IconPlus size={30} color="#FFFFFF" />
       </Animated.View>
       <RNText style={styles.fabLabel}>{strings.tabs.newWorkout}</RNText>
     </Pressable>
@@ -131,9 +132,6 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
           return <AnimatedFAB key={route.key} onPress={onPress} />;
         }
 
-        const iconName: keyof typeof Feather.glyphMap =
-          route.name === 'Home' ? 'home' : 'user';
-
         const label = route.name === 'Home' ? strings.tabs.home : strings.tabs.profile;
 
         return (
@@ -142,7 +140,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
             isFocused={isFocused}
             onPress={onPress}
             label={label}
-            iconName={iconName}
+            routeName={route.name as 'Home' | 'Profile'}
           />
         );
       })}

@@ -3,6 +3,7 @@ import { View, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, sizing } from '../../theme/tokens';
 import { Text } from '../core/Text';
+import { strings } from '../../constants/strings';
 
 interface WorkoutLog {
   client_id: string;
@@ -21,9 +22,9 @@ export const WorkoutHistory = ({ logs, isLoading }: WorkoutHistoryProps) => {
   if (isLoading) {
     return (
       <View style={styles.section}>
-        <Text variant="label" style={styles.sectionTitle}>HISTÓRICO DE TREINOS</Text>
+        <Text variant="label" style={styles.sectionTitle}>{strings.workoutHistory.title}</Text>
         <View style={styles.loadingContainer}>
-          <Text variant="caption" color={colors.textMuted}>Carregando histórico...</Text>
+          <Text variant="caption" color={colors.textMuted}>{strings.workoutHistory.loading}</Text>
         </View>
       </View>
     );
@@ -32,11 +33,11 @@ export const WorkoutHistory = ({ logs, isLoading }: WorkoutHistoryProps) => {
   if (!logs || logs.length === 0) {
     return (
       <View style={styles.section}>
-        <Text variant="label" style={styles.sectionTitle}>HISTÓRICO DE TREINOS</Text>
+        <Text variant="label" style={styles.sectionTitle}>{strings.workoutHistory.title}</Text>
         <View style={styles.emptyContainer}>
           <Ionicons name="time-outline" size={32} color={colors.textMuted} />
           <Text variant="caption" color={colors.textMuted} style={{ marginTop: spacing.xs }}>
-            Nenhum treino finalizado ainda.
+            {strings.workoutHistory.empty}
           </Text>
         </View>
       </View>
@@ -48,7 +49,7 @@ export const WorkoutHistory = ({ logs, isLoading }: WorkoutHistoryProps) => {
 
   return (
     <View style={styles.section}>
-      <Text variant="label" style={styles.sectionTitle}>HISTÓRICO DE TREINOS</Text>
+      <Text variant="label" style={styles.sectionTitle}>{strings.workoutHistory.title}</Text>
       
       <View style={styles.list}>
         {sortedLogs.map((log) => {
@@ -63,7 +64,7 @@ export const WorkoutHistory = ({ logs, isLoading }: WorkoutHistoryProps) => {
                   <Ionicons name="barbell" size={20} color={colors.accent} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text variant="body" weight="semibold">Treino Finalizado</Text>
+                  <Text variant="body" weight="semibold">{strings.workoutHistory.finishedWorkoutTitle}</Text>
                   <Text variant="caption" color={colors.textMuted}>{formattedDate}</Text>
                 </View>
               </View>
@@ -71,15 +72,15 @@ export const WorkoutHistory = ({ logs, isLoading }: WorkoutHistoryProps) => {
               <View style={styles.metricsRow}>
                 <View style={styles.metric}>
                   <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
-                  <Text variant="caption" color={colors.textSecondary}>{duration} min</Text>
+                  <Text variant="caption" color={colors.textSecondary}>{duration} {strings.workoutHistory.min}</Text>
                 </View>
                 <View style={styles.metric}>
                   <Ionicons name="fitness-outline" size={14} color={colors.textSecondary} />
-                  <Text variant="caption" color={colors.textSecondary}>{Math.round(log.total_volume_kg || 0)} kg</Text>
+                  <Text variant="caption" color={colors.textSecondary}>{Math.round(log.total_volume_kg || 0)} {strings.workoutHistory.kg}</Text>
                 </View>
                 <View style={styles.metric}>
                   <Ionicons name="layers-outline" size={14} color={colors.textSecondary} />
-                  <Text variant="caption" color={colors.textSecondary}>{log.total_sets || 0} séries</Text>
+                  <Text variant="caption" color={colors.textSecondary}>{log.total_sets || 0} {strings.workoutHistory.sets}</Text>
                 </View>
               </View>
             </View>

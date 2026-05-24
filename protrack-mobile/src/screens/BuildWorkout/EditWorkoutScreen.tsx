@@ -10,6 +10,7 @@ import { RootStackParamList } from '../../navigation/types';
 import { fetchExercises, Exercise } from '../../services/api';
 import { generateUUID } from '../../utils/uuid';
 import { useCustomWorkoutsStore, CustomWorkoutPartition, CustomExercise } from '../../stores/useCustomWorkoutsStore';
+import { strings } from '../../constants/strings';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'EditWorkout'>;
 type EditWorkoutRouteProp = RouteProp<RootStackParamList, 'EditWorkout'>;
@@ -41,7 +42,7 @@ export const EditWorkoutScreen = () => {
         // Deep copy to prevent mutating store directly
         setPartitions(JSON.parse(JSON.stringify(existingWorkout.partitions)));
       } else {
-        setPartitions([{ id: generateUUID(), name: 'Treino A', exercises: [] }]);
+        setPartitions([{ id: generateUUID(), name: strings.buildWorkout.defaultPartitionName, exercises: [] }]);
       }
       setIsInitialized(true);
     }
@@ -62,7 +63,7 @@ export const EditWorkoutScreen = () => {
       ...partitions,
       {
         id: generateUUID(),
-        name: `Treino ${String.fromCharCode(65 + partitions.length)}`,
+        name: `${strings.buildWorkout.defaultPartitionName.replace(' A', '')} ${String.fromCharCode(65 + partitions.length)}`,
         exercises: []
       }
     ]);
@@ -70,12 +71,12 @@ export const EditWorkoutScreen = () => {
 
   const removePartition = (id: string) => {
     Alert.alert(
-      'Remover repartição?',
-      'Todos os exercícios desta ficha serão perdidos.',
+      strings.buildWorkout.alertRemovePartitionTitle,
+      strings.buildWorkout.alertRemovePartitionMsg,
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: strings.buildWorkout.cancel, style: 'cancel' },
         { 
-          text: 'Remover', 
+          text: strings.buildWorkout.remove, 
           style: 'destructive',
           onPress: () => {
             setPartitions(prev => prev.filter(p => p.id !== id));
@@ -144,12 +145,12 @@ export const EditWorkoutScreen = () => {
   const handleSaveWorkout = () => {
     const cleanPartitions = partitions.map(p => ({
       ...p,
-      name: p.name.trim() || 'Sem nome'
+      name: p.name.trim() || strings.buildWorkout.noName
     }));
 
     updateWorkout({
       id: workoutId,
-      name: workoutName.trim() || 'Meu Treino',
+      name: workoutName.trim() || strings.buildWorkout.defaultWorkoutName,
       partitions: cleanPartitions,
       createdAt: new Date().toISOString()
     });
@@ -159,12 +160,12 @@ export const EditWorkoutScreen = () => {
 
   const handleDeleteWorkout = () => {
     Alert.alert(
-      'Excluir treino?',
-      'Essa ação não pode ser desfeita.',
+      strings.editWorkout.alertDeleteWorkoutTitle,
+      strings.editWorkout.alertDeleteWorkoutMsg,
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: strings.buildWorkout.cancel, style: 'cancel' },
         { 
-          text: 'Excluir', 
+          text: strings.editWorkout.delete, 
           style: 'destructive', 
           onPress: () => {
             removeWorkout(workoutId);
@@ -185,7 +186,7 @@ export const EditWorkoutScreen = () => {
           <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={12}>
             <Ionicons name="close" size={28} color={colors.text} />
           </Pressable>
-          <Text variant="heading" weight="semibold">Editar Treino</Text>
+          <Text variant="heading" weight="semibold">{strings.editWorkout.title}</Text>
           <Pressable onPress={handleDeleteWorkout} style={styles.backBtn} hitSlop={12}>
             <Ionicons name="trash-outline" size={24} color={colors.error} />
           </Pressable>
@@ -194,12 +195,12 @@ export const EditWorkoutScreen = () => {
         <ScrollView contentContainerStyle={styles.scroll}>
           
           <View style={styles.nameContainer}>
-            <Text variant="caption" color={colors.textSecondary} style={{ marginBottom: spacing.xs }}>Nome Principal do Plano</Text>
+            <Text variant="caption" color={colors.textSecondary} style={{ marginBottom: spacing.xs }}>{strings.buildWorkout.mainPlanName}</Text>
             <TextInput
               style={styles.nameInput}
               value={workoutName}
               onChangeText={setWorkoutName}
-              placeholder="Ex: Treino A - Costas"
+              placeholder={strings.editWorkout.placeholderEditName}
               placeholderTextColor={colors.textMuted}
             />
           </View>
@@ -211,7 +212,7 @@ export const EditWorkoutScreen = () => {
                   style={styles.partitionNameInput}
                   value={partition.name}
                   onChangeText={(text) => updatePartitionName(partition.id, text)}
-                  placeholder="Nome da Ficha"
+                  placeholder={strings.buildWorkout.partitionNamePlaceholder}
                   placeholderTextColor={colors.textMuted}
                 />
                 <Pressable onPress={() => removePartition(partition.id)} hitSlop={12} style={styles.iconBtn}>
@@ -221,7 +222,7 @@ export const EditWorkoutScreen = () => {
 
               {partition.exercises.length === 0 ? (
                 <View style={styles.emptyPartition}>
-                  <Text variant="caption" color={colors.textSecondary}>Nenhum exercício nesta ficha.</Text>
+                  <Text variant="caption" color={colors.textSecondary}>{strings.buildWorkout.emptyPartition}</Text>
                 </View>
               ) : (
                 partition.exercises.map((item, index) => (
@@ -238,7 +239,7 @@ export const EditWorkoutScreen = () => {
                     
                     <View style={styles.controlsRow}>
                       <View style={styles.controlGroup}>
-                        <Text variant="caption" color={colors.textSecondary}>Séries</Text>
+                        <Text variant="caption" color={colors.textSecondary}>{strings.buildWorkout.series}</Text>
                         <View style={styles.stepper}>
                           <Pressable style={styles.stepperBtn} onPress={() => updateExercise(partition.id, item.id, 'targetSets', -1)} hitSlop={8}>
                             <Ionicons name="remove" size={20} color={colors.text} />
@@ -251,7 +252,7 @@ export const EditWorkoutScreen = () => {
                       </View>
 
                       <View style={styles.controlGroup}>
-                        <Text variant="caption" color={colors.textSecondary}>Repetições</Text>
+                        <Text variant="caption" color={colors.textSecondary}>{strings.buildWorkout.reps}</Text>
                         <View style={styles.stepper}>
                           <Pressable style={styles.stepperBtn} onPress={() => updateExercise(partition.id, item.id, 'targetReps', -1)} hitSlop={8}>
                             <Ionicons name="remove" size={20} color={colors.text} />
@@ -268,7 +269,7 @@ export const EditWorkoutScreen = () => {
               )}
 
               <Button
-                title="Adicionar Exercício"
+                title={strings.buildWorkout.addExercise}
                 variant="outline"
                 onPress={() => setSelectingForPartition(partition.id)}
                 style={styles.addExBtn}
@@ -277,7 +278,7 @@ export const EditWorkoutScreen = () => {
           ))}
 
           <Button
-            title="+ Adicionar repartição"
+            title={strings.buildWorkout.addPartition}
             variant="outline"
             onPress={addPartition}
             style={styles.addPartitionBtn}
@@ -287,7 +288,7 @@ export const EditWorkoutScreen = () => {
 
         <View style={styles.footer}>
           <Button
-            title="Salvar Alterações"
+            title={strings.editWorkout.saveChangesBtn}
             variant="primary"
             disabled={partitions.length === 0}
             onPress={handleSaveWorkout}
@@ -298,7 +299,7 @@ export const EditWorkoutScreen = () => {
       <Modal visible={isSelecting} animationType="slide" presentationStyle="pageSheet">
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <Text variant="heading" weight="semibold">Selecionar Exercício</Text>
+            <Text variant="heading" weight="semibold">{strings.buildWorkout.selectExerciseModal}</Text>
             <Pressable onPress={() => setSelectingForPartition(null)} hitSlop={12} style={styles.iconBtn}>
               <Ionicons name="close" size={28} color={colors.text} />
             </Pressable>

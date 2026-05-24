@@ -18,4 +18,5 @@ Acompanhe o histórico de decisões na pasta [/decisions/](../decisions/):
 - [ADR-004: Video Strategy](../decisions/ADR-004-youtube-embed-only.md)
 - [ADR-005: RevenueCat IAP](../decisions/ADR-005-revenuecat-iap.md)
 - [ADR-006: MMKV com Adapter Customizado](../decisions/ADR-006-mmkv-custom-adapter-state-persistence.md)
+- [ADR-007: Partições de Treino (Splits)](../decisions/ADR-007-workout-partitions-split-routines.md)
 

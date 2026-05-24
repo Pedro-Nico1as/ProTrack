@@ -1,6 +1,7 @@
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 import { supabase } from './supabase';
+import { useAuthStore } from '../stores/useAuthStore';
 
 interface FetchOptions {
   method?: string;
@@ -19,8 +20,13 @@ async function supabaseFetch<T>(path: string, options: FetchOptions = {}): Promi
       ...options.headers,
     };
 
-    // Pega a sessão atual injetada pelo nosso store
-    const { data: { session } } = await supabase.auth.getSession();
+        // Pega a sessão atual injetada pelo nosso store em memória (Zustand)
+    const session = useAuthStore.getState().session;
+    
+    if (__DEV__) {
+      console.log('[DEBUG API] Estado da sessão:', session ? 'Sessão existe (Token: ' + session.access_token.substring(0, 10) + '...)' : 'Sessão NULA! ZUSTAND VAZIO.');
+    }
+
     if (session?.access_token) {
       fetchHeaders['Authorization'] = `Bearer ${session.access_token}`;
     } else {
@@ -32,9 +38,14 @@ async function supabaseFetch<T>(path: string, options: FetchOptions = {}): Promi
       headers: fetchHeaders,
       body: options.body ? JSON.stringify(options.body) : undefined,
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error(`[API ERROR] ${url} falhou com status ${res.status}:`, errText);
+      return null;
+    }
     return (await res.json()) as T;
-  } catch {
+  } catch (err) {
+    console.error(`[API ERROR CATCH] ${path}`, err);
     return null;
   }
 }

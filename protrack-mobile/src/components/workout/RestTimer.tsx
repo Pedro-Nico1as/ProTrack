@@ -7,6 +7,7 @@ import { colors, spacing, sizing } from '../../theme/tokens';
 import { Card } from '../core/Card';
 import { Text } from '../core/Text';
 import { Button } from '../core/Button';
+import { strings } from '../../constants/strings';
 
 export const RestTimer = () => {
   const { restTargetEndTime, skipRest } = useActiveWorkoutStore();
@@ -80,10 +81,10 @@ export const RestTimer = () => {
           <Text style={styles.timerText}>{timeString}</Text>
         </Animated.View>
 
-        <Text variant="label" style={styles.label}>DESCANSO</Text>
+        <Text variant="label" style={styles.label}>{strings.workout.restTimerLabel}</Text>
 
         <Button
-          title="Pular Descanso"
+          title={strings.activeWorkout.skipRest}
           onPress={skipRest}
           variant="outline"
           style={styles.skipBtn}

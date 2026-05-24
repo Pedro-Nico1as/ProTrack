@@ -14,17 +14,18 @@ Explicação técnica de como o ProTrack & Flow gerencia dados sem conexão.
 
 O aplicativo utiliza duas camadas de armazenamento local para diferentes propósitos:
 
-### 1. Estado do Treino Ativo (AsyncStorage)
+### 1. Estado do Treino Ativo (MMKV com Adapter Customizado)
 Para garantir que o usuário não perca o progresso se o aplicativo for fechado acidentalmente durante uma sessão de treino:
-- **Tecnologia**: [Zustand](https://github.com/pmndrs/zustand) com middleware de persistência e [@react-native-async-storage/async-storage](https://github.com/react-native-async-storage/async-storage).
-- **Dados**: Estado atual do timer, lista de exercícios da sessão e séries já registradas mas ainda não finalizadas.
-- **Vantagem**: Estabilidade e compatibilidade garantida com a engine Hermes no iOS.
+- **Tecnologia**: [Zustand](https://github.com/pmndrs/zustand) com middleware de persistência e [react-native-mmkv](https://github.com/mrousavy/react-native-mmkv) usando um adapter síncrono customizado (`mmkvStorage` resolvendo o contrato `StateStorage` do Zustand).
+- **Dados**: Estado atual do timer, lista de exercícios/partições do treino selecionado e séries já registradas mas ainda não finalizadas.
+- **Vantagem**: Hidratação de estado síncrona instantânea ao abrir o app e gravação em milissegundos de séries em tempo real. Solução definitiva contra o bug de prototype no Hermes Engine (veja [ADR-006](../decisions/ADR-006-mmkv-custom-adapter-state-persistence.md)).
 
-### 2. Logs de Treino Finalizados (SQLite)
-Uma vez que o usuário clica em "Finalizar Treino":
-- **Tecnologia**: SQLite (via Expo SQLite).
-- **Processo**: Os dados saem do estado ativo (AsyncStorage) e são persistidos no banco de dados relacional local como um registro pronto para sincronização.
-- **Sincronização**: O `SyncEngine` lê do SQLite para enviar ao Supabase.
+### 2. Fila de Sincronização e Logs (Zustand)
+Uma vez que o usuário clica em "Finalizar Treino", os dados precisam ser transmitidos ao backend de forma confiável:
+- **Tecnologia**: Zustand Store (`useSyncStore`) configurada com filas.
+- **Processo**: Os logs de sessões completas e as séries executadas entram nas filas locais `pendingLogs` e `pendingSets`.
+- **Sincronização**: O serviço `SyncEngine` lê diretamente do `useSyncStore` e dispara um envio em massa (batch) para o backend. Se não houver internet, os dados são preservados.
+- **Resolução de Fila**: A remoção e limpeza dos logs na memória local do cliente só ocorre mediante a confirmação explícita do servidor (`synced_ids`) ou pela classificação de conflitos de relacionamento estrutural (`conflicts`).
 
 ## Estratégia de Conflitos e Deduplicação
 - **Deduplicação via `client_id`**: Cada log e série gerada offline recebe um UUID v4 no cliente. O backend ignora registros com IDs já existentes para evitar duplicatas em caso de múltiplas tentativas de sync.

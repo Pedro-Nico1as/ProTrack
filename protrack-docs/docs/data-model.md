@@ -10,11 +10,14 @@ Este documento descreve o esquema oficial do banco de dados PostgreSQL (Supabase
 erDiagram
     profiles ||--o{ user_workout_logs : records
     athletes ||--o{ workout_plans : creates
-    workout_plans ||--o{ workout_sessions : "divisão de treino"
-    workout_sessions ||--o{ session_exercises : contains
+    workout_plans ||--o{ workout_sessions : contains
+    workout_plans ||--o{ workout_partitions : contains
+    workout_partitions ||--o{ session_exercises : contains
     exercises ||--o{ session_exercises : "referencia"
     user_workout_logs ||--o{ user_set_logs : contains
     session_exercises ||--o{ user_set_logs : "vincula ao template"
+    exercises ||--o{ user_set_logs : "referencia direta (avulso)"
+    workout_sessions ||--o{ user_workout_logs : templates
 ```
 
 ## Tabelas e Campos (Dicionário)
@@ -41,17 +44,24 @@ erDiagram
   - `duration_weeks` (int): Duração total estimada.
   - `is_published` (bool): Flag de visibilidade.
 
-- **`workout_sessions`**: Sessões ou "dias" dentro de um plano.
+- **`workout_sessions`**: Sessões/dias associados a um plano (opcional, servindo como template histórico).
   - `id` (uuid, PK).
   - `plan_id` (uuid, FK).
   - `day_number` (int): Ordem no plano.
   - `title` (text): Ex: "Push Day", "Treino A".
   - `estimated_minutes` (int): Tempo sugerido.
 
-- **`session_exercises`**: Exercícios específicos de uma sessão.
+- **`workout_partitions`**: Partições ou divisões de treino associadas a um plano (ex: "Treino A", "Treino B").
   - `id` (uuid, PK).
-  - `session_id` (uuid, FK).
-  - `exercise_id` (uuid, FK).
+  - `plan_id` (uuid, FK).
+  - `name` (text): Nome da divisão.
+  - `order_index` (int): Sequência de exibição.
+  - `created_at` (timestamptz).
+
+- **`session_exercises`**: Exercícios específicos associados a uma partição de treino.
+  - `id` (uuid, PK).
+  - `partition_id` (uuid, FK): Vínculo com a partição de treino (`workout_partitions`).
+  - `exercise_id` (uuid, FK): Referência ao exercício global.
   - `order_index` (int): Sequência de execução.
   - `sets` (int): Quantidade de séries sugeridas.
   - `reps_target` (text): Ex: "8-12", "Falha".
@@ -78,9 +88,11 @@ erDiagram
   - `id` (uuid, PK): Identificador único gerado pelo banco de dados.
   - `client_id` (uuid, unique): Unique Identifier para deduplicação offline (gerado pelo App).
   - `log_id` (uuid, FK): Vínculo com a sessão de log.
-  - `session_exercise_id` (uuid, FK).
+  - `session_exercise_id` (uuid, FK): Vínculo com o template do exercício de sessão (pode ser nulo para treinos avulsos).
+  - `exercise_id` (uuid, FK): Vínculo direto ao exercício global (usado em treinos avulsos/ad-hoc).
   - `weight_kg` (numeric): Carga utilizada (ex: 80.50).
   - `reps_done` (int): Repetições concluídas.
+  - `completed_at` (timestamptz): Momento de finalização da série.
 
 ## Segurança e Performance
 - **RLS**: Todas as tabelas possuem Row Level Security habilitado. Usuários só podem visualizar planos publicados e seus próprios logs.

@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, sizing, spacing, typography, animation } from '../../theme/tokens';
 import { Text } from '../core/Text';
+import { strings } from '../../constants/strings';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -50,7 +51,7 @@ export const SetRow = ({ setNumber, targetReps, isCompleted, onComplete }: Props
           keyboardType="decimal-pad"
           value={weight}
           onChangeText={setWeight}
-          placeholder="kg"
+          placeholder={strings.workout.kgPlaceholder}
           placeholderTextColor={colors.textMuted}
           editable={!isCompleted}
         />

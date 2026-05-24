@@ -3,7 +3,19 @@
 Siga o formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
 ## [Unreleased]
+
+## [0.3.0] - 2026-05-23
 ### Added
+- **Mobile Offline Sync Engine:**
+  - Implementação do mecanismo `SyncEngine` acoplado ao Zustand (`useSyncStore`) para gerenciamento inteligente de filas de sincronização offline (`pendingLogs` e `pendingSets`).
+  - Criação da suíte E2E em `sync-resilience.test.ts` atestando resiliência à quedas de conectividade com mocks de API.
+  - Substituição da biblioteca de ícones (`@expo/vector-icons`) para os ícones modernos e dinâmicos do `@tabler/icons-react-native` em todos os fluxos de navegação.
+
+- **Backend Sync Resiliency & QA Environment:**
+  - Criação do ambiente de testes "Mock Auth" nas Edge Functions aceitando `Authorization: Bearer mock-valid-token`, essencial para pipelines CI/CD e testes E2E assíncronos.
+  - Implementação da rotina de hash seguro `toUUID` no endpoint de sincronização para transformar timestamps e strings de UUID local para UUIDs válidos no PostgreSQL, impedindo erros críticos de integridade referencial.
+  - Adição da migração `20260523200000_restore_rls.sql` para restabelecer a segurança e as políticas Row Level Security nos logs dos atletas.
+
 - **Mobile Custom Workout Builder:**
   - Desenvolvimento completo da tela e fluxo "Montar Treino" (`BuildWorkoutScreen.tsx`) integrado com busca e listagem dinâmica de exercícios a partir do backend.
   - Seletores interativos de séries e repetições (steppers) com despacho dinâmico dos dados estruturados para execução imediata no Modo Ativo.
@@ -12,7 +24,6 @@ Siga o formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
   - **Migração Automatizada:** Rotina transparente no Zustand que converte planos v0 (lista plana de exercícios) para v1 (partições estruturadas) protegendo os dados locais dos usuários.
   - **Novos Fluxos de Splits:** Telas de Escolha de Partição (`ChooseWorkoutScreen.tsx`) e Edição de Divisões (`EditWorkoutScreen.tsx`) integrando totalmente o planejamento e início do Modo Ativo.
   - Ajustes de localização em `strings.ts` refinando os cabeçalhos de histórico de treinos na HomeScreen.
-
 
 - **Mobile Profile & Settings Screen:**
   - Criação da tela de Perfil (`ProfileScreen.tsx`) com interface baseada em tokens Cyber-Fitness e menu completo de gerenciamento de conta (Editar Perfil, Configurações, Assinatura, Ajuda/Suporte e Logout).
@@ -23,10 +34,18 @@ Siga o formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
   - Adição do banner ativo neon no topo da home para restauração imediata do treino ativo em andamento (`isActive` listener).
 
 - **Backend Database Optimization & Flexibility:**
-
-
   - Migration `20260516220000_performance_indexes.sql` adicionando índices de performance em chaves estrangeiras (`workout_plans`, `session_exercises`, `user_workout_logs`, `user_set_logs`) para acelerar queries e relatórios complexos.
   - Migration `20260516221500_add_exercise_id_to_set_logs.sql` estendendo a tabela `user_set_logs` com a coluna `exercise_id` e índice correspondente, permitindo rastrear o progresso de exercícios mesmo em treinos avulsos/ad-hoc gerados sob demanda.
+  - Migration `20260517125500_add_workout_partitions.sql` implementando partições de treinos (`workout_partitions`) e conectando-as com `session_exercises` (substituindo a coluna legada `session_id`).
+  - Migration `20260517210000_bypass_rls_for_mvp.sql` desativando temporariamente o RLS em tabelas de log para acelerar testes no MVP.
+  - Migration `20260518212000_create_profiles_trigger.sql` criando uma trigger nativa PostgreSQL no banco de dados para criar automaticamente registros em `public.profiles` na criação de novos usuários no Supabase Auth.
+
+- **Mobile API Optimization & Diagnostics:**
+  - Refatoração de `supabaseFetch` em `api.ts` para recuperar o token JWT diretamente do estado síncrono gerenciado no Zustand (`useAuthStore.getState().session`) em vez de consultar de forma assíncrona o SDK do Supabase, diminuindo o overhead e a latência de chamadas de rede.
+  - Inclusão de logs detalhados de depuração para expor o estado do token e capturar erros HTTP/exceções no console de desenvolvimento.
+
+- **Backend Edge Functions Security:**
+  - Reativação obrigatória de validação de tokens JWT nas Edge Functions `sync-workout` e `weekly-summary` usando `supabase.auth.getUser()`, fechando o acesso anônimo temporário de MVP e mapeando de forma segura logs ao ID do usuário autenticado.
 
 
 ## [0.2.0] - 2026-05-16

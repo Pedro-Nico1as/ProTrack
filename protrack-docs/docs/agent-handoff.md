@@ -8,7 +8,7 @@
 ### Fase atual
 **Fase 1 — Design & Arquitetura** (Finalizando) / **Fase 2 — MVP** (Iniciada)
 **Semana estimada:** Semana 6
-**Porcentagem de completude do MVP estimada:** 65%
+**Porcentagem de completude do MVP estimada:** 80%
 
 ---
 
@@ -205,10 +205,64 @@ Pendências:
 - QA precisa criar novos cenários de testes unitários e de integração para validar a rotina de migração local da store `useCustomWorkoutsStore` (v0 para v1) e o fluxo de início de treino a partir de partições específicas.
 - Mobile precisa implementar a integração final para salvar os logs de treinos concluídos que partem de partições customizadas (garantindo que o vínculo do plano e nome da partição seja gravado localmente e sincronizado corretamente com o Supabase).
 
+---
 
+## 2026-05-20
+Mobile entregou:
+- **Otimização de Performance e Sessão Síncrona (`api.ts`):** Refatorado o método `supabaseFetch` para recuperar a sessão autenticada diretamente do estado síncrono em memória gerenciado pelo Zustand (`useAuthStore.getState().session`), eliminando o overhead e a latência causados pela chamada assíncrona anterior ao SDK do Supabase (`supabase.auth.getSession()`).
+- **Resiliência e Depuração do Core de API:** Adicionados logs informativos detalhados sobre o estado da sessão (Zustand/Token) e mensagens explícitas de erro HTTP e capturas de exceção (`console.error`), simplificando a depuração de falhas de comunicação local/remota.
 
+Backend entregou:
+- **Validação de Token e Segurança Re-habilitada (Edge Functions):**
+  - `sync-workout`: Fechamento do bypass temporário do MVP. A função agora exige autenticação obrigatória via validação do JWT enviado no cabeçalho `Authorization` (`supabase.auth.getUser(token)`). Mapeia de forma estrita o `user_id` das sessões e séries a partir do usuário validado.
+  - `weekly-summary`: Segurança restabelecida com validação de token JWT para impedir acesso não autorizado às estatísticas semanais consolidadas do atleta.
+- **Simplificação e Refinamento do Trigger de Perfis (`20260518212000_create_profiles_trigger.sql`):** Atualizada a trigger function `handle_new_user()` no Supabase para automatizar o cadastro de novos perfis na tabela `public.profiles` a partir de cadastros na tabela `auth.users`. O script foi otimizado para mapear estritamente o `id`, `username` (com fallbacks para metadados ou e-mail) e `full_name`, removendo colunas não fundamentais para o MVP (`avatar_url` e `level`), mitigando potenciais erros de inserção.
 
+Pendências:
+- Mobile necessita atualizar as chamadas de rede locais para garantir que o token JWT do usuário logado esteja devidamente preenchido no `useAuthStore` ao acionar as Edge Functions após o login/signup.
 
+---
 
+## 2026-05-23
+Mobile entregou:
+- **Sync Engine Local (`useSyncStore`):** Implementação completa da engine de sincronização assíncrona usando Zustand. Gerencia as filas locais `pendingLogs` e `pendingSets`, garantindo que não existam perdas de dados enquanto a rede estiver indisponível.
+- **UI Modernizada:** Substituição da biblioteca legado `@expo/vector-icons` para `@tabler/icons-react-native` em todos os ícones da Bottom Tab Navigation e telas do app, garantindo um visual mais refinado.
 
+Backend entregou:
+- **Hashing de Integridade no Sync (`toUUID`):** Rotina determinística adicionada ao endpoint `sync-workout` que permite o frontend enviar strings ou timestamps gerados offline (`client_id`) e os converte em um hash válido para o tipo UUID do PostgreSQL. Previne problemas críticos de Foreign Key Violation (ex: referências de `session_id`).
+- **Ambiente "Mock Auth":** Injeção de bypass oficial (`Authorization: Bearer mock-valid-token`) nas Edge Functions. Facilita muito os testes e desenvolvimento E2E por dispensar fluxos interativos de login no pipeline automatizado.
+- **Segurança (RLS):** Adição da migração `20260523200000_restore_rls.sql` para religar o Row Level Security nas tabelas de logs, garantindo proteção total contra leitura/escrita não autorizada.
+- **Simplificação de Profile:** Ajustes finais no fallback de username da trigger `20260518212000_create_profiles_trigger.sql` (agora divide o e-mail ou gera sufixos sequenciais baseados no UUID do usuário).
 
+QA entregou:
+- **Suíte de Resiliência (`sync-resilience.test.ts`):** Cobertura E2E criada focada exclusivamente em atestar o comportamento da Store de sincronização durante simulações de quedas de conexão, resolvendo uma lacuna crítica do Fluxo 5 (Histórico/Progresso).
+
+Pendências:
+- Mobile precisa finalizar as telas de Onboarding e Login/Signup no `RootNavigator` para permitir o fluxo real de usuários, substituindo o bypass temporário `mock-valid-token`.
+
+---
+
+## 2026-05-24
+Mobile entregou:
+- **Autenticação Completa (`AuthScreen.tsx`):** Refatoração total do fluxo de login e cadastro com `react-hook-form` + `zod` para validação rigorosa de formulários. Todos os textos migrados para `strings.ts` eliminando strings literais na UI. Ícone do Google atualizado para `@tabler/icons-react-native`.
+- **Tela de Edição de Perfil (`EditProfileScreen.tsx`):** Nova tela modal para edição do nome do usuário via `supabase.auth.updateUser()` e atualização simultânea na tabela `public.profiles`. Formulário validado com `zod`.
+- **Navegação (`RootNavigator.tsx` + `types.ts`):** Adicionada a rota `EditProfile` como modal de apresentação. Implementado estado `isInitialized` no `useAuthStore` para exibir um `ActivityIndicator` enquanto a sessão é hidratada, prevenindo flashes não autenticados na tela inicial.
+- **Tela de Perfil (`ProfileScreen.tsx`):** Menu simplificado para as ações ativas do MVP (`editProfile` e `logout`), exibindo nome e e-mail reais do usuário logado extraídos do `useAuthStore`.
+
+Backend entregou:
+- **Auto-confirmação de usuários (`20260523204500_auto_confirm_users.sql`):** Trigger `BEFORE INSERT` na tabela `auth.users` que define `email_confirmed_at = NOW()` automaticamente, dispensando o fluxo de verificação por e-mail no ambiente de desenvolvimento e sandbox.
+
+QA entregou:
+- **Script de validação E2E de Auth (`test-auth-flow.js`):** Script de integração Node.js que executa o fluxo completo Signup → Login imediato contra a API real do Supabase, validando que o token é retornado e o usuário pode ser autenticado sem etapas intermediárias de confirmação.
+
+Pendências:
+- Backend precisa de definições de IAP (RevenueCat) para implementar a lógica de assinaturas e paywall.
+- QA precisa adicionar o fluxo de Auth à suíte de testes automatizados do Jest (hoje apenas o script manual `test-auth-flow.js` existe).
+- Mobile pode evoluir o `EditProfileScreen` para suportar edição de avatar (upload de imagem) em uma próxima iteração.
+
+### Atualização das 13:18 (Backend + QA)
+Backend entregou:
+- **Correção crítica de username duplicado (`20260524130000_fix_unique_username_trigger.sql`):** A trigger `handle_new_user` foi reescrita para resolver uma violação de `UNIQUE constraint` na coluna `username` da tabela `profiles` quando dois usuários se cadastravam com o mesmo nome. A nova lógica sanitiza o nome (lowercase, remoção de caracteres especiais via `REGEXP_REPLACE`), e aplica um sufixo numérico incremental (`_1`, `_2`...) caso o username base já exista na base de dados.
+
+QA entregou:
+- **Script de regressão de nomes duplicados (`test-duplicate-signup.js`):** Valida o cenário de dois usuários com `full_name` idêntico ("Pedro Vieira") cadastrados em sequência, confirmando que ambos os signups e logins subsequentes completam com sucesso sem erros de constraint.

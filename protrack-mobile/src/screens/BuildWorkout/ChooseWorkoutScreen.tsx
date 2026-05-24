@@ -9,6 +9,7 @@ import { Button } from '../../components/core/Button';
 import { RootStackParamList } from '../../navigation/types';
 import { useCustomWorkoutsStore, CustomWorkoutPartition } from '../../stores/useCustomWorkoutsStore';
 import { useActiveWorkoutStore } from '../../stores/useActiveWorkoutStore';
+import { strings } from '../../constants/strings';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'ChooseWorkout'>;
 
@@ -62,7 +63,7 @@ export const ChooseWorkoutScreen = () => {
           <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={12}>
             <Ionicons name="close" size={28} color={colors.text} />
           </Pressable>
-          <Text variant="heading" weight="semibold">Iniciar Treino</Text>
+          <Text variant="heading" weight="semibold">{strings.chooseWorkout.title}</Text>
           <View style={{ width: 44 }} />
         </View>
 
@@ -76,9 +77,9 @@ export const ChooseWorkoutScreen = () => {
               <Ionicons name="add" size={28} color="#FFF" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text variant="body" weight="semibold">Montar Novo Treino</Text>
+              <Text variant="body" weight="semibold">{strings.chooseWorkout.buildNewWorkout}</Text>
               <Text variant="caption" color={colors.textSecondary}>
-                Crie um treino do zero, do seu jeito.
+                {strings.chooseWorkout.buildNewWorkoutSub}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
@@ -86,13 +87,13 @@ export const ChooseWorkoutScreen = () => {
 
           <View style={styles.divider} />
 
-          <Text variant="label" style={styles.sectionTitle}>ESCOLHER TREINO SALVO</Text>
+          <Text variant="label" style={styles.sectionTitle}>{strings.chooseWorkout.chooseSavedWorkout}</Text>
 
           {workouts.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="folder-open-outline" size={48} color={colors.borderSubtle} />
               <Text variant="body" color={colors.textSecondary} align="center" style={{ marginTop: spacing.md }}>
-                Você ainda não salvou nenhum treino. Monte um novo para vê-lo aqui.
+                {strings.chooseWorkout.emptySavedWorkouts}
               </Text>
             </View>
           ) : (
@@ -112,7 +113,7 @@ export const ChooseWorkoutScreen = () => {
                       <View style={{ flex: 1 }}>
                         <Text variant="body" weight="semibold">{workout.name}</Text>
                         <Text variant="caption" color={colors.textMuted}>
-                          {workout.partitions?.length || 0} {(workout.partitions?.length === 1) ? 'ficha' : 'fichas'}
+                          {workout.partitions?.length || 0} {(workout.partitions?.length === 1) ? strings.myWorkouts.sheetSingular : strings.myWorkouts.sheetPlural}
                         </Text>
                       </View>
                       <Ionicons 
@@ -125,7 +126,7 @@ export const ChooseWorkoutScreen = () => {
                     {isSelected && workout.partitions && workout.partitions.length > 0 && (
                       <View style={styles.partitionsList}>
                         <Text variant="caption" color={colors.textSecondary} style={{ marginBottom: spacing.sm, paddingHorizontal: spacing.xs }}>
-                          Selecione a ficha:
+                          {strings.chooseWorkout.selectPartitionHeader}
                         </Text>
                         {workout.partitions.map(part => {
                           const isPartSelected = selectedPartitionId === part.id;
@@ -148,7 +149,7 @@ export const ChooseWorkoutScreen = () => {
                                 </Text>
                               </View>
                               <Text variant="caption" color={colors.textMuted}>
-                                {part.exercises.length} ex.
+                                {part.exercises.length} {strings.chooseWorkout.exerciseShort}
                               </Text>
                             </Pressable>
                           );
@@ -165,7 +166,7 @@ export const ChooseWorkoutScreen = () => {
 
         <View style={styles.footer}>
           <Button
-            title="Iniciar Treino"
+            title={strings.chooseWorkout.startWorkoutBtn}
             variant="primary"
             disabled={!selectedPartitionId}
             onPress={handleStartWorkout}

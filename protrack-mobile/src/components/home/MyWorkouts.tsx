@@ -8,6 +8,7 @@ import { Text } from '../core/Text';
 import { Button } from '../core/Button';
 import { useCustomWorkoutsStore } from '../../stores/useCustomWorkoutsStore';
 import { RootStackParamList } from '../../navigation/types';
+import { strings } from '../../constants/strings';
 
 export const MyWorkouts = () => {
   const { workouts } = useCustomWorkoutsStore();
@@ -17,7 +18,7 @@ export const MyWorkouts = () => {
 
   return (
     <View style={styles.section}>
-      <Text variant="label" style={styles.sectionTitle}>MEUS TREINOS (CUSTOMIZADOS)</Text>
+      <Text variant="label" style={styles.sectionTitle}>{strings.myWorkouts.title}</Text>
       
       <View style={styles.list}>
         {workouts.map((workout) => (
@@ -29,11 +30,11 @@ export const MyWorkouts = () => {
               <View style={{ flex: 1 }}>
                 <Text variant="body" weight="semibold">{workout.name}</Text>
                 <Text variant="caption" color={colors.textMuted}>
-                  {workout.partitions?.length || 0} {(workout.partitions?.length === 1) ? 'ficha' : 'fichas'}
+                  {workout.partitions?.length || 0} {(workout.partitions?.length === 1) ? strings.myWorkouts.sheetSingular : strings.myWorkouts.sheetPlural}
                 </Text>
               </View>
               <Button
-                title="Editar"
+                title={strings.myWorkouts.editBtn}
                 variant="outline"
                 onPress={() => navigation.navigate('EditWorkout', { workoutId: workout.id })}
                 style={styles.editBtn}

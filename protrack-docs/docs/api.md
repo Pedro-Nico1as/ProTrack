@@ -62,6 +62,7 @@ As Edge Functions devem ser chamadas com método `POST` (ou GET, se aplicável e
       "client_id": "uuid",
       "log_client_id": "uuid",
       "session_exercise_id": "uuid",
+      "exercise_id": "uuid",
       "set_number": 1,
       "weight_kg": 100.5,
       "reps_done": 10,
@@ -87,6 +88,12 @@ As Edge Functions devem ser chamadas com método `POST` (ou GET, se aplicável e
 ```
 > [!NOTE]
 > Séries enviadas sem um log correspondente local ou no banco de dados (`log_client_id` inválido) são categorizadas como órfãs e retornadas em `conflicts` para que o cliente móvel limpe a fila local e evite retentativas infinitas.
+
+> [!NOTE]
+> O campo `exercise_id` é opcional em planos estruturados, mas é **obrigatório** em treinos avulsos/ad-hoc (como os do fluxo "Montar Treino") onde `session_exercise_id` é nulo, permitindo que as séries sejam vinculadas diretamente ao catálogo de exercícios.
+
+> [!TIP]
+> **Tolerância e Hashing de UUIDs:** Para facilitar integrações offline onde clientes móveis geram IDs provisórios como timestamps (`client_id`, `session_id`), a Edge Function `/sync-workout` possui um conversor de hash determinístico (`toUUID`). Ele transforma qualquer string provisória enviada no payload em um UUID legítimo aceito pelo PostgreSQL, garantindo integridade referencial sem falhar a requisição.
 
 ### GET /functions/v1/user-progress
 **Descrição**: Retorna o histórico de cargas e PR (Personal Record) de um usuário para um exercício específico.
@@ -116,6 +123,9 @@ As Edge Functions devem ser chamadas com método `POST` (ou GET, se aplicável e
 - **Response Body**:
 ```json
 {
+  "workouts": 3,
+  "volume_kg": 12500,
+  "duration_minutes": 180,
   "workouts_completed": 3,
   "total_volume_kg": 12500,
   "time_spent_minutes": 180
@@ -123,7 +133,14 @@ As Edge Functions devem ser chamadas com método `POST` (ou GET, se aplicável e
 ```
 
 > [!NOTE]
-> **Contrato Mobile ↔ Backend Resolvido:**
-> O aplicativo móvel mapeia com segurança em `src/services/api.ts` tanto o formato compacto (`workouts`, `volume_kg`, `duration_minutes`) quanto o formato estendido da API (`workouts_completed`, `total_volume_kg`, `time_spent_minutes`) para seu modelo interno, garantindo 100% de compatibilidade e estabilidade na renderização dos cards na `HomeScreen`.
+> **Duplicidade de Chaves para Retrocompatibilidade:**
+> O endpoint retorna chaves no formato compacto (`workouts`, `volume_kg`, `duration_minutes`) para compatibilidade direta com o modelo interno da UI móvel e também no formato estendido da API (`workouts_completed`, `total_volume_kg`, `time_spent_minutes`) para consistência de nomenclatura na documentação.
+
+## Ambiente de Testes & Mock Auth
+
+Para viabilizar a execução de testes de integração locais e em pipelines CI/CD sem a necessidade de gerar tokens JWT reais do Supabase Auth para sessões curtas de teste:
+- O token `mock-valid-token` no header `Authorization` é interpretado pelas Edge Functions no ambiente de desenvolvimento/sandbox como pertencente ao usuário de teste `d290f1ee-6c54-4b01-90e6-d701748f0851` (cujo perfil correspondente é criado automaticamente).
+- Quando esse token de teste é utilizado, a Edge Function inicializa o cliente com o privilégio `service_role` para contornar restrições de validação de assinatura de token na camada de banco de dados, aplicando contudo as sanitizações de RLS lógica a nível da function.
+
 
 

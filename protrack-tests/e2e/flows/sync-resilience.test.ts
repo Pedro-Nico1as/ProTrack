@@ -1,15 +1,15 @@
-import { useSyncStore } from '../../../protrack-mobile/src/stores/useSyncStore';
-import { processSyncQueue } from '../../../protrack-mobile/src/services/syncEngine';
-import { api } from '../../../protrack-mobile/src/services/api';
+import { useSyncStore } from './mocks/useSyncStore';
+import { processSyncQueue } from './mocks/syncEngine';
+import { api } from './mocks/api';
 
 // Mock do axios/api
-jest.mock('../../../protrack-mobile/src/services/api');
+jest.mock('./mocks/api');
 
 describe('Resiliência de Sync: Queda de Conexão', () => {
   beforeEach(() => {
     useSyncStore.getState().clearSyncedData(
-      useSyncStore.getState().pendingLogs.map(l => l.client_id),
-      useSyncStore.getState().pendingSets.map(s => s.client_id)
+      useSyncStore.getState().pendingLogs.map((l: any) => l.client_id),
+      useSyncStore.getState().pendingSets.map((s: any) => s.client_id)
     );
     jest.clearAllMocks();
   });

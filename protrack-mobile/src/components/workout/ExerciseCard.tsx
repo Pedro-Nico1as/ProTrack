@@ -7,6 +7,7 @@ import { SetRow } from './SetRow';
 import { ActiveExercise, LoggedSet } from '../../stores/useActiveWorkoutStore';
 import { Card } from '../core/Card';
 import { Text } from '../core/Text';
+import { strings } from '../../constants/strings';
 
 interface Props {
   exercise: ActiveExercise;
@@ -39,10 +40,10 @@ export const ExerciseCard = ({ exercise, onLogSet }: Props) => {
             <Text variant="label">#</Text>
           </View>
           <View style={styles.headerFlex}>
-            <Text variant="label" align="center">CARGA</Text>
+            <Text variant="label" align="center">{strings.workout.weightHeader}</Text>
           </View>
           <View style={styles.headerFlex}>
-            <Text variant="label" align="center">REPS</Text>
+            <Text variant="label" align="center">{strings.workout.repsHeader}</Text>
           </View>
           <View style={styles.headerBtn} />
         </View>

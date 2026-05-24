@@ -14,6 +14,7 @@ import { generateUUID } from '../../utils/uuid';
 import { api } from '../../services/api';
 import { Text } from '../../components/core/Text';
 import { Button } from '../../components/core/Button';
+import { strings } from '../../constants/strings';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'ActiveWorkout'>;
 
@@ -42,12 +43,12 @@ export const ActiveWorkoutScreen = () => {
       // Registra o timestamp REAL de início
       workoutStartedAtRef.current = new Date().toISOString();
 
-      const sessionName = routeParams?.workoutName || 'Treino de Força (Costas)';
+      const sessionName = routeParams?.workoutName || strings.activeWorkout.defaultSessionName;
       const sessionExercises = routeParams?.exercises || [
         {
           id: 'ex-1',
-          name: 'Puxada Frontal',
-          muscleGroup: 'Dorsais',
+          name: strings.activeWorkout.defaultEx1Name,
+          muscleGroup: strings.activeWorkout.defaultMuscleName,
           youtubeId: 'M7lc1UVf-VE',
           targetSets: 4,
           targetReps: 10,
@@ -55,8 +56,8 @@ export const ActiveWorkoutScreen = () => {
         },
         {
           id: 'ex-2',
-          name: 'Remada Curvada',
-          muscleGroup: 'Dorsais',
+          name: strings.activeWorkout.defaultEx2Name,
+          muscleGroup: strings.activeWorkout.defaultMuscleName,
           youtubeId: 'jNQXAC9IVRw',
           targetSets: 3,
           targetReps: 12,
@@ -80,11 +81,11 @@ export const ActiveWorkoutScreen = () => {
       if (!isActive || isFinishingRef.current) return;
       e.preventDefault();
       Alert.alert(
-        'Cancelar Treino?',
-        'Você perderá o progresso desta sessão.',
+        strings.activeWorkout.alertCancelTitle,
+        strings.activeWorkout.alertCancelMsg,
         [
-          { text: 'Não', style: 'cancel', onPress: () => {} },
-          { text: 'Sim, Cancelar', style: 'destructive', onPress: () => {
+          { text: strings.activeWorkout.alertCancelNo, style: 'cancel', onPress: () => {} },
+          { text: strings.activeWorkout.alertCancelYes, style: 'destructive', onPress: () => {
               finishWorkout();
               navigation.dispatch(e.data.action);
             }
@@ -147,7 +148,7 @@ export const ActiveWorkoutScreen = () => {
       navigation.goBack();
     } catch (error) {
       setIsSaving(false);
-      Alert.alert('Erro', 'Não foi possível salvar o treino.');
+      Alert.alert(strings.activeWorkout.alertErrorTitle, strings.activeWorkout.alertErrorMsg);
     }
   };
 
@@ -165,7 +166,7 @@ export const ActiveWorkoutScreen = () => {
             <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={8}>
               <Ionicons name="close" size={28} color={colors.text} />
             </Pressable>
-            <Text variant="body" weight="semibold">Carregando...</Text>
+            <Text variant="body" weight="semibold">{strings.activeWorkout.loading}</Text>
             <View style={{ width: 28 }} />
           </View>
           <ScrollView contentContainerStyle={styles.scroll}>
@@ -231,7 +232,7 @@ export const ActiveWorkoutScreen = () => {
 
             {isLastExercise ? (
               <Button
-                title="Finalizar Treino"
+                title={strings.activeWorkout.finishBtn}
                 onPress={handleFinishWorkout}
                 loading={isSaving}
                 variant="primary"
@@ -239,7 +240,7 @@ export const ActiveWorkoutScreen = () => {
               />
             ) : (
               <Button
-                title="Próximo Exercício"
+                title={strings.activeWorkout.nextExercise}
                 onPress={nextExercise}
                 variant="primary"
                 style={{ flex: 1, marginLeft: spacing.md }}
