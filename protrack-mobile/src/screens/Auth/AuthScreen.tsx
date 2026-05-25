@@ -27,7 +27,7 @@ WebBrowser.maybeCompleteAuthSession();
 const showAlert = (
   title: string,
   message: string,
-  buttons?: Array<{ text: string; onPress?: () => void }>
+  buttons?: { text: string; onPress?: () => void }[]
 ) => {
   if (Platform.OS === 'web') {
     const webAlert = (globalThis as any).alert;

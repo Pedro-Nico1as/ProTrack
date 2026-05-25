@@ -71,10 +71,6 @@ export const strings = {
     kg: 'kg',
     sets: 'séries',
   },
-  explore: {
-    title: 'Explorar',
-    searchPlaceholder: 'Buscar exercícios ou atletas...',
-  },
   activeWorkout: {
     finishBtn: 'Finalizar Treino',
     skipRest: 'Pular Descanso',
@@ -90,9 +86,6 @@ export const strings = {
     defaultEx1Name: 'Puxada Frontal',
     defaultEx2Name: 'Remada Curvada',
     defaultMuscleName: 'Dorsais',
-  },
-  history: {
-    title: 'Histórico',
   },
   profile: {
     title: 'Perfil',
@@ -155,5 +148,15 @@ export const strings = {
     repsHeader: 'REPS',
     restTimerLabel: 'DESCANSO',
     kgPlaceholder: 'kg',
+  },
+  predefinedWorkouts: {
+    sectionTitle: 'Fichas prontas',
+    viewDetails: 'Ver ficha',
+    modalTitle: 'Detalhes da Ficha',
+    useSheetBtn: 'Usar esta ficha',
+    successImportMsg: 'Ficha "{name}" adicionada ao seu perfil!',
+    errorImportMsg: 'Não foi possível importar esta ficha.',
+    sheetSingular: 'Ficha',
+    sheetPlural: 'Fichas',
   },
 };

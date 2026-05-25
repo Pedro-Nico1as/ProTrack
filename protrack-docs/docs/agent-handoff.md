@@ -294,3 +294,15 @@ Pendências:
 - Mobile precisa integrar o `RootNavigator` para redirecionar automaticamente para `ResetPasswordScreen` ao detectar deep link com `type=recovery`.
 - QA precisa adicionar testes de integração para o fluxo completo de redefinição de senha (deep link → ResetPasswordScreen → updateUser).
 - Backend precisa de definições de IAP (RevenueCat) para implementar a lógica de assinaturas e paywall.
+
+---
+
+### Atualização das 22:34 (Mobile)
+Mobile entregou:
+- **Treinos Pré-definidos (`PredefinedWorkouts.tsx` + `predefinedWorkouts.ts`):** Novo componente de cards horizontais na `HomeScreen` exibindo rotinas prontas (Full Body, ABC, ABCDE, PPL, Upper/Lower). Cada card tem imagem local (`assets/workouts/`), gradiente de sobreposição e abre um modal com detalhes completos da divisão: descrição, abas por partição e lista de exercícios com séries/reps alvo. Ao clicar em "Usar esta ficha", o treino é importado para o `useCustomWorkoutsStore` e o usuário é redirecionado para o fluxo de Modo Ativo.
+- **Simplificação da Navegação (MVP):** Removidas as tabs `Explore` e `History` do `TabNavigator` e do `TabParamList`, consolidando a navegação em Home + FAB + Profile para o escopo atual do MVP. As telas `ExploreScreen.tsx` e `HistoryScreen.tsx` foram excluídas do projeto.
+- **Documentação de agentes removida:** Os arquivos `instrucoes-agente-backend.md` e `instrucoes-agente-frontend.md` foram removidos do repositório.
+
+Pendências:
+- Backend precisa de definições de IAP (RevenueCat) para implementar a lógica de assinaturas e paywall.
+- Mobile pode reintroduzir as tabs de Explorar e Histórico em uma iteração futura quando as telas estiverem prontas para produção.

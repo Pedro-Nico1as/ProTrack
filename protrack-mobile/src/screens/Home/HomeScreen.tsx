@@ -14,6 +14,7 @@ import { BuildWorkoutCard } from '../../components/home/BuildWorkoutCard';
 import { WeeklyStats } from '../../components/home/WeeklyStats';
 import { WorkoutHistory } from '../../components/home/WorkoutHistory';
 import { MyWorkouts } from '../../components/home/MyWorkouts';
+import { PredefinedWorkouts } from '../../components/home/PredefinedWorkouts';
 
 export const HomeScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -91,6 +92,9 @@ export const HomeScreen = () => {
               {strings.home.subtitle}
             </Text>
           </View>
+
+          {/* Predefined workouts */}
+          <PredefinedWorkouts />
 
           {/* Build Workout CTA */}
           <BuildWorkoutCard onPress={() => navigation.navigate('BuildWorkout')} />
