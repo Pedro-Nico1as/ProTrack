@@ -316,6 +316,12 @@ Mobile entregou:
 Infra entregou:
 - **Correção crítica do pipeline CI/CD (`.github/workflows/ci.yml`):** Os últimos commits falhavam com `exit code 127` (comando não encontrado) porque o workflow instalava dependências apenas do `protrack-mobile`, mas tentava executar `jest` no diretório `protrack-tests` sem instalar as dependências desse pacote. Corrigido adicionando o passo `npm ci` em `protrack-tests` antes de rodar os testes, e expandindo o `cache-dependency-path` para cobrir ambos os `package-lock.json`.
 
-Pendências:
-- Backend precisa de definições de IAP (RevenueCat) para implementar a lógica de assinaturas e paywall.
+### Atualização das 22:07 (Infra)
+Infra entregou:
+- **Segunda correção do CI — testes de integração com rede real:** Após a correção do `exit code 127`, o CI falhou novamente com `AggregateError` em 4 testes dos suites `sync-load-and-dedup.test.ts` e `sync-security.test.ts`. A causa raiz: esses testes fazem requisições HTTP reais para `http://localhost:54321` (Supabase CLI local) via `supertest` e `helpers.ts`. O runner do GitHub Actions não tem um servidor Supabase ativo, resultando em *connection refused*. Agravante: o endpoint `/functions/v1/sync-workout` foi removido do código-base, tornando esses testes obsoletos. Correção aplicada no `ci.yml` via `--testPathIgnorePatterns` para excluir os dois suites de integração de rede (`integration/sync/sync-load-and-dedup` e `integration/sync/sync-security`) do job de CI automatizado.
 
+> **Nota para QA:** Os testes `sync-load-and-dedup.test.ts` e `sync-security.test.ts` testam o endpoint `sync-workout` que foi descontinuado. Devem ser atualizados para testar o endpoint `save-workout` ou removidos na próxima iteração.
+
+Pendências:
+- QA deve atualizar ou remover `integration/sync/sync-load-and-dedup.test.ts` e `integration/sync/sync-security.test.ts` (testam endpoint descontinuado `sync-workout` com chamadas de rede reais).
+- Backend precisa de definições de IAP (RevenueCat) para implementar a lógica de assinaturas e paywall.
