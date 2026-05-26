@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
+import { IconBolt, IconPencil } from '@tabler/icons-react-native';
 import { colors, spacing, sizing } from '../../theme/tokens';
 import { Text } from '../core/Text';
 import { Button } from '../core/Button';
@@ -27,7 +27,7 @@ export const MyWorkouts = () => {
           <View key={workout.id} style={styles.card}>
             <View style={styles.cardHeader}>
               <View style={styles.iconContainer}>
-                <Ionicons name="flash" size={20} color={colors.primary} />
+                <IconBolt size={20} color={colors.primary} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text variant="body" weight="semibold">
@@ -40,12 +40,13 @@ export const MyWorkouts = () => {
                     : strings.myWorkouts.sheetPlural}
                 </Text>
               </View>
-              <Button
-                title={strings.myWorkouts.editBtn}
-                variant="outline"
+              <Pressable
                 onPress={() => navigation.navigate('EditWorkout', { workoutId: workout.id })}
-                style={styles.editBtn}
-              />
+                style={styles.editIconBtn}
+                hitSlop={12}
+              >
+                <IconPencil size={20} color={colors.textSecondary} />
+              </Pressable>
             </View>
           </View>
         ))}
@@ -84,8 +85,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  editBtn: {
-    paddingHorizontal: spacing.sm,
+  editIconBtn: {
+    width: 40,
     height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.surfaceElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
   },
 });

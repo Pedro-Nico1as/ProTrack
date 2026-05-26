@@ -17,11 +17,17 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: protrack-mobile/package-lock.json
+          cache-dependency-path: |
+            protrack-mobile/package-lock.json
+            protrack-tests/package-lock.json
 
       - name: Install dependencies (mobile)
         run: npm ci
         working-directory: protrack-mobile
+
+      - name: Install dependencies (tests)
+        run: npm ci
+        working-directory: protrack-tests
 
       - name: Run lint
         run: npm run lint

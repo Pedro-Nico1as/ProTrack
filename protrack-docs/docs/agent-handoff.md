@@ -306,3 +306,16 @@ Mobile entregou:
 Pendências:
 - Backend precisa de definições de IAP (RevenueCat) para implementar a lógica de assinaturas e paywall.
 - Mobile pode reintroduzir as tabs de Explorar e Histórico em uma iteração futura quando as telas estiverem prontas para produção.
+
+---
+
+## 2026-05-25
+Mobile entregou:
+- **Refinamento visual dos cards de treinos pré-definidos (`PredefinedWorkouts.tsx`):** Ajustes nas imagens locais dos cards (`assets/workouts/`) e na composição visual do componente.
+
+Infra entregou:
+- **Correção crítica do pipeline CI/CD (`.github/workflows/ci.yml`):** Os últimos commits falhavam com `exit code 127` (comando não encontrado) porque o workflow instalava dependências apenas do `protrack-mobile`, mas tentava executar `jest` no diretório `protrack-tests` sem instalar as dependências desse pacote. Corrigido adicionando o passo `npm ci` em `protrack-tests` antes de rodar os testes, e expandindo o `cache-dependency-path` para cobrir ambos os `package-lock.json`.
+
+Pendências:
+- Backend precisa de definições de IAP (RevenueCat) para implementar a lógica de assinaturas e paywall.
+

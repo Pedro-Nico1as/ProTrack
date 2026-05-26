@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
   Alert,
   SafeAreaView,
   StatusBar,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,11 +27,36 @@ import {
   CustomWorkoutPartition,
 } from '../../stores/useCustomWorkoutsStore';
 
+const { width: screenWidth } = Dimensions.get('window');
+
+const getWorkoutMetaText = (id: string) => {
+  switch (id) {
+    case 'predef-full-body':
+      return 'Corpo Inteiro';
+    case 'predef-ppl':
+      return 'Push / Pull / Legs';
+    case 'predef-upper-lower':
+      return 'Sup. / Inf.';
+    case 'predef-abc':
+      return '3 Dias';
+    case 'predef-abcde':
+      return '5 Dias';
+    default:
+      return '';
+  }
+};
+
 export const PredefinedWorkouts = () => {
   const [selectedWorkout, setSelectedWorkout] = useState<PredefinedWorkout | null>(null);
   const [activePartitionIndex, setActivePartitionIndex] = useState(0);
   const [catalog, setCatalog] = useState<Exercise[]>([]);
   const addWorkout = useCustomWorkoutsStore((state) => state.addWorkout);
+
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const cardWidth = screenWidth - spacing.md * 2;
+  const snapInterval = cardWidth + spacing.md;
 
   useEffect(() => {
     // Prefetch exercises catalog to map IDs later
@@ -38,6 +64,30 @@ export const PredefinedWorkouts = () => {
       .then((data) => setCatalog(data))
       .catch(() => {});
   }, []);
+
+  // Auto-scroll carousel effect
+  useEffect(() => {
+    if (predefinedWorkouts.length === 0) return;
+
+    const timer = setInterval(() => {
+      const nextIndex = (currentIndex + 1) % predefinedWorkouts.length;
+      setCurrentIndex(nextIndex);
+      scrollViewRef.current?.scrollTo({
+        x: nextIndex * snapInterval,
+        animated: true,
+      });
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [currentIndex, snapInterval]);
+
+  const handleScroll = (event: any) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.round(contentOffsetX / snapInterval);
+    if (index !== currentIndex && index >= 0 && index < predefinedWorkouts.length) {
+      setCurrentIndex(index);
+    }
+  };
 
   const handleOpenPreview = (workout: PredefinedWorkout) => {
     setSelectedWorkout(workout);
@@ -101,29 +151,65 @@ export const PredefinedWorkouts = () => {
       </Text>
 
       <ScrollView
+        ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
+        snapToInterval={snapInterval}
+        decelerationRate="fast"
+        onMomentumScrollEnd={handleScroll}
         contentContainerStyle={styles.scrollContent}
       >
         {predefinedWorkouts.map((workout) => (
           <Card
             key={workout.id}
             noPadding
-            style={styles.card}
+            style={[styles.card, { width: cardWidth }]}
             onPress={() => handleOpenPreview(workout)}
           >
             <Image source={workout.image} style={styles.cardImage} resizeMode="cover" />
             <LinearGradient
-              colors={['transparent', 'rgba(10, 10, 12, 0.65)', 'rgba(10, 10, 12, 0.95)']}
+              colors={[
+                'transparent',
+                'rgba(10, 10, 12, 0.3)',
+                'rgba(10, 10, 12, 0.85)',
+                'rgba(10, 10, 12, 0.98)',
+              ]}
               style={styles.gradientOverlay}
             >
-              <Text variant="body" weight="bold" color={colors.text} style={styles.cardTitle}>
+              <Text variant="heading" weight="bold" color={colors.text} style={styles.cardTitle}>
                 {workout.name}
+              </Text>
+              <Text
+                variant="caption"
+                weight="bold"
+                color={colors.primary}
+                style={styles.cardSubTitle}
+              >
+                {workout.partitions.length === 1
+                  ? '1 ficha'
+                  : `${workout.partitions.length} fichas`}{' '}
+                • {getWorkoutMetaText(workout.id)}
+              </Text>
+              <Text
+                variant="caption"
+                color={colors.textSecondary}
+                numberOfLines={2}
+                style={styles.cardDesc}
+              >
+                {workout.description}
               </Text>
             </LinearGradient>
           </Card>
         ))}
       </ScrollView>
+
+      {/* Pagination Dots */}
+      <View style={styles.dotsContainer}>
+        {predefinedWorkouts.map((_, index) => {
+          const isActive = currentIndex === index;
+          return <View key={index} style={[styles.dot, isActive && styles.activeDot]} />;
+        })}
+      </View>
 
       {/* Preview Modal */}
       {selectedWorkout && (
@@ -257,8 +343,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   card: {
-    width: 140,
-    height: 180,
+    height: 200,
     position: 'relative',
     backgroundColor: colors.surface,
   },
@@ -271,12 +356,41 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: '60%',
+    height: '75%',
     justifyContent: 'flex-end',
-    padding: spacing.sm,
+    padding: spacing.md,
   },
   cardTitle: {
-    fontSize: typography.sizes.md,
+    fontSize: typography.sizes.xl,
+    marginBottom: spacing.xs,
+  },
+  cardSubTitle: {
+    fontSize: typography.sizes.xs,
+    color: colors.primary,
+    fontWeight: 'bold',
+    marginBottom: spacing.xs,
+    textTransform: 'uppercase',
+  },
+  cardDesc: {
+    fontSize: typography.sizes.sm,
+    lineHeight: 16,
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: spacing.sm,
+    gap: 6,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.textMuted,
+  },
+  activeDot: {
+    width: 18,
+    backgroundColor: colors.primary,
   },
   modalContainer: {
     flex: 1,
