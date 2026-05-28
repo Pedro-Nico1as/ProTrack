@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 70" width="256" height="70">
+  <!--
+    Wordmark ProTrack — versão clara (fundo transparente)
+    Fonte: Outfit Bold 700 @ 60px, letter-spacing: -0.5px
+    Coordenadas calculadas com fonttools a partir das métricas reais da fonte:
+      UPM=1000, Ascender=60px, Descender=-15.6px
+      Largura "protrack" = 242.2px (incluindo letter-spacing -0.5 × 7 = -3.5px)
+      Baseline y = 54.4px  (SVG height 70 - descender 15.6)
+      Dot cx = 249.2px  (text_width 242.2 + margin-left 2 + radius 5)
+      Dot cy = 58px     (SVG height 70 - margin-bottom 7 - radius 5)
+  -->
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700&amp;display=swap');
+    </style>
+    <!-- Gradientes do ponto (blob multi-camada) -->
+    <linearGradient id="wl-dot-base" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#FE7B02"/>
+      <stop offset="52%"  stop-color="#FF66F4"/>
+      <stop offset="100%" stop-color="#4B73FF"/>
+    </linearGradient>
+    <radialGradient id="wl-dot-r1" cx="68%" cy="18%" r="52%" gradientUnits="objectBoundingBox">
+      <stop offset="0%"   stop-color="rgba(255,1,5,0.95)"/>
+      <stop offset="100%" stop-color="rgba(255,1,5,0)"/>
+    </radialGradient>
+    <radialGradient id="wl-dot-r2" cx="18%" cy="28%" r="48%" gradientUnits="objectBoundingBox">
+      <stop offset="0%"   stop-color="rgba(254,123,2,1)"/>
+      <stop offset="100%" stop-color="rgba(254,123,2,0)"/>
+    </radialGradient>
+    <radialGradient id="wl-dot-r3" cx="82%" cy="68%" r="52%" gradientUnits="objectBoundingBox">
+      <stop offset="0%"   stop-color="rgba(255,102,244,0.9)"/>
+      <stop offset="100%" stop-color="rgba(255,102,244,0)"/>
+    </radialGradient>
+    <radialGradient id="wl-dot-r4" cx="28%" cy="82%" r="54%" gradientUnits="objectBoundingBox">
+      <stop offset="0%"   stop-color="rgba(75,115,255,0.95)"/>
+      <stop offset="100%" stop-color="rgba(75,115,255,0)"/>
+    </radialGradient>
+    <!-- Clip para o círculo do ponto -->
+    <clipPath id="wl-dot-clip">
+      <circle cx="249.2" cy="58" r="5"/>
+    </clipPath>
+  </defs>
+
+  <!-- Texto "protrack" -->
+  <text
+    x="0"
+    y="54.4"
+    font-family="'Outfit', sans-serif"
+    font-weight="700"
+    font-size="60"
+    letter-spacing="-0.5"
+    fill="#080D18"
+  >protrack</text>
+
+  <!-- Ponto gradiente multi-camada (blob) -->
+  <g clip-path="url(#wl-dot-clip)">
+    <circle cx="249.2" cy="58" r="5" fill="url(#wl-dot-base)"/>
+    <circle cx="249.2" cy="58" r="5" fill="url(#wl-dot-r1)"/>
+    <circle cx="249.2" cy="58" r="5" fill="url(#wl-dot-r2)"/>
+    <circle cx="249.2" cy="58" r="5" fill="url(#wl-dot-r3)"/>
+    <circle cx="249.2" cy="58" r="5" fill="url(#wl-dot-r4)"/>
+  </g>
+</svg>

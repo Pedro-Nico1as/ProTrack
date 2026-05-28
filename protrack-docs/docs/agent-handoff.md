@@ -325,3 +325,22 @@ Infra entregou:
 Pendências:
 - QA deve atualizar ou remover `integration/sync/sync-load-and-dedup.test.ts` e `integration/sync/sync-security.test.ts` (testam endpoint descontinuado `sync-workout` com chamadas de rede reais).
 - Backend precisa de definições de IAP (RevenueCat) para implementar a lógica de assinaturas e paywall.
+
+---
+
+## 2026-05-27
+Mobile entregou:
+- **Redesign completo da identidade visual (Design System v2):** Paleta de cores inteiramente substituída em `tokens.ts`. Esquema anterior (verde + roxo escuro) descontinuado em favor de identidade tricolor: **Laranja** (`#FE7B02`) como accent, **Rosa** (`#FF66F4`) e **Azul** (`#4B73FF`) como primário. Fundo migrado para azul-marinho escuro (`#080D18`). Gradientes de botão (`primaryBtn`) agora tricolores. Nova entrada `pinkAccent` e `gradients.brand` adicionadas ao mapa de tokens.
+- **Tipografia Outfit:** Fonte `Outfit` (6 variantes) adicionada em `assets/fonts/` e carregada via `expo-font` no `App.tsx`. Tab Navigation migrada de `fontWeight` hardcoded para `fontFamily: 'Outfit-Medium'`.
+- **Componente `AnimatedGlowBackground`:** Fundo animado com 3 blobs coloridos (laranja, rosa, azul) flutuando de forma independente via `react-native-reanimated` sobre `bg_abstract.png`, com overlay escuro e pulse de escala lento. Aplicado na `AuthScreen`.
+- **AuthScreen — Tela de Boas-vindas e modo `forgot` integrado:**
+  - Novo estado `welcome` como modo inicial com landing page de branding antes do formulário.
+  - Fluxo "Esqueci minha senha" integrado como modo `forgot` dentro do próprio `AuthScreen` (sem navegação extra). Chama `supabase.auth.resetPasswordForEmail()` com `redirectTo: 'protrack://reset-password'`.
+  - Transições animadas entre todos os modos (`welcome → login → register → forgot`) via `LayoutAnimation`.
+  - Ícones contextuais (`IconMail`, `IconLock`, `IconUser`, `IconArrowLeft`) adicionados aos campos.
+- **Novos assets de branding:** Logos e wordmarks em SVG (`protrack_logos_svg/`) em versões dark/light para uso futuro. Ícones do app (`icon.png`, `splash-icon.png`, `adaptive-icon.png`, `favicon.png`) atualizados para a nova identidade visual.
+
+Pendências:
+- QA deve atualizar ou remover os testes de integração de sync obsoletos.
+- Backend precisa de definições de IAP (RevenueCat) para assinaturas e paywall.
+- Mobile pode evoluir o `AnimatedGlowBackground` para usar `expo-blur` onde disponível.

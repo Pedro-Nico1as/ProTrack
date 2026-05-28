@@ -192,8 +192,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
   },
   tabLabel: {
+    fontFamily: 'Outfit-Medium',
     fontSize: typography.sizes.xs,
-    fontWeight: '500' as const,
     marginTop: 4,
   },
   fabContainer: {
@@ -224,8 +224,8 @@ const styles = StyleSheet.create({
     }),
   },
   fabLabel: {
+    fontFamily: 'Outfit-Medium',
     fontSize: typography.sizes.xs,
-    fontWeight: '500' as const,
     color: colors.accent,
     marginTop: 4,
   },

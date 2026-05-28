@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="pg-base" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#FE7B02"/>
+      <stop offset="52%"  stop-color="#FF66F4"/>
+      <stop offset="100%" stop-color="#4B73FF"/>
+    </linearGradient>
+    <radialGradient id="pg-r1" cx="68%" cy="18%" r="52%">
+      <stop offset="0%"   stop-color="rgba(255,1,5,0.95)"/>
+      <stop offset="100%" stop-color="rgba(255,1,5,0)"/>
+    </radialGradient>
+    <radialGradient id="pg-r2" cx="18%" cy="28%" r="48%">
+      <stop offset="0%"   stop-color="rgba(254,123,2,1)"/>
+      <stop offset="100%" stop-color="rgba(254,123,2,0)"/>
+    </radialGradient>
+    <radialGradient id="pg-r3" cx="82%" cy="68%" r="52%">
+      <stop offset="0%"   stop-color="rgba(255,102,244,0.9)"/>
+      <stop offset="100%" stop-color="rgba(255,102,244,0)"/>
+    </radialGradient>
+    <radialGradient id="pg-r4" cx="28%" cy="82%" r="54%">
+      <stop offset="0%"   stop-color="rgba(75,115,255,0.95)"/>
+      <stop offset="100%" stop-color="rgba(75,115,255,0)"/>
+    </radialGradient>
+    <clipPath id="p-clip-64d">
+      <text
+        x="3" y="56"
+        font-family="'Outfit', sans-serif"
+        font-weight="700"
+        font-size="54"
+        text-anchor="start"
+      >p</text>
+    </clipPath>
+  </defs>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700&amp;display=swap');
+  </style>
+
+  <!-- Background: dark rounded square (border-radius:16px) -->
+  <rect width="64" height="64" rx="16" fill="#080D18"/>
+
+  <!-- "p" letter with stacked gradient -->
+  <g clip-path="url(#p-clip-64d)">
+    <rect width="64" height="64" fill="url(#pg-base)"/>
+    <rect width="64" height="64" fill="url(#pg-r1)"/>
+    <rect width="64" height="64" fill="url(#pg-r2)"/>
+    <rect width="64" height="64" fill="url(#pg-r3)"/>
+    <rect width="64" height="64" fill="url(#pg-r4)"/>
+  </g>
+</svg>

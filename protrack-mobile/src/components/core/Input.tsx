@@ -8,10 +8,22 @@ interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
   isPassword?: boolean;
+  leftIcon?: React.ReactNode;
 }
 
-export const Input = ({ label, error, style, isPassword, ...rest }: InputProps) => {
+export const Input = ({ label, error, style, isPassword, leftIcon, ...rest }: InputProps) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+
+  const handleFocus = (e: any) => {
+    setIsFocused(true);
+    if (rest.onFocus) rest.onFocus(e);
+  };
+
+  const handleBlur = (e: any) => {
+    setIsFocused(false);
+    if (rest.onBlur) rest.onBlur(e);
+  };
 
   return (
     <View style={styles.container}>
@@ -20,11 +32,20 @@ export const Input = ({ label, error, style, isPassword, ...rest }: InputProps) 
           {label}
         </Text>
       )}
-      <View style={[styles.inputContainer, error ? styles.inputError : null]}>
+      <View
+        style={[
+          styles.inputContainer,
+          isFocused ? styles.inputFocused : null,
+          error ? styles.inputError : null,
+        ]}
+      >
+        {leftIcon && <View style={styles.leftIconContainer}>{leftIcon}</View>}
         <TextInput
-          style={[styles.input, style]}
+          style={[styles.input, leftIcon ? { paddingLeft: spacing.xs } : null, style]}
           placeholderTextColor={colors.textMuted}
           secureTextEntry={isPassword ? !showPassword : rest.secureTextEntry}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           {...rest}
         />
         {isPassword && (
@@ -57,19 +78,34 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: spacing.xs,
     marginLeft: 4,
+    fontWeight: '500',
   },
   inputContainer: {
     height: sizing.buttonHeight,
-    backgroundColor: colors.surfaceHighlight,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
     borderRadius: sizing.cardRadius - 4,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     overflow: 'hidden',
     flexDirection: 'row',
     alignItems: 'center',
   },
+  inputFocused: {
+    borderColor: colors.accent,
+    backgroundColor: 'rgba(83, 74, 183, 0.08)',
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+  },
   inputError: {
     borderColor: colors.error,
+    backgroundColor: 'rgba(239, 68, 68, 0.05)',
+  },
+  leftIconContainer: {
+    paddingLeft: spacing.md,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   input: {
     flex: 1,

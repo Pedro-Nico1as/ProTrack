@@ -142,6 +142,10 @@ export const strings = {
     errorGeneral: 'Ocorreu um problema na autenticação.',
     successTitle: 'Sucesso!',
     successRegister: 'Conta criada com sucesso. Bem-vindo ao ProTrack!',
+    forgotPasswordTitle: 'Recuperar Senha',
+    forgotPasswordSubtitle: 'Insira seu e-mail cadastrado para redefinir sua senha.',
+    forgotPasswordBtn: 'Enviar Link de Recuperação',
+    backToLogin: 'Voltar para o Login',
   },
   workout: {
     weightHeader: 'CARGA',

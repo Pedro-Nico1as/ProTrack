@@ -7,12 +7,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StatusBar,
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { IconLock } from '@tabler/icons-react-native';
-import { colors, spacing } from '../../theme/tokens';
+import { LinearGradient } from 'expo-linear-gradient';
+import { AnimatedGlowBackground } from '../../components/common/AnimatedGlowBackground';
+import { colors, spacing, typography } from '../../theme/tokens';
 import { Text } from '../../components/core/Text';
 import { Button } from '../../components/core/Button';
 import { Input } from '../../components/core/Input';
@@ -119,6 +121,11 @@ export const ResetPasswordScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+
+      {/* Animated Glow Background */}
+      <AnimatedGlowBackground />
+
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -126,11 +133,9 @@ export const ResetPasswordScreen = () => {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <View style={styles.iconWrapper}>
-              <IconLock size={32} color={colors.accent} />
-            </View>
             <Text variant="heading" style={styles.title}>
               Nova Senha
             </Text>
@@ -144,7 +149,8 @@ export const ResetPasswordScreen = () => {
             </Text>
           </View>
 
-          <View style={styles.form}>
+          {/* Form Card (Glassmorphism container) */}
+          <View style={styles.formCard}>
             <Controller
               control={control}
               name="password"
@@ -224,27 +230,35 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: spacing.xl,
-  },
-  iconWrapper: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: colors.accentGlow,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.accentLight,
+    marginTop: spacing.md,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+    color: '#FFFFFF',
     marginBottom: spacing.xs,
   },
   subtitle: {
     lineHeight: 20,
     paddingHorizontal: spacing.md,
+    fontSize: typography.sizes.sm,
+    textTransform: 'uppercase',
+    letterSpacing: 1.0,
+    opacity: 0.8,
+    textAlign: 'center',
   },
-  form: {
+  formCard: {
+    backgroundColor: 'rgba(22, 22, 26, 0.45)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
+    padding: spacing.lg,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.45,
+    shadowRadius: 24,
+    elevation: 8,
     marginBottom: spacing.xl,
   },
   submitButton: {

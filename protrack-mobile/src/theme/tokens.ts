@@ -1,26 +1,29 @@
 export const colors = {
-  background: '#0A0A0C',
-  surface: '#16161A',
-  surfaceHighlight: '#1E1E24',
-  surfaceElevated: '#252530',
+  background: '#080D18',
+  surface: '#0F1626',
+  surfaceHighlight: '#172237',
+  surfaceElevated: '#1E2C4A',
 
-  primary: '#00B37E',
-  primaryDark: '#00875F',
-  primaryGlow: 'rgba(0, 179, 126, 0.15)',
+  primary: '#4B73FF',
+  primaryDark: '#2E53E0',
+  primaryGlow: 'rgba(75, 115, 255, 0.15)',
 
-  accent: '#534AB7',
-  accentGlow: 'rgba(83, 74, 183, 0.15)',
-  accentLight: 'rgba(83, 74, 183, 0.25)',
+  accent: '#FE7B02',
+  accentGlow: 'rgba(254, 123, 2, 0.15)',
+  accentLight: 'rgba(254, 123, 2, 0.25)',
+
+  pinkAccent: '#FF66F4',
+  pinkAccentGlow: 'rgba(255, 102, 244, 0.15)',
 
   badgeGreen: '#04D361',
-  badgeBlue: '#2563EB',
+  badgeBlue: '#4B73FF',
 
-  text: '#E1E1E6',
-  textSecondary: '#8D8D99',
-  textMuted: '#505059',
+  text: '#F8FAFC',
+  textSecondary: '#94A3B8',
+  textMuted: '#64748B',
 
-  border: '#29292E',
-  borderSubtle: 'rgba(255, 255, 255, 0.06)',
+  border: '#1E2C4A',
+  borderSubtle: 'rgba(255, 255, 255, 0.05)',
 
   error: '#F75A68',
   success: '#04D361',
@@ -28,11 +31,12 @@ export const colors = {
 
   // Gradients (arrays for LinearGradient)
   gradients: {
-    card: ['#1A1A22', '#12121A'],
-    primaryBtn: ['#00B37E', '#00875F'],
-    accentBtn: ['#7C3AED', '#5B21B6'],
-    surface: ['rgba(30, 30, 36, 0.9)', 'rgba(22, 22, 26, 0.95)'],
-    restTimer: ['#1E1E24', '#0F1F18'],
+    card: ['#0F1626', '#080D18'],
+    primaryBtn: ['#FE7B02', '#FF66F4', '#4B73FF'],
+    accentBtn: ['#FF66F4', '#4B73FF'],
+    surface: ['rgba(15, 22, 38, 0.9)', 'rgba(8, 13, 24, 0.95)'],
+    restTimer: ['#172237', '#080D18'],
+    brand: ['#FE7B02', '#FF66F4', '#4B73FF'],
   },
 };
 
