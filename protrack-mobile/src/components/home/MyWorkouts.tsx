@@ -5,16 +5,14 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { IconBolt, IconPencil } from '@tabler/icons-react-native';
 import { colors, spacing, sizing } from '../../theme/tokens';
 import { Text } from '../core/Text';
-import { Button } from '../core/Button';
 import { useCustomWorkoutsStore } from '../../stores/useCustomWorkoutsStore';
 import { RootStackParamList } from '../../navigation/types';
 import { strings } from '../../constants/strings';
+import { BuildWorkoutCard } from './BuildWorkoutCard';
 
 export const MyWorkouts = () => {
   const { workouts } = useCustomWorkoutsStore();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-  if (workouts.length === 0) return null;
 
   return (
     <View style={styles.section}>
@@ -50,6 +48,8 @@ export const MyWorkouts = () => {
             </View>
           </View>
         ))}
+
+        <BuildWorkoutCard onPress={() => navigation.navigate('BuildWorkout')} />
       </View>
     </View>
   );

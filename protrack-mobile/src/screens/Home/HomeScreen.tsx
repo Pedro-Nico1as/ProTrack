@@ -10,7 +10,6 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import { fetchWorkoutLogs } from '../../services/api';
 import { Text } from '../../components/core/Text';
 import { Card } from '../../components/core/Card';
-import { BuildWorkoutCard } from '../../components/home/BuildWorkoutCard';
 import { WeeklyStats } from '../../components/home/WeeklyStats';
 import { WorkoutHistory } from '../../components/home/WorkoutHistory';
 import { MyWorkouts } from '../../components/home/MyWorkouts';
@@ -25,8 +24,15 @@ export const HomeScreen = () => {
   const [logs, setLogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 6 && hour < 12) return 'Bom dia';
+    if (hour >= 12 && hour < 18) return 'Boa tarde';
+    return 'Boa noite';
+  };
+
   const userName = user?.user_metadata?.full_name?.split(' ')[0] || 'Atleta';
-  const greetingText = strings.home.greeting.replace('{name}', userName);
+  const greetingText = `${getGreeting()}, ${userName}`;
 
   useFocusEffect(
     useCallback(() => {
@@ -45,10 +51,15 @@ export const HomeScreen = () => {
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
 
-            // Start of week (Sunday)
+            // Start of week (Monday)
+            const day = now.getDay();
+            const diff = day === 0 ? 6 : day - 1;
             const weekStart = new Date(now);
-            weekStart.setDate(now.getDate() - now.getDay());
+            weekStart.setDate(now.getDate() - diff);
             weekStart.setHours(0, 0, 0, 0);
+
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 7);
 
             let monthCount = 0;
             let weekCount = 0;
@@ -57,7 +68,7 @@ export const HomeScreen = () => {
               if (!log.completed_at) return;
               const d = new Date(log.completed_at);
               if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) monthCount++;
-              if (d >= weekStart) weekCount++;
+              if (d >= weekStart && d < weekEnd) weekCount++;
             });
 
             setStats({
@@ -88,16 +99,10 @@ export const HomeScreen = () => {
           {/* Greeting header */}
           <View style={styles.heroSection}>
             <Text variant="heading">{greetingText}</Text>
-            <Text variant="caption" style={styles.subtitle}>
-              {strings.home.subtitle}
-            </Text>
           </View>
 
           {/* Predefined workouts */}
           <PredefinedWorkouts />
-
-          {/* Build Workout CTA */}
-          <BuildWorkoutCard onPress={() => navigation.navigate('BuildWorkout')} />
 
           {/* Active workout banner */}
           {isActive && (
@@ -149,9 +154,6 @@ const styles = StyleSheet.create({
   heroSection: {
     marginTop: spacing.md,
     marginBottom: spacing.lg,
-  },
-  subtitle: {
-    marginTop: spacing.xs,
   },
   activeIndicator: {
     borderColor: colors.accentGlow,

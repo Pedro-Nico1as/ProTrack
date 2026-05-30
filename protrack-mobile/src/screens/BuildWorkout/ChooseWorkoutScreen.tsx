@@ -51,6 +51,7 @@ export const ChooseWorkoutScreen = () => {
       youtubeId: ex.youtubeId,
       targetSets: ex.targetSets,
       targetReps: ex.targetReps,
+      restSeconds: ex.restSeconds || 60,
       loggedSets: [],
     }));
 

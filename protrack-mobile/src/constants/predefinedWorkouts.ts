@@ -337,4 +337,118 @@ export const predefinedWorkouts: PredefinedWorkout[] = [
       },
     ],
   },
+  {
+    id: 'predef-gluteos-pernas',
+    name: 'Glúteos & Pernas',
+    image: require('../../assets/workouts/gluteos_pernas.png'),
+    description:
+      'Foco total no desenvolvimento dos membros inferiores, com ênfase em glúteos, quadríceps e posteriores.',
+    partitions: [
+      {
+        name: 'Treino Único',
+        exercises: [
+          { name: 'Agachamento Búlgaro', muscleGroup: 'Pernas', targetSets: 3, targetReps: 10 },
+          { name: 'Elevação Pélvica', muscleGroup: 'Pernas', targetSets: 4, targetReps: 12 },
+          { name: 'Stiff com Barra', muscleGroup: 'Pernas', targetSets: 3, targetReps: 10 },
+          { name: 'Leg Press 45°', muscleGroup: 'Pernas', targetSets: 3, targetReps: 10 },
+          { name: 'Panturrilha em Pé', muscleGroup: 'Pernas', targetSets: 4, targetReps: 15 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'predef-cardio-core',
+    name: 'Cardio & Core',
+    image: require('../../assets/workouts/cardio_core.png'),
+    description:
+      'Fortalecimento do abdômen aliado a estímulos cardiovasculares para melhora do condicionamento físico.',
+    partitions: [
+      {
+        name: 'Treino Único',
+        exercises: [
+          { name: 'Prancha', muscleGroup: 'Abdômen', targetSets: 3, targetReps: 60 },
+          { name: 'Abdominal Crunch', muscleGroup: 'Abdômen', targetSets: 3, targetReps: 15 },
+          { name: 'Agachamento Livre', muscleGroup: 'Pernas', targetSets: 3, targetReps: 15 },
+          { name: 'Polichinelos', muscleGroup: 'Cardio', targetSets: 3, targetReps: 30 },
+          { name: 'Escalador', muscleGroup: 'Abdômen', targetSets: 3, targetReps: 20 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'predef-superiores-vtaper',
+    name: 'Superiores (V-Taper)',
+    image: require('../../assets/workouts/superiores_vtaper.png'),
+    description:
+      'Foco em desenvolver ombros largos e costas densas, criando a clássica e harmônica estética em V.',
+    partitions: [
+      {
+        name: 'Treino Único',
+        exercises: [
+          { name: 'Barra Fixa', muscleGroup: 'Costas', targetSets: 3, targetReps: 8 },
+          {
+            name: 'Desenvolvimento com Barra',
+            muscleGroup: 'Ombros',
+            targetSets: 3,
+            targetReps: 10,
+          },
+          { name: 'Puxada Triângulo', muscleGroup: 'Costas', targetSets: 3, targetReps: 10 },
+          {
+            name: 'Elevação Lateral com Halteres',
+            muscleGroup: 'Ombros',
+            targetSets: 4,
+            targetReps: 12,
+          },
+          { name: 'Crucifixo Invertido', muscleGroup: 'Ombros', targetSets: 3, targetReps: 12 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'predef-forca-maxima',
+    name: 'Força Máxima',
+    image: require('../../assets/workouts/forca_maxima.png'),
+    description:
+      'Treino estruturado para o ganho de força bruta focado nos três grandes levantamentos da musculação.',
+    partitions: [
+      {
+        name: 'Treino Único',
+        exercises: [
+          { name: 'Levantamento Terra', muscleGroup: 'Costas', targetSets: 4, targetReps: 5 },
+          { name: 'Supino Reto com Barra', muscleGroup: 'Peito', targetSets: 4, targetReps: 5 },
+          { name: 'Agachamento Livre', muscleGroup: 'Pernas', targetSets: 4, targetReps: 5 },
+          { name: 'Stiff com Barra', muscleGroup: 'Pernas', targetSets: 3, targetReps: 8 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'predef-arm-day',
+    name: 'Especial de Braços',
+    image: require('../../assets/workouts/arm_day.png'),
+    description:
+      'Treino focado em bíceps e tríceps para pump máximo, hipertrofia e definição dos braços.',
+    partitions: [
+      {
+        name: 'Treino Único',
+        exercises: [
+          { name: 'Rosca Direta com Barra', muscleGroup: 'Bíceps', targetSets: 3, targetReps: 10 },
+          {
+            name: 'Tríceps Testa com Barra',
+            muscleGroup: 'Tríceps',
+            targetSets: 3,
+            targetReps: 10,
+          },
+          {
+            name: 'Rosca Alternada com Halteres',
+            muscleGroup: 'Bíceps',
+            targetSets: 3,
+            targetReps: 10,
+          },
+          { name: 'Tríceps Pulley no Cabo', muscleGroup: 'Tríceps', targetSets: 3, targetReps: 12 },
+          { name: 'Rosca Martelo', muscleGroup: 'Bíceps', targetSets: 3, targetReps: 12 },
+        ],
+      },
+    ],
+  },
 ];

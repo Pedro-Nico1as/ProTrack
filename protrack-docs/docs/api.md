@@ -122,6 +122,20 @@ As Edge Functions devem ser chamadas com método `POST` (ou GET, se aplicável e
 > **Duplicidade de Chaves para Retrocompatibilidade:**
 > O endpoint retorna chaves no formato compacto (`workouts`, `volume_kg`, `duration_minutes`) para compatibilidade direta com o modelo interno da UI móvel e também no formato estendido da API (`workouts_completed`, `total_volume_kg`, `time_spent_minutes`) para consistência de nomenclatura na documentação.
 
+
+### POST /functions/v1/delete-account
+**Descrição**: Exclui permanentemente a conta do usuário logado, juntamente com todos os seus dados associados (logs de treino, logs de séries e perfil). A exclusão do usuário do `auth.users` é realizada via Supabase Admin Client.
+- **Auth**: Required (JWT obrigatório)
+- **Response Body**:
+```json
+{
+  "success": true
+}
+```
+- **Error Codes**:
+  - `401 Unauthorized`: JWT ausente ou inválido.
+  - `400 Bad Request`: Falha ao excluir os dados relacionados ou a própria conta (ex: permissões insuficientes se `SUPABASE_SERVICE_ROLE_KEY` não estiver configurada).
+
 ## Ambiente de Testes & Mock Auth
 
 Para viabilizar a execução de testes de integração locais e em pipelines CI/CD sem a necessidade de gerar tokens JWT reais do Supabase Auth:

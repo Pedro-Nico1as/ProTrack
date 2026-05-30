@@ -96,6 +96,14 @@ export const strings = {
     logout: 'Sair',
     defaultUserName: 'Usuário ProTrack',
     defaultUserEmail: 'sem-email@protrack.app',
+    deleteAccount: 'Excluir Conta',
+    deleteAccountTitle: 'Excluir Conta?',
+    deleteAccountMsg:
+      'Tem certeza que deseja excluir sua conta permanentemente? Todos os seus treinos e históricos serão perdidos para sempre. Esta ação não pode ser desfeita.',
+    deleteAccountConfirm: 'Excluir Permanentemente',
+    deleteAccountCancel: 'Cancelar',
+    deleteAccountError: 'Não foi possível excluir a conta. Tente novamente mais tarde.',
+    deleteAccountSuccess: 'Sua conta foi excluída com sucesso.',
   },
   tabs: {
     home: 'Home',

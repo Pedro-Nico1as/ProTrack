@@ -157,7 +157,8 @@ export const ActiveWorkoutScreen = () => {
 
   const handleLogSet = (set: any) => {
     logSet(currentExerciseIndex, set);
-    startRest(60);
+    const restSec = currentExercise.restSeconds || 60;
+    startRest(restSec);
   };
 
   if (isLoading || !isActive || exercises.length === 0) {

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { colors, spacing, typography, sizing } from '../../theme/tokens';
 import { Text } from '../core/Text';
 import { Card } from '../core/Card';
@@ -41,6 +42,16 @@ const getWorkoutMetaText = (id: string) => {
       return '3 Dias';
     case 'predef-abcde':
       return '5 Dias';
+    case 'predef-gluteos-pernas':
+      return 'Pernas';
+    case 'predef-cardio-core':
+      return 'Cardio / Core';
+    case 'predef-superiores-vtaper':
+      return 'Sup. (V-Taper)';
+    case 'predef-forca-maxima':
+      return 'Força';
+    case 'predef-arm-day':
+      return 'Braços';
     default:
       return '';
   }
@@ -50,6 +61,7 @@ export const PredefinedWorkouts = () => {
   const [selectedWorkout, setSelectedWorkout] = useState<PredefinedWorkout | null>(null);
   const [activePartitionIndex, setActivePartitionIndex] = useState(0);
   const [catalog, setCatalog] = useState<Exercise[]>([]);
+  const [displayWorkouts, setDisplayWorkouts] = useState<PredefinedWorkout[]>([]);
   const addWorkout = useCustomWorkoutsStore((state) => state.addWorkout);
 
   const scrollViewRef = useRef<ScrollView>(null);
@@ -65,12 +77,22 @@ export const PredefinedWorkouts = () => {
       .catch(() => {});
   }, []);
 
+  // Shuffle and pick all workouts on focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const shuffled = [...predefinedWorkouts].sort(() => 0.5 - Math.random());
+      setDisplayWorkouts(shuffled);
+      setCurrentIndex(0);
+      scrollViewRef.current?.scrollTo({ x: 0, animated: false });
+    }, [])
+  );
+
   // Auto-scroll carousel effect
   useEffect(() => {
-    if (predefinedWorkouts.length === 0) return;
+    if (displayWorkouts.length === 0) return;
 
     const timer = setInterval(() => {
-      const nextIndex = (currentIndex + 1) % predefinedWorkouts.length;
+      const nextIndex = (currentIndex + 1) % displayWorkouts.length;
       setCurrentIndex(nextIndex);
       scrollViewRef.current?.scrollTo({
         x: nextIndex * snapInterval,
@@ -79,12 +101,12 @@ export const PredefinedWorkouts = () => {
     }, 4000);
 
     return () => clearInterval(timer);
-  }, [currentIndex, snapInterval]);
+  }, [currentIndex, snapInterval, displayWorkouts.length]);
 
   const handleScroll = (event: any) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(contentOffsetX / snapInterval);
-    if (index !== currentIndex && index >= 0 && index < predefinedWorkouts.length) {
+    if (index !== currentIndex && index >= 0 && index < displayWorkouts.length) {
       setCurrentIndex(index);
     }
   };
@@ -120,6 +142,7 @@ export const PredefinedWorkouts = () => {
               youtubeId: matchedGlobal ? matchedGlobal.youtube_video_id : '',
               targetSets: ex.targetSets,
               targetReps: ex.targetReps,
+              restSeconds: 60,
             };
           }),
         };
@@ -159,7 +182,7 @@ export const PredefinedWorkouts = () => {
         onMomentumScrollEnd={handleScroll}
         contentContainerStyle={styles.scrollContent}
       >
-        {predefinedWorkouts.map((workout) => (
+        {displayWorkouts.map((workout) => (
           <Card
             key={workout.id}
             noPadding
@@ -205,7 +228,7 @@ export const PredefinedWorkouts = () => {
 
       {/* Pagination Dots */}
       <View style={styles.dotsContainer}>
-        {predefinedWorkouts.map((_, index) => {
+        {displayWorkouts.map((_, index) => {
           const isActive = currentIndex === index;
           return <View key={index} style={[styles.dot, isActive && styles.activeDot]} />;
         })}

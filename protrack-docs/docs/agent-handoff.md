@@ -344,3 +344,23 @@ Pendências:
 - QA deve atualizar ou remover os testes de integração de sync obsoletos.
 - Backend precisa de definições de IAP (RevenueCat) para assinaturas e paywall.
 - Mobile pode evoluir o `AnimatedGlowBackground` para usar `expo-blur` onde disponível.
+
+---
+
+## 2026-05-30
+Backend entregou:
+- **Edge Function `delete-account`:** Criado novo endpoint `POST /functions/v1/delete-account`. A function exige um JWT válido e utiliza tanto o token do usuário (para verificar identidade) quanto uma chave `SUPABASE_SERVICE_ROLE_KEY` do ambiente para poder apagar os registros do usuário diretamente no banco. Ela realiza os seguintes passos de exclusão em cascata:
+  1. Deleta os logs de exercícios (`user_set_logs`) associados aos logs de treinos do usuário.
+  2. Deleta os logs de treinos do usuário (`user_workout_logs`).
+  3. Deleta o perfil do usuário (`profiles`).
+  4. Deleta permanentemente a conta de autenticação via Admin API (`auth.users`).
+
+Mobile entregou:
+- **Integração de Deleção de Conta:** UI adicionada em `ProfileScreen.tsx` para chamar a Edge Function de exclusão de conta (`api.post('/functions/v1/delete-account')`), incluindo modal de confirmação (destructive) via `Alert` e limpeza total dos dados locais.
+- **Novos Treinos Pré-Definidos:** Adicionados novos programas (Glúteos & Pernas, Superiores em V, Força Máxima, Cardio & Core, Arm Day) em `predefinedWorkouts.ts`, totalizando 10 opções ricas disponíveis na Home. Novas imagens e um documento de licenciamento e atribuição (`attribution.json`) para imagens do Unsplash adicionados em `assets/workouts/`.
+- **Refinamentos Visuais Gerais:** Ajustes de espaçamento, estilo e tipografia de dezenas de componentes na Home (ex: `WorkoutHistory`, `PredefinedWorkouts`) e durante o treino (ex: `ExerciseCard`, `SetRow`, `RestTimer`), aplicando a nova paleta e estilo arredondado. `ActiveWorkoutScreen` otimizada com gradientes da paleta oficial. Scripts geradores e arquivos `output/` utilizados para os assets gerados localmente e documentados.
+
+Pendências:
+- A pipeline CI/CD precisa garantir a presença das chaves corretas de serviço (`SUPABASE_SERVICE_ROLE_KEY`) no ambiente de produção para que a Edge Function `delete-account` funcione corretamente.
+- QA deve atualizar ou remover os testes de integração de sync obsoletos.
+- Backend precisa de definições de IAP (RevenueCat) para assinaturas e paywall.

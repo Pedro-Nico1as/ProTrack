@@ -58,11 +58,22 @@ export const ExerciseCard = ({ exercise, onLogSet }: Props) => {
           const setNumber = idx + 1;
           const logged = exercise.loggedSets.find((s) => s.setNumber === setNumber);
 
+          // Find the previous completed set to copy its weight (Rule 2)
+          let prefilledWeight: string | undefined;
+          if (setNumber > 1 && !logged) {
+            const prevLogged = exercise.loggedSets.find((s) => s.setNumber === setNumber - 1);
+            if (prevLogged) {
+              prefilledWeight = prevLogged.weight.toString();
+            }
+          }
+
           return (
             <SetRow
               key={setNumber}
               setNumber={setNumber}
               targetReps={exercise.targetReps}
+              exerciseId={exercise.exerciseId || exercise.id}
+              prefilledWeight={prefilledWeight}
               isCompleted={!!logged}
               onComplete={(weight, reps) =>
                 onLogSet({

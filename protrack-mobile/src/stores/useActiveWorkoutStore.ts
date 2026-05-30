@@ -33,6 +33,7 @@ export interface ActiveExercise {
   youtubeId: string;
   targetSets: number;
   targetReps: number;
+  restSeconds?: number;
   loggedSets: LoggedSet[];
 }
 
@@ -42,6 +43,7 @@ interface ActiveWorkoutState {
   exercises: ActiveExercise[];
   currentExerciseIndex: number;
   restTargetEndTime: number | null;
+  restDuration: number;
   sessionId: string | null;
 
   startWorkout: (name: string, exercises: ActiveExercise[], sessionId?: string | null) => void;
@@ -50,6 +52,7 @@ interface ActiveWorkoutState {
   prevExercise: () => void;
   logSet: (exerciseIndex: number, set: LoggedSet) => void;
   startRest: (seconds: number) => void;
+  addRestTime: (seconds: number) => void;
   skipRest: () => void;
 }
 
@@ -61,6 +64,7 @@ export const useActiveWorkoutStore = create<ActiveWorkoutState>()(
       exercises: [],
       currentExerciseIndex: 0,
       restTargetEndTime: null,
+      restDuration: 60,
       sessionId: null,
 
       startWorkout: (name, exercises, sessionId = null) =>
@@ -70,6 +74,7 @@ export const useActiveWorkoutStore = create<ActiveWorkoutState>()(
           exercises,
           currentExerciseIndex: 0,
           restTargetEndTime: null,
+          restDuration: 60,
           sessionId,
         }),
       finishWorkout: () =>
@@ -79,6 +84,7 @@ export const useActiveWorkoutStore = create<ActiveWorkoutState>()(
           exercises: [],
           currentExerciseIndex: 0,
           restTargetEndTime: null,
+          restDuration: 60,
           sessionId: null,
         }),
       nextExercise: () =>
@@ -100,8 +106,16 @@ export const useActiveWorkoutStore = create<ActiveWorkoutState>()(
         }),
       startRest: (seconds) =>
         set({
+          restDuration: seconds,
           restTargetEndTime: Date.now() + seconds * 1000,
         }),
+      addRestTime: (seconds) =>
+        set((state) => ({
+          restDuration: state.restDuration + seconds,
+          restTargetEndTime: state.restTargetEndTime
+            ? state.restTargetEndTime + seconds * 1000
+            : Date.now() + seconds * 1000,
+        })),
       skipRest: () =>
         set({
           restTargetEndTime: null,

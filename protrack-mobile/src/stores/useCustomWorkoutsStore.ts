@@ -25,6 +25,7 @@ export interface CustomExercise {
   youtubeId: string;
   targetSets: number;
   targetReps: number;
+  restSeconds?: number;
 }
 
 export interface CustomWorkoutPartition {

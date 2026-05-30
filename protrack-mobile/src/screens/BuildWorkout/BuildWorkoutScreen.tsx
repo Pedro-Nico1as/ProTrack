@@ -99,6 +99,7 @@ export const BuildWorkoutScreen = () => {
       youtubeId: exercise.youtube_video_id,
       targetSets: 3,
       targetReps: 10,
+      restSeconds: 60,
     };
 
     setPartitions((prev) =>
@@ -116,7 +117,7 @@ export const BuildWorkoutScreen = () => {
   const updateExercise = (
     partitionId: string,
     exId: string,
-    field: 'targetSets' | 'targetReps',
+    field: 'targetSets' | 'targetReps' | 'restSeconds',
     delta: number
   ) => {
     setPartitions((prev) =>
@@ -126,7 +127,10 @@ export const BuildWorkoutScreen = () => {
             ...p,
             exercises: p.exercises.map((ex) => {
               if (ex.id === exId) {
-                return { ...ex, [field]: Math.max(1, ex[field] + delta) };
+                const current =
+                  ex[field] !== undefined ? ex[field] : field === 'restSeconds' ? 60 : 1;
+                const minVal = field === 'restSeconds' ? 15 : 1;
+                return { ...ex, [field]: Math.max(minVal, current + delta) };
               }
               return ex;
             }),
@@ -296,6 +300,31 @@ export const BuildWorkoutScreen = () => {
                             <Ionicons name="add" size={20} color={colors.text} />
                           </Pressable>
                         </View>
+                      </View>
+                    </View>
+
+                    <View style={styles.restStepperRow}>
+                      <Text variant="caption" color={colors.textSecondary}>
+                        Tempo de Descanso
+                      </Text>
+                      <View style={styles.restStepper}>
+                        <Pressable
+                          style={styles.stepperBtn}
+                          onPress={() => updateExercise(partition.id, item.id, 'restSeconds', -15)}
+                          hitSlop={8}
+                        >
+                          <Ionicons name="remove" size={20} color={colors.text} />
+                        </Pressable>
+                        <Text variant="body" weight="bold" style={styles.stepperValue}>
+                          {item.restSeconds || 60}s
+                        </Text>
+                        <Pressable
+                          style={styles.stepperBtn}
+                          onPress={() => updateExercise(partition.id, item.id, 'restSeconds', 15)}
+                          hitSlop={8}
+                        >
+                          <Ionicons name="add" size={20} color={colors.text} />
+                        </Pressable>
                       </View>
                     </View>
                   </View>
@@ -475,6 +504,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: spacing.md,
+  },
+  restStepperRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderSubtle,
+  },
+  restStepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: sizing.cardRadius,
+    paddingHorizontal: spacing.sm,
+    height: 44,
+    width: 140,
   },
   controlGroup: {
     flex: 1,

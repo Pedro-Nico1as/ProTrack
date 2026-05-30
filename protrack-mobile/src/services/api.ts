@@ -93,9 +93,9 @@ export async function fetchWeeklySummary(): Promise<WeeklySummary> {
 }
 
 export async function fetchWorkoutLogs(): Promise<any[]> {
-  // Busca até 100 treinos mais recentes com suas respectivas séries
+  // Busca até 100 treinos mais recentes com suas respectivas séries e os nomes dos exercícios associados
   const data = await supabaseFetch<any[]>(
-    '/rest/v1/user_workout_logs?select=id,completed_at,duration_seconds,user_set_logs(weight_kg,reps_done)&order=completed_at.desc&limit=100'
+    '/rest/v1/user_workout_logs?select=id,completed_at,duration_seconds,user_set_logs(weight_kg,reps_done,exercises(name))&order=completed_at.desc&limit=100'
   );
 
   if (!data) return [];
@@ -117,6 +117,13 @@ export async function fetchWorkoutLogs(): Promise<any[]> {
       duration_seconds: log.duration_seconds,
       total_volume_kg: total_volume,
       total_sets: total_sets,
+      sets: log.user_set_logs
+        ? log.user_set_logs.map((set: any) => ({
+            weight: Number(set.weight_kg) || 0,
+            reps: Number(set.reps_done) || 0,
+            exerciseName: set.exercises?.name || 'Exercício Customizado',
+          }))
+        : [],
     };
   });
 }
@@ -502,4 +509,21 @@ export async function fetchUserProgress(exerciseId: string): Promise<any> {
     progressCache.set(exerciseId, { data, timestamp: now });
   }
   return data;
+}
+
+export async function fetchLastSetWeight(exerciseId: string): Promise<number | null> {
+  const data = await supabaseFetch<any[]>(
+    `/rest/v1/user_set_logs?exercise_id=eq.${exerciseId}&order=completed_at.desc&limit=1&select=weight_kg`
+  );
+  if (data && data.length > 0) {
+    return Number(data[0].weight_kg) || null;
+  }
+  return null;
+}
+
+export async function deleteUserAccount(): Promise<boolean> {
+  const data = await supabaseFetch<{ success: boolean }>('/functions/v1/delete-account', {
+    method: 'POST',
+  });
+  return data?.success || false;
 }

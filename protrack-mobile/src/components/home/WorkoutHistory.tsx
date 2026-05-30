@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, sizing } from '../../theme/tokens';
 import { Text } from '../core/Text';
 import { strings } from '../../constants/strings';
+
+interface LoggedSetDetail {
+  weight: number;
+  reps: number;
+  exerciseName: string;
+}
 
 interface WorkoutLog {
   id: string;
@@ -11,6 +17,7 @@ interface WorkoutLog {
   duration_seconds: number;
   total_volume_kg: number;
   total_sets: number;
+  sets?: LoggedSetDetail[];
 }
 
 interface WorkoutHistoryProps {
@@ -19,6 +26,12 @@ interface WorkoutHistoryProps {
 }
 
 export const WorkoutHistory = ({ logs, isLoading }: WorkoutHistoryProps) => {
+  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+
+  const toggleExpand = (id: string) => {
+    setExpandedLogId(expandedLogId === id ? null : id);
+  };
+
   if (isLoading) {
     return (
       <View style={styles.section}>
@@ -71,9 +84,22 @@ export const WorkoutHistory = ({ logs, isLoading }: WorkoutHistoryProps) => {
             minute: '2-digit',
           });
           const duration = Math.round((log.duration_seconds || 0) / 60);
+          const isExpanded = expandedLogId === log.id;
+
+          // Group sets by exercise name
+          const groupedSets = (log.sets || []).reduce(
+            (acc, set) => {
+              if (!acc[set.exerciseName]) {
+                acc[set.exerciseName] = [];
+              }
+              acc[set.exerciseName].push(set);
+              return acc;
+            },
+            {} as Record<string, LoggedSetDetail[]>
+          );
 
           return (
-            <View key={log.id} style={styles.card}>
+            <Pressable key={log.id} style={styles.card} onPress={() => toggleExpand(log.id)}>
               <View style={styles.cardHeader}>
                 <View style={styles.iconContainer}>
                   <Ionicons name="barbell" size={20} color={colors.accent} />
@@ -86,6 +112,11 @@ export const WorkoutHistory = ({ logs, isLoading }: WorkoutHistoryProps) => {
                     {formattedDate}
                   </Text>
                 </View>
+                <Ionicons
+                  name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                  size={20}
+                  color={colors.textSecondary}
+                />
               </View>
 
               <View style={styles.metricsRow}>
@@ -108,7 +139,31 @@ export const WorkoutHistory = ({ logs, isLoading }: WorkoutHistoryProps) => {
                   </Text>
                 </View>
               </View>
-            </View>
+
+              {isExpanded && log.sets && log.sets.length > 0 && (
+                <View style={styles.detailsContainer}>
+                  {Object.entries(groupedSets).map(([exerciseName, exerciseSets]) => (
+                    <View key={exerciseName} style={styles.exerciseDetailItem}>
+                      <Text variant="body" weight="semibold" style={styles.exerciseNameText}>
+                        {exerciseName}
+                      </Text>
+                      <View style={styles.setsList}>
+                        {exerciseSets.map((set, idx) => (
+                          <View key={idx} style={styles.setDetailRow}>
+                            <Text variant="caption" color={colors.textSecondary}>
+                              Série {idx + 1}
+                            </Text>
+                            <Text variant="caption" weight="semibold" color={colors.text}>
+                              {set.weight} kg x {set.reps} reps
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </Pressable>
           );
         })}
       </View>
@@ -173,5 +228,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+  },
+  detailsContainer: {
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderSubtle,
+    gap: spacing.sm,
+  },
+  exerciseDetailItem: {
+    backgroundColor: colors.surface,
+    padding: spacing.sm,
+    borderRadius: 8,
+    borderWidth: 0.5,
+    borderColor: colors.borderSubtle,
+  },
+  exerciseNameText: {
+    fontSize: 14,
+    marginBottom: 4,
+    color: colors.primary,
+  },
+  setsList: {
+    gap: 2,
+  },
+  setDetailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 2,
+    borderBottomWidth: 0.25,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
 });
