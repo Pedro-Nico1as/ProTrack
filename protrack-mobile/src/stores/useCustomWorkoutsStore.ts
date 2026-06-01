@@ -42,17 +42,30 @@ export interface CustomWorkout {
   exercises?: CustomExercise[]; // Deprecated from v0
 }
 
+export interface CustomExerciseTemplate {
+  id: string;
+  name: string;
+  muscle_group: string;
+  youtube_video_id: string;
+  equipment: string[];
+}
+
 interface CustomWorkoutsState {
   workouts: CustomWorkout[];
+  customExercises: CustomExerciseTemplate[];
   addWorkout: (workout: CustomWorkout) => void;
   updateWorkout: (workout: CustomWorkout) => void;
   removeWorkout: (id: string) => void;
+  addCustomExercise: (exercise: CustomExerciseTemplate) => void;
+  removeCustomExercise: (id: string) => void;
+  clearWorkouts: () => void;
 }
 
 export const useCustomWorkoutsStore = create<CustomWorkoutsState>()(
   persist(
     (set) => ({
       workouts: [],
+      customExercises: [],
       addWorkout: (workout) => set((state) => ({ workouts: [workout, ...state.workouts] })),
       updateWorkout: (workout) =>
         set((state) => ({
@@ -62,17 +75,26 @@ export const useCustomWorkoutsStore = create<CustomWorkoutsState>()(
         set((state) => ({
           workouts: state.workouts.filter((w) => w.id !== id),
         })),
+      addCustomExercise: (exercise) =>
+        set((state) => ({
+          customExercises: [exercise, ...(state.customExercises || [])],
+        })),
+      removeCustomExercise: (id) =>
+        set((state) => ({
+          customExercises: (state.customExercises || []).filter((ex) => ex.id !== id),
+        })),
+      clearWorkouts: () => set({ workouts: [], customExercises: [] }),
     }),
     {
       name: 'custom-workouts-storage',
       storage: createJSONStorage(() => mmkvStorage),
-      version: 1,
+      version: 2,
       migrate: (persistedState: any, version: number) => {
+        let state = persistedState as any;
         if (version === 0) {
           // Migration from v0 (exercises directly in workout) to v1 (exercises inside partitions)
-          const state = persistedState as CustomWorkoutsState;
           if (state.workouts) {
-            state.workouts = state.workouts.map((w) => {
+            state.workouts = state.workouts.map((w: any) => {
               if (w.exercises && (!w.partitions || w.partitions.length === 0)) {
                 return {
                   ...w,
@@ -89,9 +111,13 @@ export const useCustomWorkoutsStore = create<CustomWorkoutsState>()(
               return w;
             });
           }
-          return state;
         }
-        return persistedState;
+        if (version < 2) {
+          if (!state.customExercises) {
+            state.customExercises = [];
+          }
+        }
+        return state;
       },
     }
   )

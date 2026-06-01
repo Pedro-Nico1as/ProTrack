@@ -1,42 +1,42 @@
 export const colors = {
-  background: '#080D18',
-  surface: '#0F1626',
-  surfaceHighlight: '#172237',
-  surfaceElevated: '#1E2C4A',
+  background: '#000000',
+  surface: '#1A1A1A',
+  surfaceHighlight: '#262626',
+  surfaceElevated: '#333333',
 
-  primary: '#4B73FF',
-  primaryDark: '#2E53E0',
-  primaryGlow: 'rgba(75, 115, 255, 0.15)',
+  primary: '#E43232',
+  primaryDark: '#B71C1C',
+  primaryGlow: 'rgba(228, 50, 50, 0.15)',
 
-  accent: '#FE7B02',
-  accentGlow: 'rgba(254, 123, 2, 0.15)',
-  accentLight: 'rgba(254, 123, 2, 0.25)',
+  accent: '#FF4D4D',
+  accentGlow: 'rgba(255, 77, 77, 0.15)',
+  accentLight: 'rgba(255, 77, 77, 0.25)',
 
   pinkAccent: '#FF66F4',
   pinkAccentGlow: 'rgba(255, 102, 244, 0.15)',
 
   badgeGreen: '#04D361',
-  badgeBlue: '#4B73FF',
+  badgeBlue: '#E43232',
 
-  text: '#F8FAFC',
-  textSecondary: '#94A3B8',
-  textMuted: '#64748B',
+  text: '#FFFFFF',
+  textSecondary: '#A3A3A3',
+  textMuted: '#737373',
 
-  border: '#1E2C4A',
-  borderSubtle: 'rgba(255, 255, 255, 0.05)',
+  border: '#262626',
+  borderSubtle: 'rgba(255, 255, 255, 0.08)',
 
-  error: '#F75A68',
-  success: '#04D361',
-  warning: '#FBA94C',
+  error: '#FF3344',
+  success: '#00E676',
+  warning: '#FFB300',
 
   // Gradients (arrays for LinearGradient)
   gradients: {
-    card: ['#0F1626', '#080D18'],
-    primaryBtn: ['#FE7B02', '#FF66F4', '#4B73FF'],
-    accentBtn: ['#FF66F4', '#4B73FF'],
-    surface: ['rgba(15, 22, 38, 0.9)', 'rgba(8, 13, 24, 0.95)'],
-    restTimer: ['#172237', '#080D18'],
-    brand: ['#FE7B02', '#FF66F4', '#4B73FF'],
+    card: ['#1A1A1A', '#000000'],
+    primaryBtn: ['#E43232', '#C62828'],
+    accentBtn: ['#FF4D4D', '#E43232'],
+    surface: ['rgba(26, 26, 26, 0.85)', 'rgba(0, 0, 0, 0.95)'],
+    restTimer: ['#1A1A1A', '#000000'],
+    brand: ['#E43232', '#FF4D4D'],
   },
 };
 

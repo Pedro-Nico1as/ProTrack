@@ -32,10 +32,29 @@ Todas as requisições requerem o header `Authorization: Bearer <user_jwt>`, exc
 - **Response**: Array de `session_exercises` (idealmente com relacionamentos expandidos para a tabela `exercises` via Select param: `select=*,exercises(*)`)
 
 ### Exercises (Biblioteca de Exercícios)
+
+#### Listar Exercícios
 - **Método**: `GET /rest/v1/exercises`
 - **Método (Filtro)**: `GET /rest/v1/exercises?muscle_group=eq.{group}`
 - **Auth**: Public
 - **Response**: Array de `exercises`
+
+#### Criar Exercício Customizado
+- **Método**: `POST /rest/v1/exercises`
+- **Auth**: Required (usuário autenticado)
+- **Headers**: `Prefer: return=representation`
+- **Request Body**:
+```json
+{
+  "name": "Rosca Direta",
+  "muscle_group": "Bíceps",
+  "youtube_video_id": "abc123",
+  "equipment": []
+}
+```
+- **Response**: Array com o objeto `exercises` criado (incluindo `id` gerado).
+- **Habilitado por**: Migration `20260531201500_allow_user_insert_exercises.sql`.
+
 
 ## Edge Functions
 

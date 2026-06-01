@@ -8,6 +8,23 @@ jest.mock('../../../protrack-mobile/src/services/supabase', () => ({
   },
 }));
 
+// Mock other stores to prevent react-native-mmkv import issues in Node environment
+jest.mock('../../../protrack-mobile/src/stores/useCustomWorkoutsStore', () => ({
+  useCustomWorkoutsStore: {
+    getState: () => ({
+      clearWorkouts: jest.fn(),
+    }),
+  },
+}));
+
+jest.mock('../../../protrack-mobile/src/stores/useActiveWorkoutStore', () => ({
+  useActiveWorkoutStore: {
+    getState: () => ({
+      finishWorkout: jest.fn(),
+    }),
+  },
+}));
+
 import { useAuthStore } from '../../../protrack-mobile/src/stores/useAuthStore';
 import { supabase } from '../../../protrack-mobile/src/services/supabase';
 

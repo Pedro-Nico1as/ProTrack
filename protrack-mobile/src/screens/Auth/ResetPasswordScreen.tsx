@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   formCard: {
-    backgroundColor: 'rgba(22, 22, 26, 0.45)',
+    backgroundColor: 'rgba(30, 30, 30, 0.45)',
     borderRadius: 24,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.06)',

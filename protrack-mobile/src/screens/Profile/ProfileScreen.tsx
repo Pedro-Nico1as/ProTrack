@@ -14,6 +14,8 @@ import { colors, spacing, sizing } from '../../theme/tokens';
 import { strings } from '../../constants/strings';
 import { Text } from '../../components/core/Text';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { useCustomWorkoutsStore } from '../../stores/useCustomWorkoutsStore';
+import { useActiveWorkoutStore } from '../../stores/useActiveWorkoutStore';
 import { deleteUserAccount } from '../../services/api';
 
 import { useNavigation } from '@react-navigation/native';
@@ -52,6 +54,10 @@ export const ProfileScreen = () => {
           try {
             const success = await deleteUserAccount();
             if (success) {
+              // Limpa todos os dados locais permanentemente ao excluir conta
+              useCustomWorkoutsStore.getState().clearWorkouts();
+              useActiveWorkoutStore.getState().finishWorkout();
+
               Alert.alert('Sucesso', strings.profile.deleteAccountSuccess, [
                 {
                   text: 'OK',

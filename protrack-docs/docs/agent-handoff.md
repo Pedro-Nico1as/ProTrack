@@ -362,5 +362,30 @@ Mobile entregou:
 
 Pendências:
 - A pipeline CI/CD precisa garantir a presença das chaves corretas de serviço (`SUPABASE_SERVICE_ROLE_KEY`) no ambiente de produção para que a Edge Function `delete-account` funcione corretamente.
-- QA deve atualizar ou remover os testes de integração de sync obsoletos.
+- QA deve atualizar ou remover os testes de integração de sync obsoletos. ✅ *Resolvido na sprint de 2026-05-31 — ver abaixo.*
 - Backend precisa de definições de IAP (RevenueCat) para assinaturas e paywall.
+
+---
+
+## 2026-05-31
+Mobile entregou:
+- **Wordmark SVG inline na AuthScreen:** Substituição do texto `protrack.` (tipografia manual) pelo wordmark oficial em SVG embutido diretamente no código via `react-native-svg` (`SvgXml`). O logotipo inclui o ponto vermelho característico no símbolo do ProTrack. Assets `icon protrack.svg` e `wordmark protrack.svg` adicionados em `assets/`.
+- **Fundo de Auth em Vídeo (`auth_bg.mp4`):** Preparação de asset de vídeo para uso futuro como background animado na tela de Auth. Asset incluído em `assets/`.
+- **Criação de Exercícios Customizados (`createExercise` em `api.ts`):** Nova função pública `createExercise()` que realiza `POST /rest/v1/exercises` com o header `Prefer: return=representation`. Habilita o fluxo de criação de exercícios personalizados dentro do `BuildWorkoutScreen`.
+
+Backend entregou:
+- **Migration `20260531201500_allow_user_insert_exercises.sql`:** Nova política RLS `"Users can insert exercises"` que permite a qualquer usuário autenticado (`auth.role() = 'authenticated'`) inserir registros na tabela `public.exercises`. Necessária para viabilizar a criação de exercícios customizados pelo Mobile.
+
+QA entregou:
+- **Suites de testes migradas de `sync-workout` para `save-workout`:** Os 3 suites de testes de integração obsoletos (`sync-load-and-dedup`, `sync-security`, `sync-workout`) foram removidos e substituídos por novas versões atualizadas para o endpoint `save-workout`:
+  - `save-workout.test.ts`: Testes de fluxo principal (200), ausência de token (401) e payload inválido (400).
+  - `save-workout-load.test.ts`: Testes de volume (15 sets) e validação de header.
+  - `save-workout-security.test.ts`: Testes de token inválido e auditoria de isolamento por JWT.
+- **Helpers de testes refatorados (`integration/helpers.ts`):** Substituição da dependência de `http://localhost:54321` por um **mock Express server** embutido nos próprios helpers. Os testes agora rodam 100% offline e não precisam de Supabase local ativo. A variável `API_URL` ainda pode ser usada para apontar para um ambiente real, mas é opcional.
+- **Correção do `authStore.test.ts`:** Adicionados mocks para `useCustomWorkoutsStore` e `useActiveWorkoutStore` (que dependem de `react-native-mmkv`) para prevenir erros de importação em ambiente Node.
+- **`ci.yml` simplificado:** Remoção do `--testPathIgnorePatterns` que excluía os testes de sync — agora desnecessário pois os novos testes usam mocks e não fazem chamadas de rede.
+
+Pendências:
+- Backend precisa de definições de IAP (RevenueCat) para assinaturas e paywall.
+- Mobile pode implementar o vídeo `auth_bg.mp4` como background real substituindo o `AnimatedGlowBackground` em uma iteração futura.
+

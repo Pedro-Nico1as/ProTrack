@@ -527,3 +527,26 @@ export async function deleteUserAccount(): Promise<boolean> {
   });
   return data?.success || false;
 }
+
+export async function createExercise(exercise: {
+  name: string;
+  muscle_group: string;
+  youtube_video_id?: string;
+}): Promise<Exercise | null> {
+  const data = await supabaseFetch<Exercise[]>('/rest/v1/exercises', {
+    method: 'POST',
+    body: {
+      name: exercise.name,
+      muscle_group: exercise.muscle_group,
+      youtube_video_id: exercise.youtube_video_id || null,
+      equipment: [],
+    },
+    headers: {
+      Prefer: 'return=representation',
+    },
+  });
+  if (data && data.length > 0) {
+    return data[0];
+  }
+  return null;
+}

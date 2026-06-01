@@ -63,9 +63,9 @@ export const Button = ({
           style={styles.gradient}
         >
           {loading ? (
-            <ActivityIndicator color={colors.background} />
+            <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text variant="body" weight="bold" color={colors.background}>
+            <Text variant="body" weight="bold" color="#FFFFFF">
               {title}
             </Text>
           )}

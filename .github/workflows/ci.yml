@@ -34,7 +34,5 @@ jobs:
         working-directory: protrack-mobile
 
       - name: Run tests
-        run: |
-          # Exclui testes de integração que dependem de Supabase local ativo (connection refused no CI)
-          npm test -- --watchAll=false --passWithNoTests --testPathIgnorePatterns='integration/sync/sync-load-and-dedup' 'integration/sync/sync-security'
+        run: npm test -- --watchAll=false --passWithNoTests
         working-directory: protrack-tests

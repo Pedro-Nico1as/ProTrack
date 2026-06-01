@@ -77,11 +77,11 @@ export const PredefinedWorkouts = () => {
       .catch(() => {});
   }, []);
 
-  // Shuffle and pick all workouts on focus
+  // Shuffle and pick 3 random workouts on focus
   useFocusEffect(
     React.useCallback(() => {
       const shuffled = [...predefinedWorkouts].sort(() => 0.5 - Math.random());
-      setDisplayWorkouts(shuffled);
+      setDisplayWorkouts(shuffled.slice(0, 3));
       setCurrentIndex(0);
       scrollViewRef.current?.scrollTo({ x: 0, animated: false });
     }, [])
@@ -193,9 +193,9 @@ export const PredefinedWorkouts = () => {
             <LinearGradient
               colors={[
                 'transparent',
-                'rgba(10, 10, 12, 0.3)',
-                'rgba(10, 10, 12, 0.85)',
-                'rgba(10, 10, 12, 0.98)',
+                'rgba(0, 0, 0, 0.3)',
+                'rgba(0, 0, 0, 0.85)',
+                'rgba(0, 0, 0, 0.98)',
               ]}
               style={styles.gradientOverlay}
             >
@@ -265,7 +265,7 @@ export const PredefinedWorkouts = () => {
                     resizeMode="cover"
                   />
                   <LinearGradient
-                    colors={['transparent', 'rgba(22, 22, 26, 0.95)']}
+                    colors={['transparent', 'rgba(26, 26, 26, 0.95)']}
                     style={styles.modalHeroGradient}
                   />
                 </View>

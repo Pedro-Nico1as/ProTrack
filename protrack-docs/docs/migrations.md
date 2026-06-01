@@ -111,3 +111,12 @@ Este documento rastreia o impacto de cada alteração de schema no banco de dado
 - **Segurança**: Restaura o fluxo de verificação obrigatória por e-mail no Supabase Auth para ambiente de produção.
 - **Breaking Changes**: Nenhuma para produção. Usuários que se cadastrarem agora precisarão confirmar o e-mail antes de fazer login (comportamento correto e esperado).
 - **Rollback**: Re-executar a migration `20260523204500_auto_confirm_users.sql`.
+
+## 20260531201500_allow_user_insert_exercises.sql
+**Descrição**: Cria política RLS que permite a usuários autenticados inserir novos exercícios na tabela `public.exercises`.
+**Impacto**:
+- **Nova Feature**: Usuários logados podem agora criar exercícios customizados via `POST /rest/v1/exercises`. Isso habilita o fluxo de criação de exercícios personalizados no `BuildWorkoutScreen`.
+- **Segurança**: A política usa `auth.role() = 'authenticated'` como guarda. Qualquer usuário autenticado pode inserir exercícios (exercícios públicos, não privados por usuário). Política de leitura (`SELECT`) existente não é alterada.
+- **Breaking Changes**: Nenhuma.
+- **Rollback**: `DROP POLICY "Users can insert exercises" ON public.exercises;`
+

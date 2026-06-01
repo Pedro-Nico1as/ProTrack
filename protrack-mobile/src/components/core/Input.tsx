@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   },
   inputFocused: {
     borderColor: colors.accent,
-    backgroundColor: 'rgba(83, 74, 183, 0.08)',
+    backgroundColor: 'rgba(255, 77, 77, 0.05)',
     shadowColor: colors.accent,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.25,

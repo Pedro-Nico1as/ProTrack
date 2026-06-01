@@ -20,12 +20,12 @@ export default function App() {
       <View
         style={{
           flex: 1,
-          backgroundColor: '#080D18',
+          backgroundColor: '#000000',
           justifyContent: 'center',
           alignItems: 'center',
         }}
       >
-        <ActivityIndicator size="large" color="#4B73FF" />
+        <ActivityIndicator size="large" color="#E43232" />
       </View>
     );
   }
