@@ -1,21 +1,33 @@
-// Reference Design: https://dribbble.com/shots/25546625-Iridescent-background-animation
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Image } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export const AnimatedGlowBackground = () => {
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+
   return (
     <View style={StyleSheet.absoluteFill}>
+      {/* Fallback visual background image displayed instantly while video is loading */}
+      {!isVideoLoaded && (
+        <Image
+          source={require('../../../assets/auth_bg_fallback.png')}
+          style={StyleSheet.absoluteFill}
+          resizeMode="cover"
+        />
+      )}
+
       {/* Video Background from local asset */}
       <Video
         source={require('../../../assets/auth_bg.mp4')}
-        style={StyleSheet.absoluteFill}
+        style={[StyleSheet.absoluteFill, { opacity: isVideoLoaded ? 1 : 0 }]}
         resizeMode={ResizeMode.COVER}
         shouldPlay
         isLooping
         isMuted
+        muted={true}
         useNativeControls={false}
+        onLoad={() => setIsVideoLoaded(true)}
       />
 
       {/* Black translucent overlay to balance legibility and video colors */}

@@ -30,6 +30,23 @@ serve(async (req) => {
       })
     }
 
+    // Check request body for a user ID, if provided, to ensure it matches the authenticated user ID
+    let requestedUserId: string | null = null
+    try {
+      const clonedReq = req.clone()
+      const body = await clonedReq.json()
+      requestedUserId = body?.userId ?? body?.user_id ?? body?.id ?? null
+    } catch (_) {
+      // Body is either empty or not JSON, ignore
+    }
+
+    if (requestedUserId && requestedUserId !== user.id) {
+      return new Response(JSON.stringify({ error: 'Forbidden: Authenticated user ID does not match requested user ID' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403,
+      })
+    }
+
     // Initialize the Admin Client with Service Role Key to bypass RLS policies
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     if (!serviceRoleKey) {

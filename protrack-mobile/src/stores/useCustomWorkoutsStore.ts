@@ -1,21 +1,6 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
-import { createMMKV } from 'react-native-mmkv';
-
-const storage = createMMKV({ id: 'custom-workouts-storage' });
-
-const mmkvStorage: StateStorage = {
-  setItem: (name: string, value: string) => {
-    storage.set(name, value);
-  },
-  getItem: (name: string) => {
-    const value = storage.getString(name);
-    return value ?? null;
-  },
-  removeItem: (name: string) => {
-    storage.remove(name);
-  },
-};
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface CustomExercise {
   id: string;
@@ -26,6 +11,7 @@ export interface CustomExercise {
   targetSets: number;
   targetReps: number;
   restSeconds?: number;
+  isCustom?: boolean;
 }
 
 export interface CustomWorkoutPartition {
@@ -48,6 +34,7 @@ export interface CustomExerciseTemplate {
   muscle_group: string;
   youtube_video_id: string;
   equipment: string[];
+  isCustom?: boolean;
 }
 
 interface CustomWorkoutsState {
@@ -87,7 +74,7 @@ export const useCustomWorkoutsStore = create<CustomWorkoutsState>()(
     }),
     {
       name: 'custom-workouts-storage',
-      storage: createJSONStorage(() => mmkvStorage),
+      storage: createJSONStorage(() => AsyncStorage),
       version: 2,
       migrate: (persistedState: any, version: number) => {
         let state = persistedState as any;

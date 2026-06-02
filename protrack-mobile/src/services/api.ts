@@ -93,9 +93,9 @@ export async function fetchWeeklySummary(): Promise<WeeklySummary> {
 }
 
 export async function fetchWorkoutLogs(): Promise<any[]> {
-  // Busca até 100 treinos mais recentes com suas respectivas séries e os nomes dos exercícios associados
+  // Busca até 100 treinos mais recentes com suas respectivas séries e os nomes dos exercícios (tanto pré-definidos quanto customizados)
   const data = await supabaseFetch<any[]>(
-    '/rest/v1/user_workout_logs?select=id,completed_at,duration_seconds,user_set_logs(weight_kg,reps_done,exercises(name))&order=completed_at.desc&limit=100'
+    '/rest/v1/user_workout_logs?select=id,completed_at,duration_seconds,user_set_logs(weight_kg,reps_done,exercises(name),user_custom_exercises(name))&order=completed_at.desc&limit=100'
   );
 
   if (!data) return [];
@@ -121,7 +121,8 @@ export async function fetchWorkoutLogs(): Promise<any[]> {
         ? log.user_set_logs.map((set: any) => ({
             weight: Number(set.weight_kg) || 0,
             reps: Number(set.reps_done) || 0,
-            exerciseName: set.exercises?.name || 'Exercício Customizado',
+            exerciseName:
+              set.exercises?.name || set.user_custom_exercises?.name || 'Exercício Customizado',
           }))
         : [],
     };
@@ -152,11 +153,33 @@ export interface Exercise {
   muscle_group: string;
   youtube_video_id: string;
   equipment: string[];
+  isCustom?: boolean;
 }
 
 export async function fetchExercises(): Promise<Exercise[]> {
-  const data = await supabaseFetch<Exercise[]>('/rest/v1/exercises?select=*');
-  if (data && data.length > 0) return data;
+  const [globalData, customData] = await Promise.all([
+    supabaseFetch<Exercise[]>('/rest/v1/exercises?select=*'),
+    supabaseFetch<any[]>('/rest/v1/user_custom_exercises?select=*'),
+  ]);
+
+  const allExercises: Exercise[] = [];
+  if (globalData) {
+    allExercises.push(...globalData);
+  }
+  if (customData) {
+    allExercises.push(
+      ...customData.map((c) => ({
+        id: c.id,
+        name: c.name,
+        muscle_group: c.muscle_group,
+        youtube_video_id: c.youtube_video_id,
+        equipment: c.equipment || [],
+        isCustom: true,
+      }))
+    );
+  }
+
+  if (allExercises.length > 0) return allExercises;
 
   // FALLBACK OFFLINE / MOCK
   // Se a API falhar (Supabase down ou sem internet), injeta a biblioteca base
@@ -513,7 +536,7 @@ export async function fetchUserProgress(exerciseId: string): Promise<any> {
 
 export async function fetchLastSetWeight(exerciseId: string): Promise<number | null> {
   const data = await supabaseFetch<any[]>(
-    `/rest/v1/user_set_logs?exercise_id=eq.${exerciseId}&order=completed_at.desc&limit=1&select=weight_kg`
+    `/rest/v1/user_set_logs?or=(exercise_id.eq.${exerciseId},custom_exercise_id.eq.${exerciseId})&order=completed_at.desc&limit=1&select=weight_kg`
   );
   if (data && data.length > 0) {
     return Number(data[0].weight_kg) || null;
@@ -533,7 +556,7 @@ export async function createExercise(exercise: {
   muscle_group: string;
   youtube_video_id?: string;
 }): Promise<Exercise | null> {
-  const data = await supabaseFetch<Exercise[]>('/rest/v1/exercises', {
+  const data = await supabaseFetch<Exercise[]>('/rest/v1/user_custom_exercises', {
     method: 'POST',
     body: {
       name: exercise.name,
@@ -546,7 +569,7 @@ export async function createExercise(exercise: {
     },
   });
   if (data && data.length > 0) {
-    return data[0];
+    return { ...data[0], isCustom: true };
   }
   return null;
 }

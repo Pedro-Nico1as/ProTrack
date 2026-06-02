@@ -155,6 +155,7 @@ export const EditWorkoutScreen = () => {
       targetSets: 3,
       targetReps: 10,
       restSeconds: 60,
+      isCustom: exercise.isCustom || false,
     };
 
     setPartitions((prev) =>
@@ -203,6 +204,7 @@ export const EditWorkoutScreen = () => {
       muscle_group: muscle,
       youtube_video_id: youtubeId,
       equipment: [],
+      isCustom: true,
     };
 
     addCustomExercise(newExTemplate);
@@ -630,7 +632,10 @@ export const EditWorkoutScreen = () => {
                   >
                     <Pressable
                       onPress={() => setSelectedMuscle(null)}
-                      style={[styles.filterChip, selectedMuscle === null && styles.filterChipActive]}
+                      style={[
+                        styles.filterChip,
+                        selectedMuscle === null && styles.filterChipActive,
+                      ]}
                     >
                       <Text
                         variant="caption"
@@ -721,7 +726,10 @@ export const EditWorkoutScreen = () => {
                   const isCustom = customExercises.some((ex) => ex.id === item.id);
                   return (
                     <View style={styles.catalogItemRow}>
-                      <Pressable style={styles.catalogItemContent} onPress={() => addExercise(item)}>
+                      <Pressable
+                        style={styles.catalogItemContent}
+                        onPress={() => addExercise(item)}
+                      >
                         <View style={{ flex: 1 }}>
                           <Text variant="body" weight="semibold">
                             {item.name}

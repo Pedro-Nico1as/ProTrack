@@ -1,21 +1,6 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist, StateStorage } from 'zustand/middleware';
-import { createMMKV } from 'react-native-mmkv';
-
-const storage = createMMKV();
-
-const mmkvStorage: StateStorage = {
-  setItem: (name: string, value: string) => {
-    storage.set(name, value);
-  },
-  getItem: (name: string) => {
-    const value = storage.getString(name);
-    return value ?? null;
-  },
-  removeItem: (name: string) => {
-    storage.remove(name);
-  },
-};
+import { createJSONStorage, persist } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface LoggedSet {
   id: string;
@@ -34,6 +19,7 @@ export interface ActiveExercise {
   targetSets: number;
   targetReps: number;
   restSeconds?: number;
+  isCustom?: boolean;
   loggedSets: LoggedSet[];
 }
 
@@ -123,7 +109,7 @@ export const useActiveWorkoutStore = create<ActiveWorkoutState>()(
     }),
     {
       name: 'active-workout',
-      storage: createJSONStorage(() => mmkvStorage),
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 );

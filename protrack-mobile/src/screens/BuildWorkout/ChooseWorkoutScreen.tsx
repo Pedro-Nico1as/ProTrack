@@ -53,6 +53,7 @@ export const ChooseWorkoutScreen = () => {
       targetReps: ex.targetReps,
       restSeconds: ex.restSeconds || 60,
       loggedSets: [],
+      isCustom: ex.isCustom || false,
     }));
 
     startWorkout(`${workout.name} - ${partition.name}`, activeExercises, null);

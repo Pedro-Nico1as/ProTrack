@@ -68,6 +68,7 @@ serve(async (req) => {
         log_id: logId,
         session_exercise_id: s.session_exercise_id ?? null,
         exercise_id: s.exercise_id ?? null,
+        custom_exercise_id: s.custom_exercise_id ?? null,
         set_number: s.set_number ?? i + 1,
         weight_kg: s.weight_kg ?? null,
         reps_done: s.reps_done ?? null,

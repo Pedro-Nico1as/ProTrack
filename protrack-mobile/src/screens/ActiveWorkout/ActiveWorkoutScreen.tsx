@@ -124,19 +124,23 @@ export const ActiveWorkoutScreen = () => {
     const startedAt = workoutStartedAtRef.current;
     const durationSeconds = Math.round((now.getTime() - new Date(startedAt).getTime()) / 1000);
 
-    const sets = exercises.flatMap((ex, exIdx) =>
-      ex.loggedSets.map((set, i) => ({
-        session_exercise_id: sessionId ? ex.id : null,
-        exercise_id: ex.exerciseId || ex.id,
-        set_number: set.setNumber ?? i + 1,
-        weight_kg: set.weight,
-        reps_done: set.reps,
-        completed_at: set.completedAt,
-      }))
+    const sets = exercises.flatMap((ex) =>
+      ex.loggedSets.map((set, i) => {
+        const isCustom = ex.isCustom || ex.id.startsWith('cust-') || ex.id.startsWith('custom-');
+        return {
+          session_exercise_id: sessionId ? ex.id : null,
+          exercise_id: isCustom ? null : ex.exerciseId || ex.id,
+          custom_exercise_id: isCustom ? ex.exerciseId || ex.id : null,
+          set_number: set.setNumber ?? i + 1,
+          weight_kg: set.weight,
+          reps_done: set.reps,
+          completed_at: set.completedAt,
+        };
+      })
     );
 
     try {
-      await api.post('/save-workout', {
+      const response = await api.post('/save-workout', {
         workout: {
           session_id: sessionId || null,
           started_at: startedAt,
@@ -146,12 +150,19 @@ export const ActiveWorkoutScreen = () => {
         sets,
       });
 
+      if (!response || !response.data) {
+        throw new Error('Save workout returned empty response');
+      }
+
       isFinishingRef.current = true;
       finishWorkout();
       navigation.goBack();
     } catch (error) {
       setIsSaving(false);
-      Alert.alert(strings.activeWorkout.alertErrorTitle, strings.activeWorkout.alertErrorMsg);
+      Alert.alert(
+        'Erro ao Salvar Treino',
+        'Não foi possível salvar seu treino online devido a uma falha de conexão. Seus dados continuam salvos neste dispositivo. Por favor, verifique sua internet e tente salvar novamente.'
+      );
     }
   };
 

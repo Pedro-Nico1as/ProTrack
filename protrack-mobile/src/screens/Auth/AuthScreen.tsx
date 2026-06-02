@@ -13,7 +13,7 @@ import {
   UIManager,
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri } from 'expo-auth-session';
+import * as Linking from 'expo-linking';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -234,8 +234,14 @@ export const AuthScreen = () => {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      const redirectUrl = makeRedirectUri({ path: '/auth/callback' });
+      // Resolve redirect URL dynamically using expo-linking to automatically get Expo Go host/IP
+      const redirectUrl = Linking.createURL('auth/callback');
+      console.log('[AuthScreen] Generated redirectUrl:', redirectUrl);
+      Alert.alert('DEBUG URL Gerada', redirectUrl);
+      setIsLoading(false);
+      return;
 
+      // eslint-disable-next-line no-unreachable
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
