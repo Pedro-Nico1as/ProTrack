@@ -7,10 +7,7 @@ import { colors, spacing, sizing } from '../../theme/tokens';
 import { Text } from '../../components/core/Text';
 import { Button } from '../../components/core/Button';
 import { RootStackParamList } from '../../navigation/types';
-import {
-  useCustomWorkoutsStore,
-  CustomWorkoutPartition,
-} from '../../stores/useCustomWorkoutsStore';
+import { useCustomWorkoutsStore } from '../../stores/useCustomWorkoutsStore';
 import { useActiveWorkoutStore } from '../../stores/useActiveWorkoutStore';
 import { strings } from '../../constants/strings';
 

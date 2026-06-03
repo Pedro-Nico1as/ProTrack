@@ -305,7 +305,7 @@ export const BuildWorkoutScreen = () => {
             />
           </View>
 
-          {partitions.map((partition, pIndex) => (
+          {partitions.map((partition) => (
             <View key={partition.id} style={styles.partitionContainer}>
               <View style={styles.partitionHeader}>
                 <TextInput

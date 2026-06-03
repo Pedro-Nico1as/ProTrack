@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { colors, spacing, sizing } from '../../theme/tokens';
+import { colors, spacing } from '../../theme/tokens';
 import { FloatingYouTubePlayer } from './FloatingYouTubePlayer';
 import { SetRow } from './SetRow';
 import { ActiveExercise, LoggedSet } from '../../stores/useActiveWorkoutStore';

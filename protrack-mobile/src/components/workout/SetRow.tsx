@@ -8,7 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, sizing, spacing, typography, animation } from '../../theme/tokens';
+import { colors, sizing, spacing, typography } from '../../theme/tokens';
 import { Text } from '../core/Text';
 import { strings } from '../../constants/strings';
 import { fetchLastSetWeight } from '../../services/api';
@@ -35,7 +35,6 @@ export const SetRow = ({
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState(targetReps.toString());
   const [increment, setIncrement] = useState<5 | 10>(5);
-  const scale = useSharedValue(1);
   const checkScale = useSharedValue(1);
 
   const animatedCheckStyle = useAnimatedStyle(() => ({

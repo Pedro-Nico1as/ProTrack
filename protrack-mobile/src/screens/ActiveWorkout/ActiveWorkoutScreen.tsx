@@ -12,14 +12,9 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  FadeIn,
-} from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, sizing, animation } from '../../theme/tokens';
+import { colors, spacing, sizing } from '../../theme/tokens';
 import { RootStackParamList } from '../../navigation/types';
 import { useActiveWorkoutStore } from '../../stores/useActiveWorkoutStore';
 import { ExerciseCard } from '../../components/workout/ExerciseCard';
@@ -157,7 +152,7 @@ export const ActiveWorkoutScreen = () => {
       isFinishingRef.current = true;
       finishWorkout();
       navigation.goBack();
-    } catch (error) {
+    } catch {
       setIsSaving(false);
       Alert.alert(
         'Erro ao Salvar Treino',

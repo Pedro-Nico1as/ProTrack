@@ -12,7 +12,7 @@ import {
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { AnimatedGlowBackground } from '../../components/common/AnimatedGlowBackground';
 import { colors, spacing, typography } from '../../theme/tokens';
 import { Text } from '../../components/core/Text';

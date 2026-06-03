@@ -24,7 +24,7 @@ import {
   IconLock,
   IconUser,
 } from '@tabler/icons-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { AnimatedGlowBackground } from '../../components/common/AnimatedGlowBackground';
 import { colors, spacing, sizing } from '../../theme/tokens';
 import { Text } from '../../components/core/Text';

@@ -69,7 +69,7 @@ export const ProfileScreen = () => {
             } else {
               Alert.alert('Erro', strings.profile.deleteAccountError);
             }
-          } catch (err) {
+          } catch {
             Alert.alert('Erro', strings.profile.deleteAccountError);
           } finally {
             setIsDeleting(false);
