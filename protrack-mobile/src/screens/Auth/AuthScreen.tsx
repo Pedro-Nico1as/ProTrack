@@ -237,21 +237,21 @@ export const AuthScreen = () => {
       // Resolve redirect URL dynamically using expo-linking to automatically get Expo Go host/IP
       const redirectUrl = Linking.createURL('auth/callback');
       console.log('[AuthScreen] Generated redirectUrl:', redirectUrl);
-      Alert.alert('DEBUG URL Gerada', redirectUrl);
-      setIsLoading(false);
-      return;
 
-      // eslint-disable-next-line no-unreachable
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
           skipBrowserRedirect: true,
+          queryParams: {
+            prompt: 'select_account',
+          },
         },
       });
 
       if (error) throw error;
       if (!data?.url) throw new Error(strings.auth.errorGoogleAuthUrl);
+      console.log('[AuthScreen] Supabase Auth URL:', data.url);
 
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
 

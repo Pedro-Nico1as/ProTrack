@@ -80,25 +80,21 @@ serve(async (req) => {
         completed_at,
         exercise_id,
         custom_exercise_id,
-        session_exercises(exercise_id)
+        user_workout_logs!inner(user_id)
       `)
+      .eq('user_workout_logs.user_id', user.id)
+      .or(`exercise_id.eq.${exerciseId},custom_exercise_id.eq.${exerciseId}`)
       .gte('completed_at', twoYearsAgo.toISOString())
       .order('completed_at', { ascending: false })
-      .limit(500) // Additional safety limit
+      .limit(500) // Safety limit for single exercise history
       
     if (setsError) throw setsError
-
-    const filteredSets = (sets || []).filter((s: any) => 
-      s.exercise_id === exerciseId || 
-      s.custom_exercise_id === exerciseId || 
-      (s.session_exercises && s.session_exercises.exercise_id === exerciseId)
-    )
 
     let maxWeight = 0
     let prDate = null
     const historyMap = new Map()
 
-    for (const s of filteredSets) {
+    for (const s of sets || []) {
       const weight = Number(s.weight_kg) || 0
       if (weight > maxWeight) {
         maxWeight = weight

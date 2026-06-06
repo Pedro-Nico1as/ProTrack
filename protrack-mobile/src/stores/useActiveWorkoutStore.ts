@@ -86,8 +86,15 @@ export const useActiveWorkoutStore = create<ActiveWorkoutState>()(
         })),
       logSet: (exerciseIndex, loggedSet) =>
         set((state) => {
-          const newExercises = [...state.exercises];
-          newExercises[exerciseIndex].loggedSets.push(loggedSet);
+          const newExercises = state.exercises.map((ex, idx) => {
+            if (idx === exerciseIndex) {
+              return {
+                ...ex,
+                loggedSets: [...ex.loggedSets, loggedSet],
+              };
+            }
+            return ex;
+          });
           return { exercises: newExercises };
         }),
       startRest: (seconds) =>
