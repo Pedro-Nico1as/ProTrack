@@ -119,4 +119,15 @@ Este documento rastreia o impacto de cada alteração de schema no banco de dado
 - **Segurança**: A política usa `auth.role() = 'authenticated'` como guarda. Qualquer usuário autenticado pode inserir exercícios (exercícios públicos, não privados por usuário). Política de leitura (`SELECT`) existente não é alterada.
 - **Breaking Changes**: Nenhuma.
 - **Rollback**: `DROP POLICY "Users can insert exercises" ON public.exercises;`
+- **Status**: ⚠️ Substituída pela migration `20260601190000` que reverte esta política em favor de tabela privada.
+
+## 20260601190000_create_user_custom_exercises.sql
+**Descrição**: Cria a tabela `user_custom_exercises` com RLS completo para armazenamento privado de exercícios customizados por usuário. Remove a política global de INSERT na `public.exercises`. Adiciona coluna `custom_exercise_id` em `user_set_logs`.
+**Impacto**:
+- **Breaking Change (Segurança)**: Removida a policy `"Users can insert exercises"` da tabela `public.exercises`. Usuários não podem mais inserir exercícios na biblioteca global — apenas na sua própria tabela privada `user_custom_exercises`.
+- **Nova Tabela**: `public.user_custom_exercises` com campos `id`, `user_id`, `name`, `muscle_group`, `youtube_video_id`, `instructions`, `equipment[]`, `created_at`. RLS completo (SELECT/INSERT/UPDATE/DELETE) vinculado ao `auth.uid()`.
+- **Schema**: `user_set_logs` recebe coluna `custom_exercise_id UUID` (nullable, FK para `user_custom_exercises.id` com `ON DELETE SET NULL`). Permite rastrear histórico de sets de exercícios customizados.
+- **Performance**: Índices `idx_user_set_logs_custom_exercise_id` e `idx_user_set_logs_custom_exercise_completed` adicionados para otimizar queries de histórico.
+- **Rollback**: `DROP TABLE IF EXISTS public.user_custom_exercises CASCADE; ALTER TABLE public.user_set_logs DROP COLUMN IF EXISTS custom_exercise_id;` — e re-executar a migration `20260531201500` se necessário.
+
 

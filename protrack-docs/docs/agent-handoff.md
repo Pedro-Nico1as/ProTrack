@@ -389,3 +389,24 @@ Pendências:
 - Backend precisa de definições de IAP (RevenueCat) para assinaturas e paywall.
 - Mobile pode implementar o vídeo `auth_bg.mp4` como background real substituindo o `AnimatedGlowBackground` em uma iteração futura.
 
+---
+
+## 2026-06-01 a 2026-06-08
+Mobile entregou:
+- **Exercícios Customizados — tabela privada:** Remoção da abordagem de INSERT na tabela pública `exercises`. O app agora salva exercícios criados pelo usuário na nova tabela `user_custom_exercises` via `POST /rest/v1/user_custom_exercises`, garantindo isolamento por RLS.
+- **Correção do `ActiveWorkoutScreen` (TypeError):** Resolvido crash ao finalizar treino. `useActiveWorkoutStore` atualizado com guard para sets vazios e chamadas seguras a métodos que dependem de estado opcional.
+- **`AuthScreen` — Deep links dinâmicos:** Substituição de URLs de redirect hardcoded (`protrack://auth/callback`, `protrack://reset-password`) por chamadas dinâmicas a `makeRedirectUri()` de `expo-auth-session`. Isso resolve o fluxo de OAuth e recuperação de senha tanto no Expo Go (via `exp://`) quanto em produção (via `protrack://`).
+- **Asset `auth_bg_fallback.png`:** Imagem de fallback estática adicionada em `assets/` para o background da tela de Auth caso o vídeo não esteja disponível.
+- **Lint e TypeScript:** Resolução de todos os avisos remanescentes de ESLint e TypeScript no código Mobile (11 arquivos ajustados), incluindo remoção de variáveis não utilizadas e tipagem correta de componentes.
+
+Backend entregou:
+- **Migration `20260601190000_create_user_custom_exercises`:** Nova tabela `user_custom_exercises` com RLS completo (SELECT/INSERT/UPDATE/DELETE por `auth.uid()`). Policy global de INSERT em `public.exercises` removida. Coluna `custom_exercise_id` adicionada em `user_set_logs` com índices de performance.
+- **`save-workout` — Mock token alinhado:** A função agora aceita `mock-valid-token` em ambiente de desenvolvimento/teste (`SUPABASE_ENV != 'production'`), usando a `service_role_key` para contornar autenticação. Em produção, o mock é explicitamente bloqueado com status 401. Alinhamento idêntico aplicado à `delete-account`.
+- **`user-progress` — Query otimizada:** A consulta de histórico de séries agora faz JOIN via `user_workout_logs!inner(user_id)` e filtra tanto por `exercise_id` quanto por `custom_exercise_id` (via `.or()`), com `limit(500)` de segurança. Suporte completo a exercícios customizados no histórico de performance.
+- **`supabase/config.toml` — Redirect URLs expandidas:** Lista `additional_redirect_urls` expandida para cobrir `protrack://auth/callback`, `protrack://reset-password` e variações de porta `exp://` para Expo Go (`8080`, `8081`, `8082`, `localhost` e `127.0.0.1`).
+
+Pendências:
+- Backend precisa de definições de IAP (RevenueCat) para assinaturas e paywall.
+- Mobile pode implementar o vídeo `auth_bg.mp4` como background real em iteração futura.
+
+

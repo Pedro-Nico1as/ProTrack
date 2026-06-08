@@ -13,7 +13,7 @@ import {
   UIManager,
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import * as Linking from 'expo-linking';
+import { makeRedirectUri } from 'expo-auth-session';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -151,6 +151,17 @@ export const AuthScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<'welcome' | 'login' | 'register' | 'forgot'>('welcome');
 
+  // Resolve redirect URLs dynamically using expo-auth-session to support both Expo Go and Production
+  const redirectUrl = makeRedirectUri({
+    scheme: 'protrack',
+    path: 'auth/callback',
+  });
+
+  const resetRedirectUrl = makeRedirectUri({
+    scheme: 'protrack',
+    path: 'reset-password',
+  });
+
   const { control, handleSubmit, setValue, clearErrors } = useForm<FormValues>({
     resolver: zodResolver(authSchema),
     defaultValues: {
@@ -180,7 +191,7 @@ export const AuthScreen = () => {
           password: data.password || '',
           options: {
             data: { full_name: data.name?.trim() },
-            emailRedirectTo: 'protrack://auth/callback',
+            emailRedirectTo: redirectUrl,
           },
         });
 
@@ -209,7 +220,7 @@ export const AuthScreen = () => {
         }
       } else if (data.mode === 'forgot') {
         const { error } = await supabase.auth.resetPasswordForEmail(data.email.trim(), {
-          redirectTo: 'protrack://reset-password',
+          redirectTo: resetRedirectUrl,
         });
         if (error) throw error;
         showAlert(
@@ -234,8 +245,6 @@ export const AuthScreen = () => {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      // Resolve redirect URL dynamically using expo-linking to automatically get Expo Go host/IP
-      const redirectUrl = Linking.createURL('auth/callback');
       console.log('[AuthScreen] Generated redirectUrl:', redirectUrl);
 
       const { data, error } = await supabase.auth.signInWithOAuth({

@@ -39,9 +39,14 @@ Todas as requisições requerem o header `Authorization: Bearer <user_jwt>`, exc
 - **Auth**: Public
 - **Response**: Array de `exercises`
 
+> [!CAUTION]
+> A inserção direta em `public.exercises` foi **bloqueada** pela migration `20260601190000`. Exercícios customizados agora são salvos na tabela privada `user_custom_exercises`.
+
+### Exercícios Customizados do Usuário (`user_custom_exercises`)
+
 #### Criar Exercício Customizado
-- **Método**: `POST /rest/v1/exercises`
-- **Auth**: Required (usuário autenticado)
+- **Método**: `POST /rest/v1/user_custom_exercises`
+- **Auth**: Required (JWT obrigatório)
 - **Headers**: `Prefer: return=representation`
 - **Request Body**:
 ```json
@@ -49,11 +54,12 @@ Todas as requisições requerem o header `Authorization: Bearer <user_jwt>`, exc
   "name": "Rosca Direta",
   "muscle_group": "Bíceps",
   "youtube_video_id": "abc123",
+  "instructions": "Mantenha os cotovelos fixos.",
   "equipment": []
 }
 ```
-- **Response**: Array com o objeto `exercises` criado (incluindo `id` gerado).
-- **Habilitado por**: Migration `20260531201500_allow_user_insert_exercises.sql`.
+- **Response**: Array com o objeto `user_custom_exercises` criado.
+- **Nota**: O `user_id` é preenchido automaticamente pelo banco (`DEFAULT auth.uid()`). RLS garante isolamento total entre usuários.
 
 
 ## Edge Functions
@@ -62,7 +68,7 @@ As Edge Functions devem ser chamadas com método `POST` (ou GET, se aplicável e
 
 ### POST /functions/v1/save-workout
 **Descrição**: Grava um treino finalizado de forma síncrona. Substitui o endpoint `sync-workout` que foi descontinuado. Não depende de `client_id` nem de lógica de deduplication.
-- **Auth**: Required (JWT obrigatório — sem suporte a `mock-valid-token`)
+- **Auth**: Required (JWT obrigatório). Em ambiente de desenvolvimento/teste (`SUPABASE_ENV != 'production'`), aceita `mock-valid-token` para testes automatizados.
 - **Request Body**:
 ```json
 {
