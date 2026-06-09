@@ -369,8 +369,13 @@ export const predefinedWorkouts: PredefinedWorkout[] = [
           { name: 'Prancha', muscleGroup: 'Abdômen', targetSets: 3, targetReps: 60 },
           { name: 'Abdominal Crunch', muscleGroup: 'Abdômen', targetSets: 3, targetReps: 15 },
           { name: 'Agachamento Livre', muscleGroup: 'Pernas', targetSets: 3, targetReps: 15 },
-          { name: 'Polichinelos', muscleGroup: 'Cardio', targetSets: 3, targetReps: 30 },
-          { name: 'Escalador', muscleGroup: 'Abdômen', targetSets: 3, targetReps: 20 },
+          { name: 'Elevação Pélvica', muscleGroup: 'Pernas', targetSets: 3, targetReps: 15 },
+          {
+            name: 'Tríceps Mergulho no Banco',
+            muscleGroup: 'Tríceps',
+            targetSets: 3,
+            targetReps: 20,
+          },
         ],
       },
     ],
@@ -447,6 +452,143 @@ export const predefinedWorkouts: PredefinedWorkout[] = [
           },
           { name: 'Tríceps Pulley no Cabo', muscleGroup: 'Tríceps', targetSets: 3, targetReps: 12 },
           { name: 'Rosca Martelo', muscleGroup: 'Bíceps', targetSets: 3, targetReps: 12 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'predef-arnold-classic',
+    name: 'Arnold Classic',
+    image: require('../../assets/workouts/arnold.png'),
+    description:
+      'A lendária divisão de treino de Arnold Schwarzenegger. Foco na Golden Era com superséries antagonistas e alto volume.',
+    partitions: [
+      {
+        name: 'Treino A - Peito e Costas',
+        exercises: [
+          { name: 'Supino Reto com Barra', muscleGroup: 'Peito', targetSets: 4, targetReps: 10 },
+          {
+            name: 'Supino Inclinado com Halteres',
+            muscleGroup: 'Peito',
+            targetSets: 4,
+            targetReps: 10,
+          },
+          { name: 'Crucifixo com Halteres', muscleGroup: 'Peito', targetSets: 3, targetReps: 12 },
+          { name: 'Barra Fixa', muscleGroup: 'Costas', targetSets: 4, targetReps: 8 },
+          {
+            name: 'Remada Curvada com Barra',
+            muscleGroup: 'Costas',
+            targetSets: 4,
+            targetReps: 10,
+          },
+          { name: 'Levantamento Terra', muscleGroup: 'Costas', targetSets: 3, targetReps: 8 },
+        ],
+      },
+      {
+        name: 'Treino B - Ombros e Braços',
+        exercises: [
+          {
+            name: 'Desenvolvimento com Barra',
+            muscleGroup: 'Ombros',
+            targetSets: 4,
+            targetReps: 10,
+          },
+          {
+            name: 'Elevação Lateral com Halteres',
+            muscleGroup: 'Ombros',
+            targetSets: 4,
+            targetReps: 12,
+          },
+          { name: 'Crucifixo Invertido', muscleGroup: 'Costas', targetSets: 3, targetReps: 12 },
+          { name: 'Rosca Direta com Barra', muscleGroup: 'Bíceps', targetSets: 4, targetReps: 10 },
+          {
+            name: 'Tríceps Testa com Barra',
+            muscleGroup: 'Tríceps',
+            targetSets: 4,
+            targetReps: 10,
+          },
+          {
+            name: 'Rosca Alternada com Halteres',
+            muscleGroup: 'Bíceps',
+            targetSets: 3,
+            targetReps: 12,
+          },
+          { name: 'Tríceps Pulley no Cabo', muscleGroup: 'Tríceps', targetSets: 3, targetReps: 12 },
+        ],
+      },
+      {
+        name: 'Treino C - Pernas',
+        exercises: [
+          { name: 'Agachamento Livre', muscleGroup: 'Pernas', targetSets: 4, targetReps: 8 },
+          { name: 'Leg Press 45°', muscleGroup: 'Pernas', targetSets: 3, targetReps: 10 },
+          { name: 'Cadeira Extensora', muscleGroup: 'Pernas', targetSets: 3, targetReps: 12 },
+          { name: 'Mesa Flexora', muscleGroup: 'Pernas', targetSets: 4, targetReps: 10 },
+          { name: 'Stiff com Barra', muscleGroup: 'Pernas', targetSets: 3, targetReps: 10 },
+          { name: 'Panturrilha em Pé', muscleGroup: 'Pernas', targetSets: 4, targetReps: 15 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'predef-ronnie-coleman',
+    name: 'Ronnie Coleman',
+    image: require('../../assets/workouts/ronnie.png'),
+    description:
+      'O treino do lendário 8x Mr. Olympia. Foco em cargas brutais, exercícios compostos e intensidade máxima. Light weight, baby!',
+    partitions: [
+      {
+        name: 'Treino A - Costas e Bíceps',
+        exercises: [
+          { name: 'Levantamento Terra', muscleGroup: 'Costas', targetSets: 4, targetReps: 8 },
+          {
+            name: 'Remada Curvada com Barra',
+            muscleGroup: 'Costas',
+            targetSets: 4,
+            targetReps: 10,
+          },
+          { name: 'Remada Serrote', muscleGroup: 'Costas', targetSets: 3, targetReps: 10 },
+          { name: 'Rosca Direta com Barra', muscleGroup: 'Bíceps', targetSets: 4, targetReps: 10 },
+          { name: 'Rosca Martelo', muscleGroup: 'Bíceps', targetSets: 3, targetReps: 12 },
+        ],
+      },
+      {
+        name: 'Treino B - Peito e Tríceps',
+        exercises: [
+          { name: 'Supino Reto com Barra', muscleGroup: 'Peito', targetSets: 4, targetReps: 8 },
+          {
+            name: 'Supino Inclinado com Halteres',
+            muscleGroup: 'Peito',
+            targetSets: 4,
+            targetReps: 10,
+          },
+          { name: 'Crucifixo com Halteres', muscleGroup: 'Peito', targetSets: 3, targetReps: 12 },
+          {
+            name: 'Tríceps Testa com Barra',
+            muscleGroup: 'Tríceps',
+            targetSets: 4,
+            targetReps: 10,
+          },
+          { name: 'Tríceps Pulley no Cabo', muscleGroup: 'Tríceps', targetSets: 3, targetReps: 12 },
+        ],
+      },
+      {
+        name: 'Treino C - Pernas e Ombros',
+        exercises: [
+          { name: 'Agachamento Livre', muscleGroup: 'Pernas', targetSets: 4, targetReps: 8 },
+          { name: 'Leg Press 45°', muscleGroup: 'Pernas', targetSets: 3, targetReps: 10 },
+          { name: 'Stiff com Barra', muscleGroup: 'Pernas', targetSets: 3, targetReps: 10 },
+          {
+            name: 'Desenvolvimento com Barra',
+            muscleGroup: 'Ombros',
+            targetSets: 4,
+            targetReps: 10,
+          },
+          {
+            name: 'Elevação Lateral com Halteres',
+            muscleGroup: 'Ombros',
+            targetSets: 4,
+            targetReps: 12,
+          },
         ],
       },
     ],

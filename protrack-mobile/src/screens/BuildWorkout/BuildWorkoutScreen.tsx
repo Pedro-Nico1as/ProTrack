@@ -11,13 +11,16 @@ import {
   ActivityIndicator,
   TextInput,
   Alert,
+  Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors, spacing, sizing } from '../../theme/tokens';
 import { Text } from '../../components/core/Text';
 import { Button } from '../../components/core/Button';
+import { Card } from '../../components/core/Card';
 import { RootStackParamList } from '../../navigation/types';
 import { fetchExercises, Exercise, createExercise } from '../../services/api';
 import { generateUUID } from '../../utils/uuid';
@@ -27,6 +30,7 @@ import {
   CustomExercise,
 } from '../../stores/useCustomWorkoutsStore';
 import { strings } from '../../constants/strings';
+import { predefinedWorkouts, PredefinedWorkout } from '../../constants/predefinedWorkouts';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'BuildWorkout'>;
 
@@ -44,6 +48,12 @@ export const BuildWorkoutScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null);
 
+  const [isSelectingPredefined, setIsSelectingPredefined] = useState(false);
+  const [predefinedSearchQuery, setPredefinedSearchQuery] = useState('');
+  const [selectedPredefinedPreview, setSelectedPredefinedPreview] =
+    useState<PredefinedWorkout | null>(null);
+  const [activePreviewPartitionIndex, setActivePreviewPartitionIndex] = useState(0);
+
   const [isCreatingExercise, setIsCreatingExercise] = useState(false);
   const [newExName, setNewExName] = useState('');
   const [newExMuscle, setNewExMuscle] = useState('');
@@ -56,7 +66,7 @@ export const BuildWorkoutScreen = () => {
   const isSelecting = selectingForPartition !== null;
 
   useEffect(() => {
-    if (isSelecting && catalog.length === 0) {
+    if ((isSelecting || isSelectingPredefined) && catalog.length === 0) {
       setLoadingCatalog(true);
       fetchExercises().then((data) => {
         const merged = [...(data || []), ...customExercises];
@@ -64,7 +74,7 @@ export const BuildWorkoutScreen = () => {
         setLoadingCatalog(false);
       });
     }
-  }, [isSelecting, catalog.length, customExercises]);
+  }, [isSelecting, isSelectingPredefined, catalog.length, customExercises]);
 
   useEffect(() => {
     if (!isSelecting) {
@@ -72,6 +82,84 @@ export const BuildWorkoutScreen = () => {
       setSelectedMuscle(null);
     }
   }, [isSelecting]);
+
+  useEffect(() => {
+    if (!isSelectingPredefined) {
+      setPredefinedSearchQuery('');
+    }
+  }, [isSelectingPredefined]);
+
+  const filteredPredefined = React.useMemo(() => {
+    return predefinedWorkouts.filter((workout) =>
+      workout.name.toLowerCase().includes(predefinedSearchQuery.toLowerCase())
+    );
+  }, [predefinedSearchQuery]);
+
+  const getWorkoutMetaText = (id: string) => {
+    switch (id) {
+      case 'predef-full-body':
+        return 'Corpo Inteiro';
+      case 'predef-ppl':
+        return 'Push / Pull / Legs';
+      case 'predef-upper-lower':
+        return 'Sup. / Inf.';
+      case 'predef-abc':
+        return '3 Dias';
+      case 'predef-abcde':
+        return '5 Dias';
+      case 'predef-gluteos-pernas':
+        return 'Pernas';
+      case 'predef-cardio-core':
+        return 'Cardio / Core';
+      case 'predef-superiores-vtaper':
+        return 'Sup. (V-Taper)';
+      case 'predef-forca-maxima':
+        return 'Força';
+      case 'predef-arm-day':
+        return 'Braços';
+      case 'predef-arnold-classic':
+        return 'Arnold Classic';
+      case 'predef-ronnie-coleman':
+        return 'Ronnie Coleman';
+      default:
+        return '';
+    }
+  };
+
+  const handleImportPredefined = (selectedWorkout: PredefinedWorkout) => {
+    try {
+      const mappedPartitions: CustomWorkoutPartition[] = selectedWorkout.partitions.map((part) => {
+        return {
+          id: generateUUID(),
+          name: part.name,
+          exercises: part.exercises.map((ex) => {
+            // Match against database catalog by name
+            const matchedGlobal = catalog.find(
+              (catEx) => catEx.name.toLowerCase() === ex.name.toLowerCase()
+            );
+
+            return {
+              id: generateUUID(),
+              exerciseId: matchedGlobal ? matchedGlobal.id : generateUUID(),
+              name: ex.name,
+              muscleGroup: matchedGlobal ? matchedGlobal.muscle_group : ex.muscleGroup,
+              youtubeId: matchedGlobal ? matchedGlobal.youtube_video_id : '',
+              targetSets: ex.targetSets,
+              targetReps: ex.targetReps,
+              restSeconds: 60,
+            };
+          }),
+        };
+      });
+
+      setWorkoutName(selectedWorkout.name);
+      setPartitions(mappedPartitions);
+      setSelectedPredefinedPreview(null);
+      setIsSelectingPredefined(false);
+    } catch {
+      Alert.alert('Erro', 'Não foi possível carregar a ficha.');
+    }
+  };
 
   const uniqueMuscles = React.useMemo(() => {
     const groups = catalog.map((ex) => ex.muscle_group);
@@ -288,6 +376,27 @@ export const BuildWorkoutScreen = () => {
         </View>
 
         <ScrollView contentContainerStyle={styles.scroll}>
+          <Pressable
+            style={styles.predefinedTriggerCard}
+            onPress={() => setIsSelectingPredefined(true)}
+          >
+            <Ionicons
+              name="copy-outline"
+              size={22}
+              color={colors.primary}
+              style={{ marginRight: spacing.sm }}
+            />
+            <View style={{ flex: 1 }}>
+              <Text variant="body" weight="semibold" color={colors.primary}>
+                Fichas Prontas
+              </Text>
+              <Text variant="caption" color={colors.textSecondary}>
+                Busque fichas prontas dentro da nossa base
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </Pressable>
+
           <View style={styles.nameContainer}>
             <Text
               variant="caption"
@@ -716,6 +825,252 @@ export const BuildWorkoutScreen = () => {
           </View>
         )}
       </Modal>
+
+      <Modal
+        visible={isSelectingPredefined}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => {
+          setIsSelectingPredefined(false);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text variant="heading" weight="semibold">
+              Buscar por Fichas Prontas
+            </Text>
+            <Pressable
+              onPress={() => setIsSelectingPredefined(false)}
+              hitSlop={12}
+              style={styles.iconBtn}
+            >
+              <Ionicons name="close" size={28} color={colors.text} />
+            </Pressable>
+          </View>
+
+          <View style={styles.searchContainer}>
+            <View style={styles.searchBar}>
+              <Ionicons
+                name="search"
+                size={20}
+                color={colors.textMuted}
+                style={styles.searchIcon}
+              />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Buscar ficha por nome..."
+                placeholderTextColor={colors.textMuted}
+                value={predefinedSearchQuery}
+                onChangeText={setPredefinedSearchQuery}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              {predefinedSearchQuery.length > 0 && (
+                <Pressable onPress={() => setPredefinedSearchQuery('')} hitSlop={8}>
+                  <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
+                </Pressable>
+              )}
+            </View>
+          </View>
+
+          <FlatList
+            data={filteredPredefined}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.predefinedListContent}
+            ListEmptyComponent={
+              <View style={styles.emptyStateContainer}>
+                <Ionicons name="search-outline" size={48} color={colors.textMuted} />
+                <Text variant="body" color={colors.textSecondary} style={{ marginTop: spacing.sm }}>
+                  Nenhuma ficha encontrada
+                </Text>
+              </View>
+            }
+            renderItem={({ item }) => (
+              <Card
+                noPadding
+                style={styles.predefinedListCard}
+                onPress={() => {
+                  setIsSelectingPredefined(false);
+                  setSelectedPredefinedPreview(item);
+                  setActivePreviewPartitionIndex(0);
+                }}
+              >
+                <Image source={item.image} style={styles.predefinedCardImage} resizeMode="cover" />
+                <LinearGradient
+                  colors={[
+                    'transparent',
+                    'rgba(0, 0, 0, 0.3)',
+                    'rgba(0, 0, 0, 0.85)',
+                    'rgba(0, 0, 0, 0.98)',
+                  ]}
+                  style={styles.predefinedGradientOverlay}
+                >
+                  <Text
+                    variant="heading"
+                    weight="bold"
+                    color={colors.text}
+                    style={styles.predefinedCardTitle}
+                  >
+                    {item.name}
+                  </Text>
+                  <Text
+                    variant="caption"
+                    weight="bold"
+                    color={colors.primary}
+                    style={styles.predefinedCardSubTitle}
+                  >
+                    {item.partitions.length === 1 ? '1 ficha' : `${item.partitions.length} fichas`}{' '}
+                    • {getWorkoutMetaText(item.id)}
+                  </Text>
+                  <Text
+                    variant="caption"
+                    color={colors.textSecondary}
+                    numberOfLines={2}
+                    style={styles.predefinedCardDesc}
+                  >
+                    {item.description}
+                  </Text>
+                </LinearGradient>
+              </Card>
+            )}
+          />
+        </View>
+      </Modal>
+
+      {/* Preview Modal for Predefined Workout */}
+      {selectedPredefinedPreview && (
+        <Modal
+          visible={true}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => {
+            setSelectedPredefinedPreview(null);
+            setIsSelectingPredefined(true);
+          }}
+        >
+          <View style={styles.modalContainer}>
+            <StatusBar barStyle="light-content" />
+            <SafeAreaView style={styles.previewSafe}>
+              {/* Header */}
+              <View style={styles.modalHeader}>
+                <Text variant="heading" weight="semibold">
+                  Detalhes da Ficha
+                </Text>
+                <Pressable
+                  onPress={() => {
+                    setSelectedPredefinedPreview(null);
+                    setIsSelectingPredefined(true);
+                  }}
+                  hitSlop={12}
+                  style={styles.previewCloseBtn}
+                >
+                  <Ionicons name="close" size={28} color={colors.text} />
+                </Pressable>
+              </View>
+
+              {/* Scrollable Content */}
+              <ScrollView showsVerticalScrollIndicator={false} style={styles.previewScroll}>
+                {/* Hero Image */}
+                <View style={styles.previewHeroImageContainer}>
+                  <Image
+                    source={selectedPredefinedPreview.image}
+                    style={styles.previewHeroImage}
+                    resizeMode="cover"
+                  />
+                  <LinearGradient
+                    colors={['transparent', 'rgba(26, 26, 26, 0.95)']}
+                    style={styles.previewHeroGradient}
+                  />
+                </View>
+
+                {/* Workout Details */}
+                <View style={styles.previewDetailsContainer}>
+                  <Text variant="heading" weight="bold" style={styles.previewWorkoutName}>
+                    {selectedPredefinedPreview.name}
+                  </Text>
+                  <Text
+                    variant="body"
+                    color={colors.textSecondary}
+                    style={styles.previewDescription}
+                  >
+                    {selectedPredefinedPreview.description}
+                  </Text>
+
+                  {/* Partition Tabs */}
+                  {selectedPredefinedPreview.partitions.length > 1 && (
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.previewTabsContainer}
+                    >
+                      {selectedPredefinedPreview.partitions.map((part, index) => {
+                        const isActive = activePreviewPartitionIndex === index;
+                        return (
+                          <Pressable
+                            key={index}
+                            style={[
+                              styles.previewTabButton,
+                              isActive && styles.previewActiveTabButton,
+                            ]}
+                            onPress={() => setActivePreviewPartitionIndex(index)}
+                          >
+                            <Text
+                              variant="caption"
+                              weight="semibold"
+                              color={isActive ? colors.primary : colors.textSecondary}
+                            >
+                              {part.name.replace('Treino ', '')}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </ScrollView>
+                  )}
+
+                  {/* Exercises List */}
+                  <View style={styles.previewExercisesList}>
+                    {selectedPredefinedPreview.partitions[
+                      activePreviewPartitionIndex
+                    ].exercises.map((ex, index) => (
+                      <View key={index} style={styles.previewExerciseItem}>
+                        <View style={styles.previewExerciseInfo}>
+                          <Text variant="body" weight="semibold">
+                            {ex.name}
+                          </Text>
+                          <Text variant="caption" color={colors.primary}>
+                            {ex.muscleGroup}
+                          </Text>
+                        </View>
+                        <View style={styles.previewExerciseSetsReps}>
+                          <Text variant="body" weight="bold" color={colors.text}>
+                            {ex.targetSets}
+                          </Text>
+                          <Text variant="caption" color={colors.textSecondary}>
+                            {' '}
+                            x{' '}
+                          </Text>
+                          <Text variant="body" weight="bold" color={colors.text}>
+                            {ex.targetReps}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </ScrollView>
+
+              {/* Action Button Footer */}
+              <View style={styles.modalFooter}>
+                <Button
+                  title="Usar esta ficha"
+                  variant="primary"
+                  onPress={() => handleImportPredefined(selectedPredefinedPreview)}
+                />
+              </View>
+            </SafeAreaView>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 };
@@ -1044,5 +1399,142 @@ const styles = StyleSheet.create({
   },
   createSubmitBtn: {
     marginTop: spacing.md,
+  },
+  predefinedTriggerCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceHighlight,
+    borderRadius: sizing.cardRadius,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  predefinedListContent: {
+    padding: spacing.md,
+    gap: spacing.md,
+    paddingBottom: spacing.xxl,
+  },
+  predefinedListCard: {
+    height: 180,
+    position: 'relative',
+    backgroundColor: colors.surface,
+    overflow: 'hidden',
+    borderRadius: sizing.cardRadius,
+  },
+  predefinedCardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  predefinedGradientOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '80%',
+    justifyContent: 'flex-end',
+    padding: spacing.md,
+  },
+  predefinedCardTitle: {
+    fontSize: 20,
+    marginBottom: 2,
+    color: colors.text,
+  },
+  predefinedCardSubTitle: {
+    fontSize: 12,
+    color: colors.primary,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  predefinedCardDesc: {
+    fontSize: 13,
+    lineHeight: 16,
+    color: colors.textSecondary,
+  },
+  previewSafe: {
+    flex: 1,
+  },
+  previewCloseBtn: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
+  previewScroll: {
+    flex: 1,
+  },
+  previewHeroImageContainer: {
+    width: '100%',
+    height: 200,
+    position: 'relative',
+  },
+  previewHeroImage: {
+    width: '100%',
+    height: '100%',
+  },
+  previewHeroGradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '40%',
+  },
+  previewDetailsContainer: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.lg,
+  },
+  previewWorkoutName: {
+    fontSize: 28,
+    marginBottom: spacing.xs,
+  },
+  previewDescription: {
+    lineHeight: 20,
+    marginBottom: spacing.lg,
+  },
+  previewTabsContainer: {
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  previewTabButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: sizing.cardRadius,
+    backgroundColor: colors.surfaceHighlight,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewActiveTabButton: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryGlow,
+  },
+  previewExercisesList: {
+    gap: spacing.sm,
+  },
+  previewExerciseItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.surfaceHighlight,
+    borderRadius: sizing.cardRadius,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+  },
+  previewExerciseInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  previewExerciseSetsReps: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceElevated,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: 8,
   },
 });

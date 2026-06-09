@@ -52,6 +52,10 @@ const getWorkoutMetaText = (id: string) => {
       return 'Força';
     case 'predef-arm-day':
       return 'Braços';
+    case 'predef-arnold-classic':
+      return 'Arnold Classic';
+    case 'predef-ronnie-coleman':
+      return 'Ronnie Coleman';
     default:
       return '';
   }

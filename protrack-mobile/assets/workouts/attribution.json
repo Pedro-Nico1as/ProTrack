@@ -48,5 +48,15 @@
     "photographer_name": "Alora Griffiths",
     "photographer_profile_url": "https://unsplash.com/@aloragriffiths",
     "photo_url": "https://unsplash.com/photos/photo-1598971639058-fab3c3109a00"
+  },
+  "arnold.png": {
+    "photographer_name": "Local Asset",
+    "photographer_profile_url": "https://local-archive",
+    "photo_url": "https://local-archive"
+  },
+  "ronnie.png": {
+    "photographer_name": "Local Asset",
+    "photographer_profile_url": "https://local-archive",
+    "photo_url": "https://local-archive"
   }
 }
