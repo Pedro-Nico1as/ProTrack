@@ -409,4 +409,16 @@ Pendências:
 - Backend precisa de definições de IAP (RevenueCat) para assinaturas e paywall.
 - Mobile pode implementar o vídeo `auth_bg.mp4` como background real em iteração futura.
 
+---
 
+## 2026-06-08 (noite)
+Mobile entregou:
+- **Sign In with Apple (`expo-apple-authentication`):** Implementado fluxo nativo de autenticação com Apple ID na `AuthScreen`. O botão aparece condicionalmente apenas em iOS e apenas se `AppleAuthentication.isAvailableAsync()` retornar `true`. O fluxo usa `signInAsync()` com escopos `FULL_NAME` e `EMAIL`, obtém o `identityToken` e autentica via `supabase.auth.signInWithIdToken({ provider: 'apple', token })`. Cancelamentos pelo usuário (`ERR_REQUEST_CANCELED`) são silenciados.
+- **`app.json` — Configuração de Produção iOS:** `name` alterado de `protrack-mobile` para `Protrack`. `bundleIdentifier` atualizado para `com.protrack.app`. `buildNumber` inicial definido como `"1"`. Permissão `UIBackgroundModes: audio` removida e substituída por `NSMicrophoneUsageDescription` explicando o uso da lib de vídeo. Plugin `expo-build-properties` adicionado com `deploymentTarget: "16.0"` para iOS.
+- **`babel.config.js` — Remoção de logs em produção:** Plugin `babel-plugin-transform-remove-console` integrado condicionalmente: em `NODE_ENV=production`, todos os `console.*` são removidos do bundle final, melhorando segurança e performance.
+- **Dependências atualizadas:** `expo` atualizado para `~54.0.35`, `expo-apple-authentication ~8.0.8` e `expo-build-properties ~1.0.10` adicionados. `babel-preset-expo` fixado em `~54.0.10` para evitar incompatibilidades com o SDK. `react-native-worklets 0.5.1` adicionado (dependência indireta de Reanimated).
+- **Logs de debug protegidos:** Chamadas a `console.log` críticas na `AuthScreen` (redirect URL, URL do OAuth) encapsuladas em `if (__DEV__)` para não vazar informações sensíveis em produção.
+
+Pendências:
+- Backend precisa configurar o provider Apple no Supabase Dashboard (client ID: `com.protrack.app`, chave privada Apple) para que o Sign In with Apple funcione em produção.
+- Backend precisa de definições de IAP (RevenueCat) para assinaturas e paywall.

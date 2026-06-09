@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "protrack-mobile",
+    "name": "Protrack",
     "slug": "protrack-mobile",
     "jsEngine": "hermes",
     "scheme": "protrack",
@@ -17,11 +17,10 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": [
-          "audio"
-        ]
+        "NSMicrophoneUsageDescription": "O Protrack não utiliza o microfone. Esta permissão é declarada apenas por requisitos da biblioteca nativa de reprodução do vídeo de fundo."
       },
-      "bundleIdentifier": "com.anonymous.protrack-mobile"
+      "bundleIdentifier": "com.protrack.app",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
@@ -38,7 +37,15 @@
       "expo-sqlite",
       "expo-web-browser",
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "16.0"
+          }
+        }
+      ]
     ]
   }
 }

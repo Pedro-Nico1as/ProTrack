@@ -17,12 +17,14 @@ import { makeRedirectUri } from 'expo-auth-session';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import {
   IconBrandGoogle,
   IconArrowLeft,
   IconMail,
   IconLock,
   IconUser,
+  IconBrandApple,
 } from '@tabler/icons-react-native';
 
 import { AnimatedGlowBackground } from '../../components/common/AnimatedGlowBackground';
@@ -150,6 +152,13 @@ type FormValues = z.infer<typeof authSchema>;
 export const AuthScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<'welcome' | 'login' | 'register' | 'forgot'>('welcome');
+  const [isAppleAvailable, setIsAppleAvailable] = useState(false);
+
+  React.useEffect(() => {
+    if (Platform.OS === 'ios') {
+      AppleAuthentication.isAvailableAsync().then(setIsAppleAvailable);
+    }
+  }, []);
 
   // Resolve redirect URLs dynamically using expo-auth-session to support both Expo Go and Production
   const redirectUrl = makeRedirectUri({
@@ -245,7 +254,9 @@ export const AuthScreen = () => {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      console.log('[AuthScreen] Generated redirectUrl:', redirectUrl);
+      if (__DEV__) {
+        console.log('[AuthScreen] Generated redirectUrl:', redirectUrl);
+      }
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -260,7 +271,9 @@ export const AuthScreen = () => {
 
       if (error) throw error;
       if (!data?.url) throw new Error(strings.auth.errorGoogleAuthUrl);
-      console.log('[AuthScreen] Supabase Auth URL:', data.url);
+      if (__DEV__) {
+        console.log('[AuthScreen] Supabase Auth URL:', data.url);
+      }
 
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
 
@@ -288,6 +301,37 @@ export const AuthScreen = () => {
         strings.auth.alertErrorTitleGoogle,
         error.message || strings.auth.errorGoogleConnection
       );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAppleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      if (credential.identityToken) {
+        const { error } = await supabase.auth.signInWithIdToken({
+          provider: 'apple',
+          token: credential.identityToken,
+        });
+        if (error) throw error;
+      } else {
+        throw new Error('Não foi possível obter o token de identidade da Apple.');
+      }
+    } catch (error: any) {
+      if (error?.code !== 'ERR_REQUEST_CANCELED') {
+        showAlert(
+          'Erro no Login com Apple',
+          error.message || 'Ocorreu um erro ao conectar com a conta Apple.'
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -517,6 +561,18 @@ export const AuthScreen = () => {
                       <IconBrandGoogle size={20} color="#E1E1E6" style={styles.googleIcon} />
                       <Text style={styles.googleButtonText}>{strings.auth.googleBtnText}</Text>
                     </TouchableOpacity>
+
+                    {Platform.OS === 'ios' && isAppleAvailable && (
+                      <TouchableOpacity
+                        style={styles.appleButton}
+                        onPress={handleAppleLogin}
+                        disabled={isLoading}
+                        activeOpacity={0.8}
+                      >
+                        <IconBrandApple size={20} color="#000000" style={styles.appleIcon} />
+                        <Text style={styles.appleButtonText}>Conectar com a Apple</Text>
+                      </TouchableOpacity>
+                    )}
                   </>
                 )}
 
@@ -702,6 +758,29 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     color: colors.text,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  appleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    width: '100%',
+    height: 52,
+    borderRadius: 26,
+    marginTop: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  appleIcon: {
+    marginRight: 12,
+  },
+  appleButtonText: {
+    color: '#000000',
     fontSize: 15,
     fontWeight: '600',
   },
