@@ -1,52 +1,82 @@
-# ProTrack & Flow API Documentation
+# ProTrack & Flow — API Reference
 
-## Auth (Supabase Native)
-Os endpoints de autenticação são gerenciados diretamente pelo cliente do Supabase.
-- `POST /auth/v1/token`: Login/Cadastro via Google e Apple.
-- `POST /auth/v1/logout`: Encerra a sessão.
+## Autenticação (Supabase Native)
+
+Gerenciado pelo cliente `@supabase/supabase-js`. Não há chamadas diretas pelo app — tudo via `supabase.auth.*`.
+
+| Operação | Método Supabase |
+|----------|----------------|
+| Login e-mail/senha | `supabase.auth.signInWithPassword()` |
+| Cadastro | `supabase.auth.signUp()` |
+| Google OAuth | `supabase.auth.signInWithOAuth({ provider: 'google' })` |
+| Sign In with Apple | `supabase.auth.signInWithIdToken({ provider: 'apple', token })` |
+| Logout | `supabase.auth.signOut()` |
+| Recuperar senha | `supabase.auth.resetPasswordForEmail()` |
+| Atualizar senha | `supabase.auth.updateUser({ password })` |
+| Atualizar perfil | `supabase.auth.updateUser({ data: { full_name } })` |
+
+---
 
 ## REST Endpoints (PostgREST)
 
-Todas as requisições requerem o header `Authorization: Bearer <user_jwt>`, exceto para leitura de dados públicos (quando configurado no RLS, mas a Anon Key ainda é enviada).
+Todas as requisições autenticadas enviam `Authorization: Bearer <user_jwt>`.  
+Dados públicos usam a `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
 
-### Workout Plans (Planos de Treino)
+### Planos de Treino
 
 #### Listar Planos Publicados
-- **Método**: `GET /rest/v1/workout_plans?is_published=eq.true`
+```
+GET /rest/v1/workout_plans?is_published=eq.true&limit=2&select=id,name,athlete_name,exercise_count,youtube_thumbnail,badge
+```
 - **Auth**: Public (Anon key)
-- **Response**: Array de objetos `workout_plans`
 
-#### Obter Detalhes de um Plano
-- **Método**: `GET /rest/v1/workout_plans?id=eq.{id}`
+#### Detalhes de um Plano
+```
+GET /rest/v1/workout_plans?id=eq.{id}
+```
 - **Auth**: Public
-- **Response**: Objeto `workout_plans`
 
-### Workout Sessions (Sessões)
-- **Método**: `GET /rest/v1/workout_sessions?plan_id=eq.{id}`
+### Sessões de Treino
+
+```
+GET /rest/v1/workout_sessions?plan_id=eq.{id}
+```
 - **Auth**: Public
-- **Response**: Array de objetos `workout_sessions` ordenados por `day_number`
 
-### Session Exercises (Exercícios da Sessão)
-- **Método**: `GET /rest/v1/session_exercises?session_id=eq.{id}`
+### Exercícios da Sessão
+
+```
+GET /rest/v1/session_exercises?session_id=eq.{id}&select=*,exercises(*)
+```
 - **Auth**: Public
-- **Response**: Array de `session_exercises` (idealmente com relacionamentos expandidos para a tabela `exercises` via Select param: `select=*,exercises(*)`)
 
-### Exercises (Biblioteca de Exercícios)
+### Biblioteca de Exercícios
 
-#### Listar Exercícios
-- **Método**: `GET /rest/v1/exercises`
-- **Método (Filtro)**: `GET /rest/v1/exercises?muscle_group=eq.{group}`
+#### Listar exercícios globais
+```
+GET /rest/v1/exercises?select=*
+GET /rest/v1/exercises?muscle_group=eq.{group}
+```
 - **Auth**: Public
-- **Response**: Array de `exercises`
 
 > [!CAUTION]
-> A inserção direta em `public.exercises` foi **bloqueada** pela migration `20260601190000`. Exercícios customizados agora são salvos na tabela privada `user_custom_exercises`.
+> A inserção em `public.exercises` está **bloqueada** por RLS. Novos exercícios criados pelo usuário são salvos em `user_custom_exercises`.
 
-### Exercícios Customizados do Usuário (`user_custom_exercises`)
+### Exercícios Customizados do Usuário
 
-#### Criar Exercício Customizado
-- **Método**: `POST /rest/v1/user_custom_exercises`
-- **Auth**: Required (JWT obrigatório)
+O `fetchExercises()` combina a biblioteca global com os exercícios customizados do usuário em uma única lista.
+
+#### Listar exercícios customizados
+```
+GET /rest/v1/user_custom_exercises?select=*
+```
+- **Auth**: Required (JWT)
+
+#### Criar exercício customizado
+```
+POST /rest/v1/user_custom_exercises
+```
+- **Auth**: Required (JWT)
 - **Headers**: `Prefer: return=representation`
 - **Request Body**:
 ```json
@@ -59,23 +89,57 @@ Todas as requisições requerem o header `Authorization: Bearer <user_jwt>`, exc
 }
 ```
 - **Response**: Array com o objeto `user_custom_exercises` criado.
-- **Nota**: O `user_id` é preenchido automaticamente pelo banco (`DEFAULT auth.uid()`). RLS garante isolamento total entre usuários.
+- **Nota**: `user_id` é preenchido automaticamente pelo banco (`DEFAULT auth.uid()`). RLS garante isolamento total.
 
+### Histórico de Treinos
+
+```
+GET /rest/v1/user_workout_logs
+  ?select=id,completed_at,duration_seconds,user_set_logs(weight_kg,reps_done,exercises(name),user_custom_exercises(name))
+  &order=completed_at.desc
+  &limit=100
+```
+- **Auth**: Required (JWT)
+
+### Último Peso de um Exercício
+
+```
+GET /rest/v1/user_set_logs
+  ?or=(exercise_id.eq.{id},custom_exercise_id.eq.{id})
+  &order=completed_at.desc
+  &limit=1
+  &select=weight_kg
+```
+- **Auth**: Required (JWT)
+- Suporta tanto exercícios da biblioteca global quanto customizados.
+
+### Perfil do Usuário
+
+```
+GET /rest/v1/profiles?id=eq.{user_id}&select=*
+PATCH /rest/v1/profiles?id=eq.{user_id}
+```
+- **Auth**: Required (JWT)
+
+---
 
 ## Edge Functions
 
-As Edge Functions devem ser chamadas com método `POST` (ou GET, se aplicável e com JWT no header).
+Base URL: `{SUPABASE_URL}/functions/v1/`  
+Todas requerem `Authorization: Bearer <jwt>`.
 
 ### POST /functions/v1/save-workout
-**Descrição**: Grava um treino finalizado de forma síncrona. Substitui o endpoint `sync-workout` que foi descontinuado. Não depende de `client_id` nem de lógica de deduplication.
-- **Auth**: Required (JWT obrigatório). Em ambiente de desenvolvimento/teste (`SUPABASE_ENV != 'production'`), aceita `mock-valid-token` para testes automatizados.
+
+Grava um treino finalizado de forma síncrona.
+
+- **Auth**: Required (JWT). Em ambiente de dev/teste (`SUPABASE_ENV != 'production'`), aceita `mock-valid-token`.
 - **Request Body**:
 ```json
 {
   "workout": {
     "session_id": "uuid | null",
-    "started_at": "2024-05-09T18:00:00Z",
-    "completed_at": "2024-05-09T19:00:00Z",
+    "started_at": "2026-06-09T18:00:00Z",
+    "completed_at": "2026-06-09T19:00:00Z",
     "duration_seconds": 3600,
     "notes": "Treino pesado hoje"
   },
@@ -86,86 +150,68 @@ As Edge Functions devem ser chamadas com método `POST` (ou GET, se aplicável e
       "set_number": 1,
       "weight_kg": 100.5,
       "reps_done": 10,
-      "completed_at": "2024-05-09T18:10:00Z"
+      "completed_at": "2026-06-09T18:10:00Z"
     }
   ]
 }
 ```
-- **Response Body**:
+- **Response**:
 ```json
-{
-  "log_id": "uuid-do-log-criado",
-  "sets_saved": 4
-}
+{ "log_id": "uuid", "sets_saved": 4 }
 ```
-- **Error Codes**:
-  - `401 Unauthorized`: JWT ausente ou inválido.
-  - `400 Bad Request`: `workout.started_at` ou `workout.completed_at` ausentes.
-
-> [!NOTE]
-> O campo `exercise_id` é opcional em planos estruturados, mas é **obrigatório** em treinos avulsos/ad-hoc (como os do fluxo "Montar Treino") onde `session_exercise_id` é nulo.
-
+- **Erros**: `401` JWT inválido · `400` `started_at` ou `completed_at` ausentes
 
 ### GET /functions/v1/user-progress
-**Descrição**: Retorna o histórico de cargas e PR (Personal Record) de um usuário para um exercício específico.
-- **Auth**: Required
-- **Query Params**: `exercise_id={id}` (Obrigatório, deve ser um UUID válido)
-- **Response Body**:
+
+Retorna histórico de cargas e PR de um exercício (global ou customizado).
+
+- **Auth**: Required (JWT). Aceita `mock-valid-token` em dev.
+- **Query Param**: `exercise_id={uuid}` (obrigatório)
+- **Response**:
 ```json
 {
-  "personal_record": {
-    "weight_kg": 120,
-    "achieved_at": "2024-05-01T..."
-  },
-  "history": [
-    {
-      "date": "2024-05-01",
-      "max_weight_kg": 120
-    }
-  ]
+  "personal_record": { "weight_kg": 120, "achieved_at": "2026-06-01T..." },
+  "history": [{ "date": "2026-06-01", "max_weight_kg": 120 }]
 }
 ```
-- **Error Codes**:
-  - `400 Bad Request`: Se `exercise_id` estiver ausente ou não for um UUID válido.
+- **Erros**: `400` `exercise_id` ausente ou não-UUID
+
+> [!NOTE]
+> A query filtra por `exercise_id` OU `custom_exercise_id` (`.or()`), com `limit(500)` de segurança. Suporta tanto exercícios da biblioteca global quanto customizados.
 
 ### GET /functions/v1/weekly-summary
-**Descrição**: Retorna o resumo de treinos da semana atual do usuário logado (calculado estritamente em UTC a partir de segunda-feira).
-- **Auth**: Required
-- **Response Body**:
+
+Resumo da semana atual do usuário (calculado em UTC, a partir de segunda-feira).
+
+- **Auth**: Required (JWT). Aceita `mock-valid-token` em dev.
+- **Response**:
 ```json
 {
   "workouts": 3,
   "volume_kg": 12500,
-  "duration_minutes": 180,
-  "workouts_completed": 3,
-  "total_volume_kg": 12500,
-  "time_spent_minutes": 180
+  "duration_minutes": 180
 }
 ```
-
-> [!NOTE]
-> **Duplicidade de Chaves para Retrocompatibilidade:**
-> O endpoint retorna chaves no formato compacto (`workouts`, `volume_kg`, `duration_minutes`) para compatibilidade direta com o modelo interno da UI móvel e também no formato estendido da API (`workouts_completed`, `total_volume_kg`, `time_spent_minutes`) para consistência de nomenclatura na documentação.
-
 
 ### POST /functions/v1/delete-account
-**Descrição**: Exclui permanentemente a conta do usuário logado, juntamente com todos os seus dados associados (logs de treino, logs de séries e perfil). A exclusão do usuário do `auth.users` é realizada via Supabase Admin Client.
-- **Auth**: Required (JWT obrigatório)
-- **Response Body**:
-```json
-{
-  "success": true
-}
-```
-- **Error Codes**:
-  - `401 Unauthorized`: JWT ausente ou inválido.
-  - `400 Bad Request`: Falha ao excluir os dados relacionados ou a própria conta (ex: permissões insuficientes se `SUPABASE_SERVICE_ROLE_KEY` não estiver configurada).
+
+Exclui permanentemente a conta e todos os dados do usuário em cascata.
+
+- **Auth**: Required (JWT obrigatório — **sem mock token**)
+- **Ordem de deleção**:
+  1. `user_set_logs` dos logs do usuário
+  2. `user_workout_logs` do usuário
+  3. `profiles` do usuário
+  4. `auth.users` via Admin API
+- **Response**: `{ "success": true }`
+- **Erros**: `401` JWT inválido · `400` falha na exclusão (verificar `SUPABASE_SERVICE_ROLE_KEY`)
+
+---
 
 ## Ambiente de Testes & Mock Auth
 
-Para viabilizar a execução de testes de integração locais e em pipelines CI/CD sem a necessidade de gerar tokens JWT reais do Supabase Auth:
-- O token `mock-valid-token` no header `Authorization` é interpretado pelas Edge Functions `user-progress` e `weekly-summary` no ambiente de desenvolvimento/sandbox como pertencente ao usuário de teste `d290f1ee-6c54-4b01-90e6-d701748f0851`.
-- Quando esse token de teste é utilizado, a Edge Function inicializa o cliente com o privilégio `service_role` para contornar restrições de validação de assinatura de token.
+Os testes de integração usam um **mock Express server** embutido em `protrack-tests/integration/helpers.ts`. Não há dependência de Supabase local ativo.
 
-> [!CAUTION]
-> A Edge Function `save-workout` **não aceita** `mock-valid-token`. Ela exige JWT real em todas as requisições. O endpoint `sync-workout` foi **descontinuado** e removido do código-base.
+- Token `mock-valid-token` é aceito pelas Edge Functions `save-workout`, `user-progress` e `weekly-summary` **apenas em ambientes não-produção** (`SUPABASE_ENV != 'production'`).
+- Em produção, qualquer request com `mock-valid-token` retorna `401`.
+- `delete-account` **nunca** aceita mock token.

@@ -1,17 +1,32 @@
-# Tracker de Entrega de APIs (Agente Mobile <-> Backend)
+# Tracker de APIs — Mobile ↔ Backend
 
-Este documento registra o status dos endpoints requisitados pelo aplicativo móvel.
+Estado atual de todos os endpoints consumidos pelo app.
 
-| Feature / Endpoint | Tipo | Path / Filtros | Status | Observações |
-| :--- | :--- | :--- | :--- | :--- |
-| **Auth** - Login Native | Supabase | `POST /auth/v1/token` | ✅ Entregue | Gerenciado pelo Supabase |
-| **Auth** - Logout | Supabase | `POST /auth/v1/logout` | ✅ Entregue | Gerenciado pelo Supabase |
-| **Treinos** - Listar Planos | REST | `GET /rest/v1/workout_plans?is_published=eq.true` | ✅ Entregue | Apenas planos publicados |
-| **Treinos** - Detalhes do Plano | REST | `GET /rest/v1/workout_plans?id=eq.{id}` | ✅ Entregue | |
-| **Treinos** - Sessões | REST | `GET /rest/v1/workout_sessions?plan_id=eq.{id}` | ✅ Entregue | |
-| **Treinos** - Exercícios da Sessão | REST | `GET /rest/v1/session_exercises?session_id=eq.{id}`| ✅ Entregue | |
-| **Biblioteca** - Listar Exercícios | REST | `GET /rest/v1/exercises` | ✅ Entregue | |
-| **Biblioteca** - Filtro Muscular | REST | `GET /rest/v1/exercises?muscle_group=eq.{group}` | ✅ Entregue | |
-| **Sync** - Offline Sincronização | Edge Function| `POST /functions/v1/sync-workout` | ✅ Entregue | Necessita implementação do código (Deno) |
-| **Stats** - Progresso do Usuário | Edge Function| `GET /functions/v1/user-progress` | ✅ Entregue | Necessita implementação do código (Deno) |
-| **Stats** - Resumo Semanal | Edge Function| `GET /functions/v1/weekly-summary` | ✅ Entregue | Necessita implementação do código (Deno) |
+| Endpoint | Tipo | Status | Notas |
+|----------|------|--------|-------|
+| Login e-mail/senha | Supabase Auth | ✅ Entregue | `signInWithPassword()` |
+| Cadastro | Supabase Auth | ✅ Entregue | `signUp()` com `emailRedirectTo` dinâmico |
+| Google OAuth | Supabase Auth | ✅ Entregue | `signInWithOAuth()` via `expo-auth-session` |
+| Sign In with Apple | Supabase Auth | ✅ Entregue | `signInWithIdToken()` via `expo-apple-authentication` |
+| Recuperar senha | Supabase Auth | ✅ Entregue | `resetPasswordForEmail()` integrado na `AuthScreen` |
+| Redefinir senha | Supabase Auth | ✅ Entregue | `updateUser({ password })` na `ResetPasswordScreen` |
+| Perfil do usuário | REST | ✅ Entregue | `GET/PATCH /rest/v1/profiles` |
+| Atualizar nome (Auth + Profile) | Supabase Auth + REST | ✅ Entregue | `EditProfileScreen` — escrita dual |
+| Listar planos publicados | REST | ✅ Entregue | `GET /rest/v1/workout_plans?is_published=eq.true` |
+| Sessões de um plano | REST | ✅ Entregue | `GET /rest/v1/workout_sessions?plan_id=eq.{id}` |
+| Exercícios de uma sessão | REST | ✅ Entregue | `GET /rest/v1/session_exercises?session_id=eq.{id}` |
+| Biblioteca de exercícios | REST | ✅ Entregue | `GET /rest/v1/exercises` |
+| Exercícios customizados | REST | ✅ Entregue | `GET/POST /rest/v1/user_custom_exercises` |
+| Histórico de treinos | REST | ✅ Entregue | `GET /rest/v1/user_workout_logs` com joins |
+| Último peso de exercício | REST | ✅ Entregue | `GET /rest/v1/user_set_logs?or=(exercise_id,custom_exercise_id)` |
+| Gravar treino finalizado | Edge Function | ✅ Entregue | `POST /functions/v1/save-workout` |
+| Progresso por exercício | Edge Function | ✅ Entregue | `GET /functions/v1/user-progress?exercise_id=` |
+| Resumo semanal | Edge Function | ✅ Entregue | `GET /functions/v1/weekly-summary` |
+| Deletar conta | Edge Function | ✅ Entregue | `POST /functions/v1/delete-account` |
+
+## Pendências
+
+| Feature | Tipo | Prioridade | Notas |
+|---------|------|-----------|-------|
+| IAP / Assinaturas | SDK externo | 🔴 Alta | RevenueCat — definições não iniciadas |
+| Provider Apple no Supabase Dashboard | Config Infra | 🔴 Alta | Necessário para Sign In with Apple em produção |

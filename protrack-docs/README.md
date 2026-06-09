@@ -1,48 +1,70 @@
 # ProTrack & Flow
 
-> App mobile de fitness que une curadoria de atletas profissionais
+> App mobile de fitness que une curadoria de atletas profissionais  
 > com ferramentas de registro de performance.
 
 ## O que é
-O ProTrack & Flow é uma plataforma completa de treinamento que preenche a lacuna entre atletas de elite e entusiastas do fitness. Através de uma curadoria rigorosa de atletas profissionais, o aplicativo oferece planos de treino autênticos e testados, combinados com ferramentas avançadas de registro de performance para garantir que cada série conte.
-
-Nossa missão é democratizar o acesso a metodologias de treino profissionais, permitindo que qualquer usuário treine com a mesma estrutura e foco de um atleta de alto rendimento, mantendo um registro preciso de sua evolução ao longo do tempo.
+O ProTrack & Flow é uma plataforma de treinamento que preenche a lacuna entre atletas de elite e entusiastas do fitness. O app oferece planos de treino autênticos com curadoria de atletas parceiros, combinados com ferramentas avançadas de registro de performance — histórico de cargas, PR por exercício e resumo semanal.
 
 ## Status do projeto
-| Fase | Status | Previsão |
-|------|--------|----------|
+
+| Fase | Status | Período |
+|------|--------|---------|
 | Fase 0 — Discovery | ✅ Completo | Sem 1-2 |
 | Fase 1 — Design & Arquitetura | ✅ Completo | Sem 3-5 |
-| Fase 2 — MVP | 🔄 Em andamento | Sem 6-12 |
+| Fase 2 — MVP | 🔄 Em andamento | Sem 6-14 |
 
-## Arquitetura em 30 segundos
-```mermaid
-graph TD
-    User((Usuário)) --> Mobile[React Native App / Expo]
-    Mobile --> |Sync Offline/Online| Supabase[Supabase Backend]
-    Supabase --> DB[(PostgreSQL)]
-    Supabase --> Storage[S3 Storage]
-    Supabase --> Auth[GoTrue Auth]
-    Influencer((Atleta Parceiro)) --> Portal[Portal do Influencer]
-    Portal --> Supabase
+**Versão atual:** `0.3.x` | **Bundle ID iOS:** `com.protrack.app` | **Build:** `1`
+
+## Arquitetura
+
+```
+React Native (Expo SDK 54) + TypeScript
+        │
+        ├── Autenticação: Supabase Auth (Email/Senha, Google OAuth, Sign in with Apple)
+        ├── Banco de Dados: PostgreSQL via PostgREST (Supabase)
+        ├── Lógica de Negócio: Supabase Edge Functions (Deno)
+        ├── Estado local: Zustand + AsyncStorage (treino ativo e treinos customizados)
+        └── Navegação: React Navigation 7 (Stack + Bottom Tabs)
 ```
 
-## Como rodar localmente
-[Link para /docs/setup-guide.md](./docs/setup-guide.md)
+## Estrutura de Pastas
 
-## Documentação completa
+```
+ProTrack/
+├── protrack-mobile/       # App React Native (Expo)
+│   ├── src/
+│   │   ├── screens/       # Telas (Auth, Home, ActiveWorkout, BuildWorkout, Profile)
+│   │   ├── components/    # Componentes reutilizáveis (core/ e home/ e workout/)
+│   │   ├── stores/        # Zustand stores (Auth, ActiveWorkout, CustomWorkouts)
+│   │   ├── services/      # api.ts (PostgREST + Edge Functions), supabase.ts
+│   │   ├── navigation/    # RootNavigator, TabNavigator, types.ts
+│   │   ├── theme/         # tokens.ts (Design System)
+│   │   ├── constants/     # strings.ts, predefinedWorkouts.ts
+│   │   └── utils/         # authUtils.ts, uuid.ts
+│   └── assets/            # Imagens, fontes (Outfit), vídeos
+├── supabase/
+│   ├── functions/         # Edge Functions: save-workout, user-progress, weekly-summary, delete-account
+│   └── migrations/        # 15 migrations aplicadas
+├── protrack-tests/
+│   ├── integration/       # Testes com mock Express server (auth/ e sync/)
+│   └── e2e/               # Testes de fluxo com mocks
+└── protrack-docs/         # Esta documentação
+```
+
+## Documentação
+
 - [API Reference](./docs/api.md)
-- [Architecture Decisions](./docs/architecture.md)
-- [Design System](./docs/design-system.md)
-- [Data Model](./docs/data-model.md)
-- [Content Library](./docs/content-library.md)
-- [Offline Sync Strategy](./docs/offline-sync.md)
+- [Histórico de Migrations](./docs/migrations.md)
+- [Estratégia de Gravação de Treinos](./docs/offline-sync.md)
 - [Agent Handoff Log](./docs/agent-handoff.md)
+- [Tracker de APIs (Mobile ↔ Backend)](./docs/pending-api-requests.md)
 
-## Time de agentes
-| Agente | Responsabilidade | Workspace |
-|--------|-----------------|-----------|
-| Mobile Engineer | App iOS/Android | protrack-mobile |
-| Backend Engineer | Supabase, APIs | protrack-backend |
-| QA Engineer | Testes e qualidade | protrack-tests |
-| Technical Writer | Documentação | protrack-docs |
+## Time
+
+| Agente | Responsabilidade |
+|--------|-----------------|
+| Mobile Engineer | App iOS/Android (React Native + Expo) |
+| Backend Engineer | Supabase: banco, Edge Functions, auth |
+| QA Engineer | Testes de integração e E2E |
+| Technical Writer | Documentação |
