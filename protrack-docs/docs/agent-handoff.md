@@ -422,3 +422,15 @@ Mobile entregou:
 Pendências:
 - Backend precisa configurar o provider Apple no Supabase Dashboard (client ID: `com.protrack.app`, chave privada Apple) para que o Sign In with Apple funcione em produção.
 - Backend precisa de definições de IAP (RevenueCat) para assinaturas e paywall.
+
+---
+
+## 2026-06-09
+Mobile entregou:
+- **Novos Treinos Pré-Definidos — Frank Zane e Mike Mentzer:** Dois novos programas lendários adicionados em `predefinedWorkouts.ts`, totalizando **12 fichas prontas** disponíveis na Home. Frank Zane (3x Mr. Olympia) com divisão A/B/C focada em proporção, simetria e definição. Mike Mentzer com protocolo de **Heavy Duty** de alta intensidade e baixo volume (splits Peito/Costas, Ombros/Braços, Pernas). Imagens `frank.png` e `mike.png` adicionadas em `assets/workouts/` e créditos atualizados no `attribution.json`.
+- **`BuildWorkoutScreen` — Fluxo de escolha de método:** O `BuildWorkoutScreen` agora apresenta uma tela inicial de escolha antes de exibir o formulário de criação. O usuário escolhe entre **"Fichas Prontas"** (navega para seleção de treino pré-definido) ou **"Montar do Zero"** (inicia com uma partição em branco). O estado `isEditing` controla a transição entre a tela de escolha e o formulário. Após importar um treino pré-definido, `isEditing` é setado para `true` automaticamente.
+- **Novas strings localizadas em `strings.ts`:** `chooseMethodTitle`, `chooseMethodSubtitle`, `predefinedOptionTitle`, `predefinedOptionSubtitle`, `scratchOptionTitle`, `scratchOptionSubtitle` adicionadas ao grupo `buildWorkout`.
+
+Pendências:
+- Backend precisa configurar o provider Apple no Supabase Dashboard para Sign In with Apple em produção.
+- Backend precisa de definições de IAP (RevenueCat) para assinaturas e paywall.

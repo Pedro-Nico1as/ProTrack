@@ -42,6 +42,8 @@ export const BuildWorkoutScreen = () => {
     { id: generateUUID(), name: strings.buildWorkout.defaultPartitionName, exercises: [] },
   ]);
 
+  const [isEditing, setIsEditing] = useState(false);
+
   const [selectingForPartition, setSelectingForPartition] = useState<string | null>(null);
   const [catalog, setCatalog] = useState<Exercise[]>([]);
   const [loadingCatalog, setLoadingCatalog] = useState(false);
@@ -121,6 +123,10 @@ export const BuildWorkoutScreen = () => {
         return 'Arnold Classic';
       case 'predef-ronnie-coleman':
         return 'Ronnie Coleman';
+      case 'predef-frank-zane':
+        return 'Frank Zane';
+      case 'predef-mike-mentzer':
+        return 'Mike Mentzer';
       default:
         return '';
     }
@@ -156,9 +162,18 @@ export const BuildWorkoutScreen = () => {
       setPartitions(mappedPartitions);
       setSelectedPredefinedPreview(null);
       setIsSelectingPredefined(false);
+      setIsEditing(true);
     } catch {
       Alert.alert('Erro', 'Não foi possível carregar a ficha.');
     }
+  };
+
+  const handleBuildFromScratch = () => {
+    setWorkoutName(strings.buildWorkout.defaultWorkoutName);
+    setPartitions([
+      { id: generateUUID(), name: strings.buildWorkout.defaultPartitionName, exercises: [] },
+    ]);
+    setIsEditing(true);
   };
 
   const uniqueMuscles = React.useMemo(() => {
@@ -366,8 +381,25 @@ export const BuildWorkoutScreen = () => {
       <StatusBar barStyle="light-content" />
       <SafeAreaView style={styles.safe}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={12}>
-            <Ionicons name="close" size={28} color={colors.text} />
+          <Pressable
+            onPress={() => {
+              if (isEditing) {
+                Alert.alert(
+                  'Sair do Construtor?',
+                  'Deseja voltar para a seleção? As alterações não salvas serão perdidas.',
+                  [
+                    { text: 'Cancelar', style: 'cancel' },
+                    { text: 'Sair', style: 'destructive', onPress: () => setIsEditing(false) },
+                  ]
+                );
+              } else {
+                navigation.goBack();
+              }
+            }}
+            style={styles.backBtn}
+            hitSlop={12}
+          >
+            <Ionicons name={isEditing ? 'arrow-back' : 'close'} size={28} color={colors.text} />
           </Pressable>
           <Text variant="heading" weight="semibold">
             {strings.buildWorkout.title}
@@ -375,196 +407,252 @@ export const BuildWorkoutScreen = () => {
           <View style={{ width: 44 }} />
         </View>
 
-        <ScrollView contentContainerStyle={styles.scroll}>
-          <Pressable
-            style={styles.predefinedTriggerCard}
-            onPress={() => setIsSelectingPredefined(true)}
-          >
-            <Ionicons
-              name="copy-outline"
-              size={22}
-              color={colors.primary}
-              style={{ marginRight: spacing.sm }}
-            />
-            <View style={{ flex: 1 }}>
-              <Text variant="body" weight="semibold" color={colors.primary}>
-                Fichas Prontas
-              </Text>
-              <Text variant="caption" color={colors.textSecondary}>
-                Busque fichas prontas dentro da nossa base
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-          </Pressable>
-
-          <View style={styles.nameContainer}>
-            <Text
-              variant="caption"
-              color={colors.textSecondary}
-              style={{ marginBottom: spacing.xs }}
-            >
-              {strings.buildWorkout.mainPlanName}
+        {!isEditing ? (
+          <View style={styles.selectionContainer}>
+            <Text variant="heading" weight="bold" style={styles.selectionTitle} color={colors.text}>
+              {strings.buildWorkout.chooseMethodTitle}
             </Text>
-            <TextInput
-              style={styles.nameInput}
-              value={workoutName}
-              onChangeText={setWorkoutName}
-              placeholder={strings.buildWorkout.placeholderPlanName}
-              placeholderTextColor={colors.textMuted}
-            />
-          </View>
+            <Text variant="body" color={colors.textSecondary} style={styles.selectionSubtitle}>
+              {strings.buildWorkout.chooseMethodSubtitle}
+            </Text>
 
-          {partitions.map((partition) => (
-            <View key={partition.id} style={styles.partitionContainer}>
-              <View style={styles.partitionHeader}>
+            <Pressable style={styles.selectionCard} onPress={() => setIsSelectingPredefined(true)}>
+              <LinearGradient
+                colors={['rgba(228, 50, 50, 0.15)', 'rgba(26, 26, 26, 0.6)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.cardGradient}
+              />
+              <View style={styles.cardIconCircle}>
+                <Ionicons name="copy-outline" size={26} color={colors.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text
+                  variant="body"
+                  weight="semibold"
+                  color={colors.text}
+                  style={styles.cardTitleText}
+                >
+                  {strings.buildWorkout.predefinedOptionTitle}
+                </Text>
+                <Text variant="caption" color={colors.textSecondary}>
+                  {strings.buildWorkout.predefinedOptionSubtitle}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </Pressable>
+
+            <Pressable style={styles.selectionCard} onPress={handleBuildFromScratch}>
+              <LinearGradient
+                colors={['rgba(255, 255, 255, 0.05)', 'rgba(26, 26, 26, 0.6)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.cardGradient}
+              />
+              <View style={[styles.cardIconCircle, styles.cardIconCircleAlt]}>
+                <Ionicons name="create-outline" size={26} color={colors.text} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text
+                  variant="body"
+                  weight="semibold"
+                  color={colors.text}
+                  style={styles.cardTitleText}
+                >
+                  {strings.buildWorkout.scratchOptionTitle}
+                </Text>
+                <Text variant="caption" color={colors.textSecondary}>
+                  {strings.buildWorkout.scratchOptionSubtitle}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </Pressable>
+          </View>
+        ) : (
+          <>
+            <ScrollView contentContainerStyle={styles.scroll}>
+              <View style={styles.nameContainer}>
+                <Text
+                  variant="caption"
+                  color={colors.textSecondary}
+                  style={{ marginBottom: spacing.xs }}
+                >
+                  {strings.buildWorkout.mainPlanName}
+                </Text>
                 <TextInput
-                  style={styles.partitionNameInput}
-                  value={partition.name}
-                  onChangeText={(text) => updatePartitionName(partition.id, text)}
-                  placeholder={strings.buildWorkout.partitionNamePlaceholder}
+                  style={styles.nameInput}
+                  value={workoutName}
+                  onChangeText={setWorkoutName}
+                  placeholder={strings.buildWorkout.placeholderPlanName}
                   placeholderTextColor={colors.textMuted}
                 />
-                <Pressable
-                  onPress={() => removePartition(partition.id)}
-                  hitSlop={12}
-                  style={styles.iconBtn}
-                >
-                  <Ionicons name="trash-outline" size={22} color={colors.error} />
-                </Pressable>
               </View>
 
-              {partition.exercises.length === 0 ? (
-                <View style={styles.emptyPartition}>
-                  <Text variant="caption" color={colors.textSecondary}>
-                    {strings.buildWorkout.emptyPartition}
-                  </Text>
-                </View>
-              ) : (
-                partition.exercises.map((item, index) => (
-                  <View key={item.id} style={styles.exerciseCard}>
-                    <View style={styles.exerciseHeader}>
-                      <View style={{ flex: 1 }}>
-                        <Text variant="body" weight="semibold">
-                          {index + 1}. {item.name}
-                        </Text>
-                        <Text variant="caption" color={colors.primary}>
-                          {item.muscleGroup}
-                        </Text>
-                      </View>
-                      <Pressable
-                        onPress={() => removeExercise(partition.id, item.id)}
-                        hitSlop={12}
-                        style={styles.removeBtn}
-                      >
-                        <Ionicons name="close" size={20} color={colors.textSecondary} />
-                      </Pressable>
-                    </View>
-
-                    <View style={styles.controlsRow}>
-                      <View style={styles.controlGroup}>
-                        <Text variant="caption" color={colors.textSecondary}>
-                          {strings.buildWorkout.series}
-                        </Text>
-                        <View style={styles.stepper}>
-                          <Pressable
-                            style={styles.stepperBtn}
-                            onPress={() => updateExercise(partition.id, item.id, 'targetSets', -1)}
-                            hitSlop={8}
-                          >
-                            <Ionicons name="remove" size={20} color={colors.text} />
-                          </Pressable>
-                          <Text variant="body" weight="bold" style={styles.stepperValue}>
-                            {item.targetSets}
-                          </Text>
-                          <Pressable
-                            style={styles.stepperBtn}
-                            onPress={() => updateExercise(partition.id, item.id, 'targetSets', 1)}
-                            hitSlop={8}
-                          >
-                            <Ionicons name="add" size={20} color={colors.text} />
-                          </Pressable>
-                        </View>
-                      </View>
-
-                      <View style={styles.controlGroup}>
-                        <Text variant="caption" color={colors.textSecondary}>
-                          {strings.buildWorkout.reps}
-                        </Text>
-                        <View style={styles.stepper}>
-                          <Pressable
-                            style={styles.stepperBtn}
-                            onPress={() => updateExercise(partition.id, item.id, 'targetReps', -1)}
-                            hitSlop={8}
-                          >
-                            <Ionicons name="remove" size={20} color={colors.text} />
-                          </Pressable>
-                          <Text variant="body" weight="bold" style={styles.stepperValue}>
-                            {item.targetReps}
-                          </Text>
-                          <Pressable
-                            style={styles.stepperBtn}
-                            onPress={() => updateExercise(partition.id, item.id, 'targetReps', 1)}
-                            hitSlop={8}
-                          >
-                            <Ionicons name="add" size={20} color={colors.text} />
-                          </Pressable>
-                        </View>
-                      </View>
-                    </View>
-
-                    <View style={styles.restStepperRow}>
-                      <Text variant="caption" color={colors.textSecondary}>
-                        Tempo de Descanso
-                      </Text>
-                      <View style={styles.restStepper}>
-                        <Pressable
-                          style={styles.stepperBtn}
-                          onPress={() => updateExercise(partition.id, item.id, 'restSeconds', -15)}
-                          hitSlop={8}
-                        >
-                          <Ionicons name="remove" size={20} color={colors.text} />
-                        </Pressable>
-                        <Text variant="body" weight="bold" style={styles.stepperValue}>
-                          {item.restSeconds || 60}s
-                        </Text>
-                        <Pressable
-                          style={styles.stepperBtn}
-                          onPress={() => updateExercise(partition.id, item.id, 'restSeconds', 15)}
-                          hitSlop={8}
-                        >
-                          <Ionicons name="add" size={20} color={colors.text} />
-                        </Pressable>
-                      </View>
-                    </View>
+              {partitions.map((partition) => (
+                <View key={partition.id} style={styles.partitionContainer}>
+                  <View style={styles.partitionHeader}>
+                    <TextInput
+                      style={styles.partitionNameInput}
+                      value={partition.name}
+                      onChangeText={(text) => updatePartitionName(partition.id, text)}
+                      placeholder={strings.buildWorkout.partitionNamePlaceholder}
+                      placeholderTextColor={colors.textMuted}
+                    />
+                    <Pressable
+                      onPress={() => removePartition(partition.id)}
+                      hitSlop={12}
+                      style={styles.iconBtn}
+                    >
+                      <Ionicons name="trash-outline" size={22} color={colors.error} />
+                    </Pressable>
                   </View>
-                ))
-              )}
+
+                  {partition.exercises.length === 0 ? (
+                    <View style={styles.emptyPartition}>
+                      <Text variant="caption" color={colors.textSecondary}>
+                        {strings.buildWorkout.emptyPartition}
+                      </Text>
+                    </View>
+                  ) : (
+                    partition.exercises.map((item, index) => (
+                      <View key={item.id} style={styles.exerciseCard}>
+                        <View style={styles.exerciseHeader}>
+                          <View style={{ flex: 1 }}>
+                            <Text variant="body" weight="semibold">
+                              {index + 1}. {item.name}
+                            </Text>
+                            <Text variant="caption" color={colors.primary}>
+                              {item.muscleGroup}
+                            </Text>
+                          </View>
+                          <Pressable
+                            onPress={() => removeExercise(partition.id, item.id)}
+                            hitSlop={12}
+                            style={styles.removeBtn}
+                          >
+                            <Ionicons name="close" size={20} color={colors.textSecondary} />
+                          </Pressable>
+                        </View>
+
+                        <View style={styles.controlsRow}>
+                          <View style={styles.controlGroup}>
+                            <Text variant="caption" color={colors.textSecondary}>
+                              {strings.buildWorkout.series}
+                            </Text>
+                            <View style={styles.stepper}>
+                              <Pressable
+                                style={styles.stepperBtn}
+                                onPress={() =>
+                                  updateExercise(partition.id, item.id, 'targetSets', -1)
+                                }
+                                hitSlop={8}
+                              >
+                                <Ionicons name="remove" size={20} color={colors.text} />
+                              </Pressable>
+                              <Text variant="body" weight="bold" style={styles.stepperValue}>
+                                {item.targetSets}
+                              </Text>
+                              <Pressable
+                                style={styles.stepperBtn}
+                                onPress={() =>
+                                  updateExercise(partition.id, item.id, 'targetSets', 1)
+                                }
+                                hitSlop={8}
+                              >
+                                <Ionicons name="add" size={20} color={colors.text} />
+                              </Pressable>
+                            </View>
+                          </View>
+
+                          <View style={styles.controlGroup}>
+                            <Text variant="caption" color={colors.textSecondary}>
+                              {strings.buildWorkout.reps}
+                            </Text>
+                            <View style={styles.stepper}>
+                              <Pressable
+                                style={styles.stepperBtn}
+                                onPress={() =>
+                                  updateExercise(partition.id, item.id, 'targetReps', -1)
+                                }
+                                hitSlop={8}
+                              >
+                                <Ionicons name="remove" size={20} color={colors.text} />
+                              </Pressable>
+                              <Text variant="body" weight="bold" style={styles.stepperValue}>
+                                {item.targetReps}
+                              </Text>
+                              <Pressable
+                                style={styles.stepperBtn}
+                                onPress={() =>
+                                  updateExercise(partition.id, item.id, 'targetReps', 1)
+                                }
+                                hitSlop={8}
+                              >
+                                <Ionicons name="add" size={20} color={colors.text} />
+                              </Pressable>
+                            </View>
+                          </View>
+                        </View>
+
+                        <View style={styles.restStepperRow}>
+                          <Text variant="caption" color={colors.textSecondary}>
+                            Tempo de Descanso
+                          </Text>
+                          <View style={styles.restStepper}>
+                            <Pressable
+                              style={styles.stepperBtn}
+                              onPress={() =>
+                                updateExercise(partition.id, item.id, 'restSeconds', -15)
+                              }
+                              hitSlop={8}
+                            >
+                              <Ionicons name="remove" size={20} color={colors.text} />
+                            </Pressable>
+                            <Text variant="body" weight="bold" style={styles.stepperValue}>
+                              {item.restSeconds || 60}s
+                            </Text>
+                            <Pressable
+                              style={styles.stepperBtn}
+                              onPress={() =>
+                                updateExercise(partition.id, item.id, 'restSeconds', 15)
+                              }
+                              hitSlop={8}
+                            >
+                              <Ionicons name="add" size={20} color={colors.text} />
+                            </Pressable>
+                          </View>
+                        </View>
+                      </View>
+                    ))
+                  )}
+
+                  <Button
+                    title={strings.buildWorkout.addExercise}
+                    variant="outline"
+                    onPress={() => setSelectingForPartition(partition.id)}
+                    style={styles.addExBtn}
+                  />
+                </View>
+              ))}
 
               <Button
-                title={strings.buildWorkout.addExercise}
+                title={strings.buildWorkout.addPartition}
                 variant="outline"
-                onPress={() => setSelectingForPartition(partition.id)}
-                style={styles.addExBtn}
+                onPress={addPartition}
+                style={styles.addPartitionBtn}
+              />
+            </ScrollView>
+
+            <View style={styles.footer}>
+              <Button
+                title={strings.buildWorkout.savePlan}
+                variant="primary"
+                disabled={partitions.length === 0}
+                onPress={handleCreateWorkout}
               />
             </View>
-          ))}
-
-          <Button
-            title={strings.buildWorkout.addPartition}
-            variant="outline"
-            onPress={addPartition}
-            style={styles.addPartitionBtn}
-          />
-        </ScrollView>
-
-        <View style={styles.footer}>
-          <Button
-            title={strings.buildWorkout.savePlan}
-            variant="primary"
-            disabled={partitions.length === 0}
-            onPress={handleCreateWorkout}
-          />
-        </View>
+          </>
+        )}
       </SafeAreaView>
 
       <Modal
@@ -1409,6 +1497,57 @@ const styles = StyleSheet.create({
     borderColor: colors.borderSubtle,
     padding: spacing.md,
     marginBottom: spacing.lg,
+  },
+  selectionContainer: {
+    flex: 1,
+    padding: spacing.lg,
+    justifyContent: 'center',
+    gap: spacing.md,
+  },
+  selectionTitle: {
+    fontSize: 24,
+    marginBottom: spacing.xs,
+  },
+  selectionSubtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: spacing.xl,
+  },
+  selectionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceHighlight,
+    borderRadius: sizing.cardRadius,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    padding: spacing.lg,
+    position: 'relative',
+    overflow: 'hidden',
+    minHeight: 100,
+  },
+  cardGradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  cardIconCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(228, 50, 50, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: spacing.md,
+    zIndex: 1,
+  },
+  cardIconCircleAlt: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  cardTitleText: {
+    fontSize: 18,
+    marginBottom: 4,
   },
   predefinedListContent: {
     padding: spacing.md,

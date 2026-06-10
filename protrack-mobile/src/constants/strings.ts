@@ -9,6 +9,12 @@ export const strings = {
   buildWorkout: {
     title: 'Montar Treino',
     subtitle: 'Crie um treino personalizado',
+    chooseMethodTitle: 'Como deseja começar?',
+    chooseMethodSubtitle: 'Escolha uma das opções abaixo para montar seu plano',
+    predefinedOptionTitle: 'Fichas Prontas',
+    predefinedOptionSubtitle: 'Importe um de nossos modelos profissionais',
+    scratchOptionTitle: 'Montar do Zero',
+    scratchOptionSubtitle: 'Comece com um plano em branco do seu jeito',
     mainPlanName: 'Nome Principal do Plano',
     placeholderPlanName: 'Ex: PPL do João',
     partitionNamePlaceholder: 'Nome da Ficha',

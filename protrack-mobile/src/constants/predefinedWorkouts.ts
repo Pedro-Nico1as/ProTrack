@@ -593,4 +593,127 @@ export const predefinedWorkouts: PredefinedWorkout[] = [
       },
     ],
   },
+  {
+    id: 'predef-frank-zane',
+    name: 'Frank Zane',
+    image: require('../../assets/workouts/frank.png'),
+    description:
+      'O treino focado em proporção, simetria e definição estética de Frank Zane, 3x Mr. Olympia. Foco em controle de movimento e conexão mente-músculo.',
+    partitions: [
+      {
+        name: 'Treino A - Peito, Ombros e Tríceps',
+        exercises: [
+          { name: 'Supino Reto com Barra', muscleGroup: 'Peito', targetSets: 4, targetReps: 12 },
+          {
+            name: 'Supino Inclinado com Halteres',
+            muscleGroup: 'Peito',
+            targetSets: 4,
+            targetReps: 12,
+          },
+          {
+            name: 'Elevação Lateral com Halteres',
+            muscleGroup: 'Ombros',
+            targetSets: 4,
+            targetReps: 15,
+          },
+          {
+            name: 'Desenvolvimento com Barra',
+            muscleGroup: 'Ombros',
+            targetSets: 3,
+            targetReps: 12,
+          },
+          {
+            name: 'Tríceps Testa com Barra',
+            muscleGroup: 'Tríceps',
+            targetSets: 4,
+            targetReps: 12,
+          },
+          { name: 'Tríceps Pulley no Cabo', muscleGroup: 'Tríceps', targetSets: 3, targetReps: 12 },
+        ],
+      },
+      {
+        name: 'Treino B - Costas e Bíceps',
+        exercises: [
+          { name: 'Puxada Frontal no Cabo', muscleGroup: 'Costas', targetSets: 4, targetReps: 12 },
+          {
+            name: 'Remada Curvada com Barra',
+            muscleGroup: 'Costas',
+            targetSets: 4,
+            targetReps: 12,
+          },
+          { name: 'Crucifixo Invertido', muscleGroup: 'Costas', targetSets: 3, targetReps: 15 },
+          { name: 'Rosca Direta com Barra', muscleGroup: 'Bíceps', targetSets: 4, targetReps: 12 },
+          {
+            name: 'Rosca Concentrada',
+            muscleGroup: 'Bíceps',
+            targetSets: 3,
+            targetReps: 12,
+          },
+        ],
+      },
+      {
+        name: 'Treino C - Pernas e Abdômen',
+        exercises: [
+          { name: 'Agachamento Livre', muscleGroup: 'Pernas', targetSets: 4, targetReps: 12 },
+          { name: 'Leg Press 45°', muscleGroup: 'Pernas', targetSets: 3, targetReps: 12 },
+          { name: 'Cadeira Extensora', muscleGroup: 'Pernas', targetSets: 3, targetReps: 15 },
+          { name: 'Mesa Flexora', muscleGroup: 'Pernas', targetSets: 4, targetReps: 12 },
+          { name: 'Abdominal Crunch', muscleGroup: 'Abdômen', targetSets: 4, targetReps: 25 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'predef-mike-mentzer',
+    name: 'Mike Mentzer Heavy Duty',
+    image: require('../../assets/workouts/mike.png'),
+    description:
+      'O revolucionário treino Heavy Duty de Mike Mentzer. Foco em baixíssimo volume, intensidade extrema levada até a falha total e tempo máximo de recuperação.',
+    partitions: [
+      {
+        name: 'Treino A - Peito, Costas e Ombros',
+        exercises: [
+          { name: 'Crucifixo com Halteres', muscleGroup: 'Peito', targetSets: 2, targetReps: 8 },
+          {
+            name: 'Supino Inclinado com Halteres',
+            muscleGroup: 'Peito',
+            targetSets: 2,
+            targetReps: 8,
+          },
+          { name: 'Pullover com Halter', muscleGroup: 'Peito', targetSets: 2, targetReps: 8 },
+          { name: 'Puxada Frontal no Cabo', muscleGroup: 'Costas', targetSets: 2, targetReps: 8 },
+          {
+            name: 'Elevação Lateral com Halteres',
+            muscleGroup: 'Ombros',
+            targetSets: 2,
+            targetReps: 10,
+          },
+        ],
+      },
+      {
+        name: 'Treino B - Pernas',
+        exercises: [
+          { name: 'Cadeira Extensora', muscleGroup: 'Pernas', targetSets: 2, targetReps: 10 },
+          { name: 'Leg Press 45°', muscleGroup: 'Pernas', targetSets: 2, targetReps: 8 },
+          { name: 'Agachamento Livre', muscleGroup: 'Pernas', targetSets: 2, targetReps: 8 },
+          { name: 'Mesa Flexora', muscleGroup: 'Pernas', targetSets: 2, targetReps: 8 },
+          { name: 'Panturrilha em Pé', muscleGroup: 'Pernas', targetSets: 2, targetReps: 12 },
+        ],
+      },
+      {
+        name: 'Treino C - Braços e Abdômen',
+        exercises: [
+          { name: 'Rosca Direta com Barra', muscleGroup: 'Bíceps', targetSets: 2, targetReps: 8 },
+          { name: 'Tríceps Pulley no Cabo', muscleGroup: 'Tríceps', targetSets: 2, targetReps: 8 },
+          {
+            name: 'Tríceps Mergulho no Banco',
+            muscleGroup: 'Tríceps',
+            targetSets: 2,
+            targetReps: 10,
+          },
+          { name: 'Abdominal Crunch', muscleGroup: 'Abdômen', targetSets: 3, targetReps: 15 },
+        ],
+      },
+    ],
+  },
 ];

@@ -56,6 +56,10 @@ const getWorkoutMetaText = (id: string) => {
       return 'Arnold Classic';
     case 'predef-ronnie-coleman':
       return 'Ronnie Coleman';
+    case 'predef-frank-zane':
+      return 'Frank Zane';
+    case 'predef-mike-mentzer':
+      return 'Mike Mentzer';
     default:
       return '';
   }

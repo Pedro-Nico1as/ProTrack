@@ -58,5 +58,15 @@
     "photographer_name": "Local Asset",
     "photographer_profile_url": "https://local-archive",
     "photo_url": "https://local-archive"
+  },
+  "frank.png": {
+    "photographer_name": "Local Asset",
+    "photographer_profile_url": "https://local-archive",
+    "photo_url": "https://local-archive"
+  },
+  "mike.png": {
+    "photographer_name": "Local Asset",
+    "photographer_profile_url": "https://local-archive",
+    "photo_url": "https://local-archive"
   }
 }
