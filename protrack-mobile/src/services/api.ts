@@ -527,7 +527,8 @@ export async function fetchUserProgress(exerciseId: string): Promise<any> {
     return cached.data;
   }
 
-  const data = await supabaseFetch<any>(`/functions/v1/user-progress?exercise_id=${exerciseId}`);
+  const encodedId = encodeURIComponent(exerciseId);
+  const data = await supabaseFetch<any>(`/functions/v1/user-progress?exercise_id=${encodedId}`);
   if (data) {
     progressCache.set(exerciseId, { data, timestamp: now });
   }
@@ -535,8 +536,9 @@ export async function fetchUserProgress(exerciseId: string): Promise<any> {
 }
 
 export async function fetchLastSetWeight(exerciseId: string): Promise<number | null> {
+  const encodedId = encodeURIComponent(exerciseId);
   const data = await supabaseFetch<any[]>(
-    `/rest/v1/user_set_logs?or=(exercise_id.eq.${exerciseId},custom_exercise_id.eq.${exerciseId})&order=completed_at.desc&limit=1&select=weight_kg`
+    `/rest/v1/user_set_logs?or=(exercise_id.eq.${encodedId},custom_exercise_id.eq.${encodedId})&order=completed_at.desc&limit=1&select=weight_kg`
   );
   if (data && data.length > 0) {
     return Number(data[0].weight_kg) || null;

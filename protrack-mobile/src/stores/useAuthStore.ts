@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 import { useActiveWorkoutStore } from './useActiveWorkoutStore';
+import { useCustomWorkoutsStore } from './useCustomWorkoutsStore';
 
 interface AuthState {
   session: Session | null;
@@ -23,6 +24,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   signOut: async () => {
     // Limpa estado de treino ativo ao sair
     useActiveWorkoutStore.getState().finishWorkout();
+    useCustomWorkoutsStore.getState().clearWorkouts();
 
     await supabase.auth.signOut();
     set({ session: null, user: null, isResettingPassword: false });

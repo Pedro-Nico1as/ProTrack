@@ -409,24 +409,42 @@ export const BuildWorkoutScreen = () => {
 
         {!isEditing ? (
           <View style={styles.selectionContainer}>
-            <Text variant="heading" weight="bold" style={styles.selectionTitle} color={colors.text}>
+            <View style={styles.decorGlow} />
+            <Text
+              variant="heading"
+              weight="bold"
+              style={styles.selectionTitleText}
+              color={colors.text}
+            >
               {strings.buildWorkout.chooseMethodTitle}
             </Text>
-            <Text variant="body" color={colors.textSecondary} style={styles.selectionSubtitle}>
+            <Text variant="body" color={colors.textSecondary} style={styles.selectionSubtitleText}>
               {strings.buildWorkout.chooseMethodSubtitle}
             </Text>
 
-            <Pressable style={styles.selectionCard} onPress={() => setIsSelectingPredefined(true)}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.selectionCard,
+                styles.predefinedCard,
+                pressed && styles.cardPressed,
+              ]}
+              onPress={() => setIsSelectingPredefined(true)}
+            >
               <LinearGradient
-                colors={['rgba(228, 50, 50, 0.15)', 'rgba(26, 26, 26, 0.6)']}
+                colors={['rgba(228, 50, 50, 0.12)', 'rgba(26, 26, 26, 0.7)']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.cardGradient}
               />
-              <View style={styles.cardIconCircle}>
-                <Ionicons name="copy-outline" size={26} color={colors.primary} />
+              <View style={styles.cardBadge}>
+                <Text variant="caption" weight="bold" style={styles.cardBadgeText}>
+                  RECOMENDADO
+                </Text>
               </View>
-              <View style={{ flex: 1 }}>
+              <View style={styles.cardIconCircle}>
+                <Ionicons name="barbell-outline" size={26} color={colors.primary} />
+              </View>
+              <View style={{ flex: 1, paddingRight: 40 }}>
                 <Text
                   variant="body"
                   weight="semibold"
@@ -442,17 +460,29 @@ export const BuildWorkoutScreen = () => {
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </Pressable>
 
-            <Pressable style={styles.selectionCard} onPress={handleBuildFromScratch}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.selectionCard,
+                styles.scratchCard,
+                pressed && styles.cardPressed,
+              ]}
+              onPress={handleBuildFromScratch}
+            >
               <LinearGradient
-                colors={['rgba(255, 255, 255, 0.05)', 'rgba(26, 26, 26, 0.6)']}
+                colors={['rgba(255, 255, 255, 0.03)', 'rgba(26, 26, 26, 0.7)']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.cardGradient}
               />
+              <View style={[styles.cardBadge, styles.cardBadgeAlt]}>
+                <Text variant="caption" weight="bold" style={styles.cardBadgeTextAlt}>
+                  LIVRE
+                </Text>
+              </View>
               <View style={[styles.cardIconCircle, styles.cardIconCircleAlt]}>
                 <Ionicons name="create-outline" size={26} color={colors.text} />
               </View>
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, paddingRight: 40 }}>
                 <Text
                   variant="body"
                   weight="semibold"
@@ -1503,15 +1533,31 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     justifyContent: 'center',
     gap: spacing.md,
+    position: 'relative',
   },
-  selectionTitle: {
-    fontSize: 24,
+  decorGlow: {
+    position: 'absolute',
+    top: -120,
+    left: '50%',
+    transform: [{ translateX: -125 }],
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    backgroundColor: colors.primary,
+    opacity: 0.06,
+  },
+  selectionTitleText: {
+    fontSize: 26,
+    lineHeight: 32,
     marginBottom: spacing.xs,
+    textAlign: 'center',
   },
-  selectionSubtitle: {
-    fontSize: 14,
+  selectionSubtitleText: {
+    fontSize: 15,
     color: colors.textSecondary,
     marginBottom: spacing.xl,
+    textAlign: 'center',
+    paddingHorizontal: spacing.md,
   },
   selectionCard: {
     flexDirection: 'row',
@@ -1520,10 +1566,52 @@ const styles = StyleSheet.create({
     borderRadius: sizing.cardRadius,
     borderWidth: 1,
     borderColor: colors.borderSubtle,
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
     position: 'relative',
     overflow: 'hidden',
-    minHeight: 100,
+    minHeight: 110,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  predefinedCard: {
+    borderColor: 'rgba(228, 50, 50, 0.25)',
+  },
+  scratchCard: {
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  cardPressed: {
+    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
+  },
+  cardBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 16,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  cardBadgeAlt: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  cardBadgeText: {
+    fontSize: 9,
+    fontWeight: 'bold',
+    color: '#FFF',
+    letterSpacing: 0.5,
+  },
+  cardBadgeTextAlt: {
+    fontSize: 9,
+    fontWeight: 'bold',
+    color: colors.textSecondary,
+    letterSpacing: 0.5,
   },
   cardGradient: {
     position: 'absolute',
@@ -1536,14 +1624,17 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: 'rgba(228, 50, 50, 0.1)',
+    backgroundColor: 'rgba(228, 50, 50, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing.md,
     zIndex: 1,
+    borderWidth: 1,
+    borderColor: 'rgba(228, 50, 50, 0.2)',
   },
   cardIconCircleAlt: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   cardTitleText: {
     fontSize: 18,
