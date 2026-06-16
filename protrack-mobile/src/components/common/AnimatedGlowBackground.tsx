@@ -25,7 +25,6 @@ export const AnimatedGlowBackground = () => {
         shouldPlay
         isLooping
         isMuted
-        muted={true}
         useNativeControls={false}
         onLoad={() => setIsVideoLoaded(true)}
       />

@@ -1178,7 +1178,7 @@ export const BuildWorkoutScreen = () => {
               </ScrollView>
 
               {/* Action Button Footer */}
-              <View style={styles.modalFooter}>
+              <View style={styles.footer}>
                 <Button
                   title="Usar esta ficha"
                   variant="primary"
